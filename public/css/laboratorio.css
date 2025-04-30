@@ -1,0 +1,124 @@
+.ms-content-wrapper {
+padding: 1.5rem 15px;
+}
+
+.ms-d-block-lg {
+display: none;
+}
+
+.ms-d-block-sm {
+display: block;
+}
+
+.ms-aside-left-open .ms-aside-left.side-nav {
+transform: translateX(-100%);
+}
+
+.ms-aside-left.ms-aside-open.side-nav {
+transform: translateX(0);
+background-color: #0b99d0 ;
+}
+
+.body-content,
+.ms-has-quickbar .body-content,
+.ms-aside-left-open .body-content {
+padding-right: 0;
+padding-left: 0;
+}
+
+.ms-aside-right-open .body-content {
+padding-right: 0;
+}
+
+.ms-aside-overlay.ms-overlay-left {
+display: none;
+position: fixed;
+top: 0;
+left: 0;
+bottom: 0;
+right: 0;
+overflow: hidden;
+z-index: 998;
+background-color: rgba(0, 0, 0, 0.3);
+}
+
+.navbar,
+.ms-logged-out .navbar {
+padding: 0.25rem 15px;
+}
+
+.ms-navbar .ms-nav-list {
+position: absolute;
+width: 100%;
+background-color: #10a4fc;
+top: 0;
+left: 0;
+z-index: 10;
+text-align: right;
+padding: 0 1.25rem;
+opacity: 0;
+visibility: hidden;
+}
+
+.ms-dark-theme .ms-navbar .ms-nav-list {
+background-color: #252851;
+}
+
+.ms-navbar .ms-nav-list.ms-inline {
+-webkit-transition: 0.3s;
+transition: 0.3s;
+height: auto;
+}
+
+.ms-nav-list.ms-slide-down {
+top: 100%;
+opacity: 1;
+visibility: visible;
+}
+
+.ms-nav-toggler {
+border-left: 0;
+}
+
+.ms-navbar .ms-nav-list .ms-search-form {
+display: none;
+}
+
+.ms-horizontal-layout .ms-panel .navbar {
+padding: 0.25rem 15px;
+}
+
+.ms-horizontal-layout .ms-panel .navbar .ms-nav-toggler {
+padding: .25rem 0;
+}
+
+.ms-horizontal-layout .ms-panel .navbar .navbar-nav li.nav-item>a {
+border-right: 0;
+}
+
+.ms-horizontal-layout .ms-panel .navbar .navbar-nav .dropdown-menu {
+display: none;
+}
+
+.ms-horizontal-layout .ms-panel .navbar .navbar-nav .dropdown-menu.show {
+display: block;
+}
+
+.ms-horizontal-layout .ms-panel .navbar .navbar-nav li.nav-item.active {
+border-bottom: 0;
+}
+
+.ms-horizontal-layout .ms-panel .navbar .navbar-nav .dropdown-menu a {
+justify-content: center;
+}
+
+.ms-horizontal-layout .ms-panel .navbar .navbar-nav .dropdown-toggle::after {
+-webkit-transform: rotate(95deg);
+transform: rotate(95deg);
+margin-top: 3px;
+margin-left: 10px;
+}
+
+.ms-panel.ms-panel-fh {
+height: auto;
+}

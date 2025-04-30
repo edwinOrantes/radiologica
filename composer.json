@@ -1,0 +1,15 @@
+{
+    "require": {
+        "phpoffice/phpspreadsheet": "^1.16",
+        "curl/curl": "^2.5",
+        "mpdf/mpdf": "^8.1",
+        "bacon/bacon-qr-code": "^2.0",
+        "mike42/escpos-php": "^2.2",
+        "phpmailer/phpmailer": "^6.8"
+    },
+    "config": {
+        "platform": {
+            "php": "7.3.31"
+        }
+    }
+}

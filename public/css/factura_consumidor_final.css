@@ -1,0 +1,98 @@
+
+@font-face {
+    font-family: 'Courier Prime', monospace;
+    src: url('/public/fonts/CourierPrime-Regular.ttf');
+    font-style: normal;
+    font-weight: normal;
+  }
+/* Seccion factura Old */
+    /* #factura{
+        width: 13.9cm;
+        height: 21.4cm;
+        
+    }
+    .text{
+        font-family: Vegur, 'PT Sans', Verdana, sans-serif;
+        letter-spacing: 1px;
+        font-size: 0.3cm;
+    }
+    #cabecera{
+        height: 3.48cm;
+    }
+    #fecha{
+        height: 0.6cm;
+    }
+
+    #dia, #mes, #año{
+        float: left;
+        height: 0.6cm;
+        color: white;
+    }
+
+    #diaContainer, #mesContainer, #añoContainer{
+        float: left;
+        height: 0.6cm;
+    }
+    #dia{
+        width: 0.9cm;
+    }
+    #mes{
+        width: 0.79cm;
+    }
+
+    #año{
+        width: 0.8cm;
+    }
+
+    #diaContainer{
+        width: 1.2cm;
+    }
+    #mesContainer{
+        width: 1.6cm;
+    }
+
+    #añoContainer{
+        width: 1.4cm;
+    }
+
+    #paciente, #apellido, #documento{
+        height: 0.7cm;
+        
+    }
+    #detalle{
+        height: 10.2cm;
+    }
+    #tblDetalle{
+        border-collapse: collapse;
+        border-spacing: 0;
+        
+    }
+    #tblDetalle td, #tblDetalle th{
+        height: 0.72cm;
+    }
+    #footer{
+        height: 4.1cm;
+    }
+    #footerLeft{
+        width: 7cm;
+        height: 4.1cm;
+        float: left;
+    }
+    #footerRight{
+        width: 5.2cm;
+        height: 4.1cm;
+        float: right;
+    }
+    #tblFooter{
+        width: 100%;
+        border-collapse: collapse;
+        border-spacing: 0;
+        
+    }
+    #tblFooter td, #tblFooter th{
+        height: 0.7cm;
+    } */
+
+
+/* Fin factura old */
+

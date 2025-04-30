@@ -1,0 +1,31 @@
+Prvisualizar stocks iniciales en kardex
+    SELECT 
+        m.nombreMedicamento, m.tipoMedicamento,
+        m.idMedicamento AS idInsumo,
+        m.stockMedicamento AS cantidadInsumo,
+        m.stockMedicamento AS stockActual,
+        'Entrada (Inicial)' AS tipoKardex,
+        0 AS filaEntrada
+    FROM tbl_medicamentos m
+    LEFT JOIN tbl_kardex_botiquin k 
+        ON k.idInsumo = m.idMedicamento AND k.tipoKardex = 'Entrada (Inicial)'
+    WHERE k.idInsumo IS NULL AND m.ocultarMedicamento = 0 AND m.tipoMedicamento IN('Medicamentos', 'Materiales médicos');
+
+Insertar kardex inicial de todos los medicamentos
+
+    INSERT INTO tbl_kardex_botiquin (
+        idInsumo, cantidadInsumo, stockActual, tipoKardex, filaEntrada
+    )
+    SELECT 
+        m.idMedicamento,
+        m.stockMedicamento,
+        m.stockMedicamento,
+        'Inicial',
+        0
+    FROM tbl_medicamentos m
+    LEFT JOIN tbl_kardex_botiquin k 
+        ON k.idInsumo = m.idMedicamento AND k.tipoKardex = 'Inicial'
+    WHERE 
+        k.idInsumo IS NULL 
+        AND m.ocultarMedicamento = 0 
+        AND m.tipoMedicamento IN ('Medicamentos', 'Materiales médicos');
