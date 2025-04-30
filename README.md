@@ -1,0 +1,2 @@
+# radiologica
+Para clinica radiologica
