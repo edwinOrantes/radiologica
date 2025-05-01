@@ -189,7 +189,7 @@
 
             <?php
                 
-                $conn = mysqli_connect("localhost", "root", "", "db_hospital_orellana");
+                $conn = mysqli_connect("localhost", "root", "", "db_clinica_radiologica");
                 // $conn = mysqli_connect("192.168.1.253", "ho", "ho24...", "db_hospital_orellana");
                 if (!$conn){die("Connection failed: " . mysqli_connect_error());}
                 else{
@@ -223,89 +223,6 @@
                 <a class="pl-0 ml-0 text-center navbar-brand" href="#"><img src="<?= base_url()?>public/img/mini_logo.png" alt="logo"> </a>
             </div>
 
-            <div>
-                
-                <?php
-                    /* if(date('m') == 12 && date('d') == 25){
-                        echo '<div id="marzo">
-                                <p>
-                                🎄 Feliz Navidad 🎄
-                                    <span>
-                                        '.$this->session->userdata("usuario_h").'
-                                    </span>
-                                </p>
-                            </div>';
-                    }else{
-                        echo '<a class="pl-0 ml-0 text-center navbar-brand mr-0"><img src="'.base_url().'public/img/logo_celebracion.png" alt="logo"> </a>';
-                    } */
-                
-                ?>
-
-            <div id="marzo">
-                <?php
-                    // Array con las frases
-                    $frases = [
-                        "Brillas sin sombras.",
-                        "Imparable cada día.",
-                        "Creas tu historia.",
-                        "Invencible por naturaleza.",
-                        "Fuerza sin medida.",
-                        "Poder sin límites.",
-                        "Transformas el mundo.",
-                        "Única en esencia.",
-                        "Luz que trasciende.",
-                        "Grandeza en acción."
-                    ];
-
-                    // Array con los emojis de flores
-                    $flores = [
-                        "🌸", // Flor de cerezo
-                        "💐", // Ramo de flores
-                        "🌺", // Hibisco
-                        "🌻", // Girasol
-                        "🌷", // Tulipán
-                        "🌼", // Flor
-                        "🌹"  // Rosa
-                    ];
-
-                    // Verificar si ya hay una frase en la sesión, si no, asignar una aleatoria
-                    if (!$this->session->userdata("frase_usuario")) {
-                        $this->session->set_userdata("frase_usuario", $frases[array_rand($frases)]);
-                    }
-
-                    // Verificar si ya hay un emoji de flor en la sesión, si no, asignar uno aleatorio
-                    if (!$this->session->userdata("flor_usuario")) {
-                        $this->session->set_userdata("flor_usuario", $flores[array_rand($flores)]);
-                    }
-
-                    $fraseSesion = $this->session->userdata("frase_usuario");
-                    $florSesion = $this->session->userdata("flor_usuario");
-
-                    if(date('m') == "03") {
-                        if($this->session->userdata("celebrar") == 1) {
-                            echo '<p>
-                                ' . $florSesion . ' ' . $fraseSesion . ' ' . $florSesion . '
-                                <span>
-                                    ' . $this->session->userdata("usuario_h") . '
-                                </span>
-                            </p>';
-                        } else {
-                            echo '<p>
-                                🌹 Marzo 08 🌹
-                                <span>
-                                    Día de la mujer
-                                </span>
-                            </p>';
-                        }
-                    }
-                ?>
-            </div>
-
-                    
-                    
-            </div>
-
-
             <ul class="ms-nav-list ms-inline mb-0" id="ms-nav-options">
 
                 <li class="ms-nav-item ms-nav-user dropdown">
@@ -337,74 +254,3 @@
                 <span class="ms-toggler-bar bg-white"></span>
             </div>
         </nav>
-
-
-
-<script>
-
-    /* $(document).ready(function(){
-        $.ajax({
-                url: "obtener_medicamentos",
-                success: function(data) {
-                registro= eval(data);
-                if(registro.length > 0){
-                    var notificacion = "";
-                    $("#notificationDropdown").show();
-                    //console.log(registro.length);
-                    for (var i = 0; i < registro.length; i++) {
-                        if(registro[i]["tipoMedicamento"] == "Medicamentos" || registro[i]["tipoMedicamento"] == "Materiales médicos"){
-                            notificacion += '<a class="media p-2" href="#">';
-                            notificacion += '    <div class="media-body">';
-                            notificacion += '        <span class="medium">'+registro[i]["nombreMedicamento"]+'</span>';
-                            notificacion += '        <p class="fs-10 my-1 text-disabled"><i class="fa fa-play"></i> Stock disponible '+registro[i]["stockMedicamento"]+'</p>';
-                            notificacion += '    </div>';
-                            notificacion += '</a>';
-                        }
-                    }
-                    $("#notificaciones").append(notificacion);
-                    //console.log(notificacion);
-                }else{
-                    console.log("No hay minimos");
-                }
-    
-                }
-            });
-    });
-
-    function notificaciones(){
-        var contador = 0;
-        $.ajax({
-            url: "obtener_medicamentos",
-            success: function(data) {
-            registro= eval(data);
-            if(registro.length > 0){
-                var notificacion = "";
-                $("#notificaciones").html("");
-                $("#notificationDropdown").show();
-                //console.log(registro.length);
-                for (var i = 0; i < registro.length; i++) {
-                    if(registro[i]["tipoMedicamento"] == "Medicamentos" || registro[i]["tipoMedicamento"] == "Materiales médicos"){
-                        notificacion += '<a class="media p-2" href="#">';
-                        notificacion += '    <div class="media-body">';
-                        notificacion += '        <span class="medium">'+registro[i]["nombreMedicamento"]+'</span>';
-                        notificacion += '        <p class="fs-10 my-1 text-disabled"><i class="fa fa-play"></i> Stock disponible '+registro[i]["stockMedicamento"]+'</p>';
-                        notificacion += '    </div>';
-                        notificacion += '</a>';
-                    }
-
-                }
-                $("#notificaciones").append(notificacion);
-            }else{
-                $("#notificaciones").html("");
-                $("#notificationDropdown").hide();
-                //console.log("No hay minimos");
-            }
-
-            }
-        });
-    } */
-
-    /* setInterval(function(){ 
-    notificaciones();
-    }, 5000);  */
-</script>

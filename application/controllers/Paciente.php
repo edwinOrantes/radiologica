@@ -1,26 +1,26 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 	// Clases para el reporte en excel
-
-use Mpdf\Tag\Dd;
-use PhpOffice\PhpSpreadsheet\Spreadsheet;
-	use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
-
-	use PhpOffice\PhpSpreadsheet\Helper\Sample;
-	use PhpOffice\PhpSpreadsheet\IOFactory;
-	use PhpOffice\PhpSpreadsheet\RichText\RichText;
-	use PhpOffice\PhpSpreadsheet\Shared\Date;
-	use PhpOffice\PhpSpreadsheet\Style\Alignment;
-	use PhpOffice\PhpSpreadsheet\Style\Border;
-	use PhpOffice\PhpSpreadsheet\Style\Color;
-	use PhpOffice\PhpSpreadsheet\Style\Fill;
-	use PhpOffice\PhpSpreadsheet\Style\Font;
-	use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
-	use PhpOffice\PhpSpreadsheet\Style\Protection;
-	use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
-	use PhpOffice\PhpSpreadsheet\Worksheet\PageSetup;
-	use PhpOffice\PhpSpreadsheet\Worksheet\ColumnDimension;
-	use PhpOffice\PhpSpreadsheet\Worksheet;
+		use Mpdf\Tag\Dd;
+		use PhpOffice\PhpSpreadsheet\Spreadsheet;
+		use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+		
+		use PhpOffice\PhpSpreadsheet\Helper\Sample;
+		use PhpOffice\PhpSpreadsheet\IOFactory;
+		use PhpOffice\PhpSpreadsheet\RichText\RichText;
+		use PhpOffice\PhpSpreadsheet\Shared\Date;
+		use PhpOffice\PhpSpreadsheet\Style\Alignment;
+		use PhpOffice\PhpSpreadsheet\Style\Border;
+		use PhpOffice\PhpSpreadsheet\Style\Color;
+		use PhpOffice\PhpSpreadsheet\Style\Fill;
+		use PhpOffice\PhpSpreadsheet\Style\Font;
+		use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
+		use PhpOffice\PhpSpreadsheet\Style\Protection;
+		use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
+		use PhpOffice\PhpSpreadsheet\Worksheet\PageSetup;
+		use PhpOffice\PhpSpreadsheet\Worksheet\ColumnDimension;
+		use PhpOffice\PhpSpreadsheet\Worksheet;
+	// Clases para el reporte en excel
 
 class Paciente extends CI_Controller {
 

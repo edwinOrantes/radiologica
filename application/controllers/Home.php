@@ -18,7 +18,6 @@ class Home extends CI_Controller {
 		$data["fecha"] = $dias[date("w")].", ".$meses[date('n')-1]." ".date("d");
 		$data["hora"] = date("h:i A");
 
-		$data["anuncios"] = $this->Usuarios_Model->obtenerAnuncios();
 		$this->load->view('Base/login', $data);
 		//echo md5("os2021");
 		//echo md5("Admin2021_Orellana");
@@ -77,48 +76,12 @@ class Home extends CI_Controller {
 			$this->session->set_userdata($cajera);
 			
 			$this->session->set_flashdata("exito", "Bienvenido nuevamente: ".$this->session->userdata('empleado_h')."");
-			// Agregando evento a bitacora
-				$data["idUsuario"] = $this->session->userdata('id_usuario_h');
-				$data["descripcionBitacora"] = "El usuario: ".$this->session->userdata('usuario_h')." Ha iniciado sesión";
-				$this->Usuarios_Model->insertarBitacora($data);
-			// Mandando a cada usuario a su respectivo lugar
+
 			switch ($datos["datos"]->idAcceso) {
 				case 1:
-					// redirect(base_url()."Usuarios/dashboard");
-					redirect(base_url()."Paciente/agregar_pacientes");
+					redirect(base_url()."Consulta/agregar_paciente/");
 					break;
 
-				case 7:
-					redirect(base_url()."Laboratorio/");
-					break;
-
-				// case 8:
-				// 	redirect(base_url()."Consultas/consultas_pendientes");
-				// 	break;
-					
-				// case 5:
-				// 	redirect(base_url()."Usuarios/dashboard");
-				// 	break;
-
-				case 9:
-					redirect(base_url()."Gastos/");
-					break;
-				
-				case 14:
-					redirect(base_url()."Rx/");
-					break;
-
-				case 15:
-					redirect(base_url()."Botiquin/precios_medicamentos/");
-					break;
-
-				case 16:
-					redirect(base_url()."InsumosLab/agregar_compra/");
-					break;
-					
-				default:
-					redirect(base_url()."Paciente/agregar_pacientes");
-					break;
 			}
 		}
 		else{

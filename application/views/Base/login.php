@@ -91,64 +91,6 @@
   <div class="ms-auth-container">
     <div class="ms-auth-col">
       <div class="ms-auth-bg">
-        <br><br><br><br><br>
-        <?php
-          if(sizeof($anuncios) > 0){
-        ?>
-          <div class="col-md-8 pt-5"  style="display:flex; margin: 0 auto; justify-content: center; align-items: center">
-            <div id="dottedSlider" class="ms-dotted-indicator-slider mt-5 carousel slide" data-ride="carousel">
-              
-              <ol class="carousel-indicators">
-                <?php
-                  $flag = 0;
-                  foreach ($anuncios as $row) {
-                    if($flag == 0){
-                      echo '<li data-target="#dottedSlider" data-slide-to="" class="active"></li>';
-                    }else{
-                      echo '<li data-target="#dottedSlider" data-slide-to="'.$flag.'"></li>';
-                    }
-                    $flag++;
-                  }
-  
-                ?>
-                
-              </ol>
-  
-              <div class="carousel-inner">
-                <?php
-                  $flag = 0;
-                  foreach ($anuncios as $row) {
-                    if($flag == 0){
-                      echo '<div class="carousel-item active">
-                              <img class="d-block w-100" src="'.base_url().'public/img/anuncios/'.$row->tituloAnuncio.'.png" alt="First slide">
-                            </div>';
-                    }else{
-                      echo '<div class="carousel-item">
-                              <img class="d-block w-100" src="'.base_url().'public/img/anuncios/'.$row->tituloAnuncio.'.png" alt="Second slide">
-                            </div>';
-                    }
-                    $flag++;
-                  }
-  
-                ?>
-  
-              </div>
-  
-              <a class="carousel-control-prev" href="#dottedSlider" role="button" data-slide="prev">
-                <span class="material-icons" aria-hidden="true">keyboard_arrow_left</span>
-                <span class="sr-only">Previous</span>
-              </a>
-              <a class="carousel-control-next" href="#dottedSlider" role="button" data-slide="next">
-                <span class="material-icons" aria-hidden="true">keyboard_arrow_right</span>
-                <span class="sr-only">Next</span>
-              </a>
-  
-            </div>
-          </div>
-        <?php
-          }
-        ?>
-
       </div>
     </div>
 
