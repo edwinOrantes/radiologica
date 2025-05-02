@@ -37,13 +37,13 @@
                     </div>
 				</div>
 				<div class="ms-panel-body">
-					<form class="needs-validation" method="post" action="<?php echo base_url()?>Paciente/agregar_paciente" novalidate>
+					<form class="needs-validation" method="post" action="<?php echo base_url()?>Consulta/guardar_paciente" novalidate>
                         
                         <div class="row">
 
                             <div class="form-group col-md-12">
                                 <label for=""><strong>Nombre Completo</strong></label>
-                                <input type="text" class="form-control" id="nombrePaciente" name="nombrePaciente" placeholder="Nombre del paciente" list='recomendacionesPacientes'  required>
+                                <input type="text" class="form-control" id="pacienteConsulta" name="pacienteConsulta" placeholder="Nombre del paciente" list='recomendacionesPacientes'  required>
                                 <div class="invalid-tooltip">
                                     Debes ingresar el nombre del paciente.
                                 </div>
@@ -52,7 +52,7 @@
                             
                             <div class="form-group col-md-12">
                                 <label for=""><strong>Médico</strong></label>
-                                <select class="form-control controlInteligente" id="civilPaciente" name="civilPaciente" required>
+                                <select class="form-control controlInteligente" id="medicoConsulta" name="medicoConsulta" required>
                                     <option value="">..:: Seleccionar ::..</option>
                                     <?php foreach ($medicos as $row) { ?>
                                         <option value="<?php echo $row->idMedico;  ?>"><?php echo $row->nombreMedico;  ?></option>
@@ -65,7 +65,7 @@
                             
                             <div class="form-group col-md-12">
                                 <label for=""><strong>Tipo de referencia</strong></label>
-                                <select class="form-control" id="civilPaciente" name="civilPaciente" required>
+                                <select class="form-control" id="referenciaConsulta" name="referenciaConsulta" required>
                                     <option value="">..:: Seleccionar ::..</option>
                                     <option value="Publica">Pública</option>
                                     <option value="Privada">Privada</option>

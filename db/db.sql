@@ -1,8 +1,8 @@
 -- --------------------------------------------------------
 -- Host:                         127.0.0.1
--- Versión del servidor:         10.4.27-MariaDB - mariadb.org binary distribution
+-- Versión del servidor:         10.4.28-MariaDB - mariadb.org binary distribution
 -- SO del servidor:              Win64
--- HeidiSQL Versión:             12.4.0.6659
+-- HeidiSQL Versión:             12.5.0.6677
 -- --------------------------------------------------------
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
@@ -55,6 +55,35 @@ INSERT INTO `tbl_cajas` (`idCaja`, `idUsuario`, `nombreCaja`, `numeroCaja`, `cod
 	(5, 23, 'Hoospital Orellana', 1, 'HO', 'M001', 1, '2025-03-31 17:09:58'),
 	(6, 5, 'Hoospital Orellana', 1, 'HO', 'M001', 1, '2025-03-31 17:09:58'),
 	(7, 13, 'Hoospital Orellana', 1, 'HO', 'M001', 1, '2025-03-31 17:09:58');
+
+-- Volcando estructura para tabla db_clinica_radiologica.tbl_consulta
+CREATE TABLE IF NOT EXISTS `tbl_consulta` (
+  `idConsulta` int(11) NOT NULL AUTO_INCREMENT,
+  `nombrePaciente` text NOT NULL,
+  `idMedico` int(11) NOT NULL,
+  `tipoReferencia` text NOT NULL,
+  `fechaConsulta` int(11) NOT NULL,
+  `creado` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`idConsulta`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_spanish_ci;
+
+-- Volcando datos para la tabla db_clinica_radiologica.tbl_consulta: ~1 rows (aproximadamente)
+INSERT INTO `tbl_consulta` (`idConsulta`, `nombrePaciente`, `idMedico`, `tipoReferencia`, `fechaConsulta`, `creado`) VALUES
+	(1, 'Josselyn Sorto', 2, 'Privada', 2147483647, '2025-05-02 20:38:35');
+
+-- Volcando estructura para tabla db_clinica_radiologica.tbl_detalle_consulta
+CREATE TABLE IF NOT EXISTS `tbl_detalle_consulta` (
+  `idDetalle` int(11) NOT NULL AUTO_INCREMENT,
+  `idConsulta` int(11) NOT NULL,
+  `idExamen` int(11) NOT NULL,
+  `cantidadExamen` int(11) NOT NULL,
+  `precioExamen` decimal(9,2) NOT NULL,
+  `estadoDetalle` int(11) NOT NULL DEFAULT 1,
+  `creado` timestamp NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`idDetalle`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_spanish_ci;
+
+-- Volcando datos para la tabla db_clinica_radiologica.tbl_detalle_consulta: ~0 rows (aproximadamente)
 
 -- Volcando estructura para tabla db_clinica_radiologica.tbl_empleados
 CREATE TABLE IF NOT EXISTS `tbl_empleados` (
@@ -114,6 +143,100 @@ INSERT INTO `tbl_empleados` (`idEmpleado`, `nombreEmpleado`, `apellidoEmpleado`,
 	(31, 'Roberto de Jesus', 'Duran Benitez', 34, '7205-5130', 12, 'Masculino', '04231015-8', '1121-210290-101-0', 'Casado/a', '1990-02-20', 13, 81, 'Residencial San Francisco, pje 21, calle al rio, casa #55', 1, '2020-02-01'),
 	(32, 'María Guadalupe', 'Márquez Sura', 27, '7898-2643', 12, 'Masculino', '05600256-3', '0000-000000-000-0', 'Soltero/a', '1997-08-29', 11, 64, 'Barrio la parroquia, Concepcion Batres ', 1, '2024-01-16'),
 	(33, 'Karen Azucena', 'Quintanilla Zelaya', 22, '7657-8425', 12, 'Femenino', '06301070-5', '0000-000000-000-0', 'Soltero/a', '2002-11-18', 13, 82, 'Canton Los Zelaya, San Rafael Oriente San Miguel', 1, '2024-04-03');
+
+-- Volcando estructura para tabla db_clinica_radiologica.tbl_examenes
+CREATE TABLE IF NOT EXISTS `tbl_examenes` (
+  `idExamen` int(11) NOT NULL AUTO_INCREMENT,
+  `codigoExamen` varchar(20) DEFAULT NULL,
+  `nombreExamen` varchar(255) DEFAULT NULL,
+  `precioPublico` decimal(10,2) DEFAULT NULL,
+  `precioPrivado` decimal(10,2) DEFAULT NULL,
+  `tipoExamen` int(11) DEFAULT NULL,
+  `estadoExamen` int(11) DEFAULT 1,
+  `creado` timestamp NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`idExamen`),
+  CONSTRAINT `tbl_examenes_ibfk_1` FOREIGN KEY (`tipoExamen`) REFERENCES `tbl_tipo_examenes` (`idTipo`)
+) ENGINE=InnoDB AUTO_INCREMENT=78 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_spanish_ci;
+
+-- Volcando datos para la tabla db_clinica_radiologica.tbl_examenes: ~77 rows (aproximadamente)
+INSERT INTO `tbl_examenes` (`idExamen`, `codigoExamen`, `nombreExamen`, `precioPublico`, `precioPrivado`, `tipoExamen`, `estadoExamen`, `creado`) VALUES
+	(1, 'EX1000', 'Craneo Ap y Lat', 30.00, 35.00, 1, 1, '2025-05-02 20:22:47'),
+	(2, 'EX1001', 'Orbitas', 30.00, 35.00, 1, 1, '2025-05-02 20:22:48'),
+	(3, 'EX1002', 'Watters', 15.00, 15.00, 1, 1, '2025-05-02 20:22:49'),
+	(4, 'EX1003', 'Cavum', 15.00, 15.00, 1, 1, '2025-05-02 20:22:49'),
+	(5, 'EX1004', 'Senos Paranasales', 30.00, 35.00, 1, 1, '2025-05-02 20:22:51'),
+	(6, 'EX1005', 'Silla Turca', 23.00, 25.00, 1, 1, '2025-05-02 20:22:50'),
+	(7, 'EX1006', 'Huesos Nasales', 25.00, 25.00, 1, 1, '2025-05-02 20:22:51'),
+	(8, 'EX1007', 'Agujeros Opticos', 30.00, 35.00, 1, 1, '2025-05-02 20:22:52'),
+	(9, 'EX1008', 'Art Temp, Mand, Bilate', 55.00, 65.00, 1, 1, '2025-05-02 20:22:52'),
+	(10, 'EX1009', 'Mandibulas', 30.00, 35.00, 1, 1, '2025-05-02 20:22:54'),
+	(11, 'EX1010', 'Mastoides', 45.00, 55.00, 1, 1, '2025-05-02 20:22:54'),
+	(12, 'EX1011', 'Arco Cigomatico', 25.00, 30.00, 1, 1, '2025-05-02 20:22:55'),
+	(13, 'EX1012', 'Town', 15.00, 15.00, 1, 1, '2025-05-02 20:22:56'),
+	(14, 'EX1013', 'Clavicula', 20.00, 25.00, 2, 1, '2025-05-02 20:22:56'),
+	(15, 'EX1014', 'Columna Cervical', 25.00, 30.00, 2, 1, '2025-05-02 20:22:57'),
+	(16, 'EX1015', 'Columna Dorsal', 25.00, 30.00, 2, 1, '2025-05-02 20:22:58'),
+	(17, 'EX1016', 'Columna Lumbar', 25.00, 30.00, 2, 1, '2025-05-02 20:23:00'),
+	(18, 'EX1017', 'Columna Cerv/Oblicuas', 45.00, 50.00, 2, 1, '2025-05-02 20:23:01'),
+	(19, 'EX1018', 'Columna Lumb/Oblicuas', 45.00, 50.00, 2, 1, '2025-05-02 20:23:02'),
+	(20, 'EX1019', 'Sacro Coxis', 25.00, 30.00, 2, 1, '2025-05-02 20:23:02'),
+	(21, 'EX1020', 'Pelvis AP', 25.00, 30.00, 2, 1, '2025-05-02 20:23:03'),
+	(22, 'EX1021', 'Columna Lumb AP/Flex', 55.00, 60.00, 2, 1, '2025-05-02 20:23:03'),
+	(23, 'EX1022', 'Hombro Der o Izq', 20.00, 25.00, 3, 1, '2025-05-02 20:23:04'),
+	(24, 'EX1023', 'Escapulas Der o Izq', 20.00, 25.00, 3, 1, '2025-05-02 20:23:05'),
+	(25, 'EX1024', 'Humero Der o Izq', 20.00, 25.00, 3, 1, '2025-05-02 20:23:05'),
+	(26, 'EX1025', 'Codo Der o Izq', 20.00, 25.00, 3, 1, '2025-05-02 20:23:05'),
+	(27, 'EX1026', 'Antebrazo Der o Izq', 20.00, 25.00, 3, 1, '2025-05-02 20:23:06'),
+	(28, 'EX1027', 'Muñeca Der o Izq', 20.00, 25.00, 3, 1, '2025-05-02 20:23:07'),
+	(29, 'EX1028', 'Ambas Rodillas', 50.00, 55.00, 3, 1, '2025-05-02 20:23:07'),
+	(30, 'EX1029', 'Femur Der o Izq', 20.00, 25.00, 3, 1, '2025-05-02 20:23:08'),
+	(31, 'EX1030', 'Rodilla Der o Izq AP y LAT', 24.00, 27.00, 3, 1, '2025-05-02 20:23:09'),
+	(32, 'EX1031', 'Pierna Der o Izq', 23.00, 25.00, 3, 1, '2025-05-02 20:23:10'),
+	(33, 'EX1032', 'Ambas Piernas', 45.00, 50.00, 3, 1, '2025-05-02 20:23:11'),
+	(34, 'EX1033', 'Tobillo Der o Izq', 20.00, 25.00, 3, 1, '2025-05-02 20:23:11'),
+	(35, 'EX1034', 'Ambos Tobillos', 40.00, 50.00, 3, 1, '2025-05-02 20:23:12'),
+	(36, 'EX1035', 'Pie Der o Izq', 20.00, 25.00, 3, 1, '2025-05-02 20:23:13'),
+	(37, 'EX1036', 'Ambos Pies', 40.00, 50.00, 3, 1, '2025-05-02 20:23:14'),
+	(38, 'EX1037', 'Pie Lateral', 20.00, 25.00, 3, 1, '2025-05-02 20:23:15'),
+	(39, 'EX1038', 'Calcaneos', 20.00, 25.00, 3, 1, '2025-05-02 20:23:15'),
+	(40, 'EX1039', 'Femur AP', 20.00, 25.00, 3, 1, '2025-05-02 20:23:16'),
+	(41, 'EX1040', 'Mano Der o Izq', 20.00, 25.00, 3, 1, '2025-05-02 20:23:17'),
+	(42, 'EX1041', 'Torax PA*', 15.00, 15.00, 4, 1, '2025-05-02 20:23:17'),
+	(43, 'EX1042', 'Torax PA y Lateral', 25.00, 30.00, 4, 1, '2025-05-02 20:23:18'),
+	(44, 'EX1043', 'Torax Costilla', 25.00, 30.00, 4, 1, '2025-05-02 20:23:19'),
+	(45, 'EX1044', 'Esternon', 25.00, 30.00, 4, 1, '2025-05-02 20:23:20'),
+	(46, 'EX1045', 'Abdomen AP Simple', 25.00, 30.00, 5, 1, '2025-05-02 20:23:20'),
+	(47, 'EX1046', 'Abdomen Agudo', 55.00, 60.00, 5, 1, '2025-05-02 20:23:22'),
+	(48, 'EX1047', 'Colangiograma en tubo T', 100.00, 125.00, 5, 1, '2025-05-02 20:23:24'),
+	(49, 'EX1048', 'Transito Intestinal', 100.00, 125.00, 5, 1, '2025-05-02 20:23:25'),
+	(50, 'EX1049', 'Enema Baritado', 100.00, 125.00, 5, 1, '2025-05-02 20:23:27'),
+	(51, 'EX1050', 'Esofagograma', 100.00, 125.00, 5, 1, '2025-05-02 20:23:30'),
+	(52, 'EX1051', 'Fistulograma', 100.00, 125.00, 5, 1, '2025-05-02 20:23:31'),
+	(53, 'EX1052', 'Tubo Digestivo Sup', 100.00, 125.00, 5, 1, '2025-05-02 20:23:32'),
+	(54, 'EX1053', 'Pielograma EV/ P', 100.00, 150.00, 6, 1, '2025-05-02 20:23:33'),
+	(55, 'EX1054', 'Cistograma/ Cistografia', 75.00, 150.00, 6, 1, '2025-05-02 20:23:33'),
+	(56, 'EX1055', 'Uretrograma', 75.00, 100.00, 6, 1, '2025-05-02 20:23:34'),
+	(57, 'EX1056', 'Caderas', 25.00, 30.00, 7, 1, '2025-05-02 20:23:34'),
+	(58, 'EX1057', 'Edad Osea', 25.00, 30.00, 7, 1, '2025-05-02 20:23:35'),
+	(59, 'EX1058', 'Serie Osea/Surbey Oseo', 180.00, 200.00, 7, 1, '2025-05-02 20:23:36'),
+	(60, 'EX1059', 'Histerosalpinpograma', 180.00, 200.00, 7, 1, '2025-05-02 20:23:36'),
+	(61, 'EX1060', 'Mamo Bilateral', 25.00, 30.00, 8, 1, '2025-05-02 20:23:37'),
+	(62, 'EX1061', 'USG Abd/Ren/Vesical', 18.00, 23.00, 9, 1, '2025-05-02 20:23:38'),
+	(63, 'EX1062', 'USG Tejido Blando', 22.00, 25.00, 9, 1, '2025-05-02 20:23:38'),
+	(64, 'EX1063', 'USG Tiroides', 22.00, 25.00, 9, 1, '2025-05-02 20:23:39'),
+	(65, 'EX1064', 'USG Musculo Esqueletico', 30.00, 35.00, 9, 1, '2025-05-02 20:23:40'),
+	(66, 'EX1065', 'USG Prostata', 22.00, 25.00, 9, 1, '2025-05-02 20:23:40'),
+	(67, 'EX1066', 'Doppler Ambas Piernas', 130.00, 140.00, 9, 1, '2025-05-02 20:23:41'),
+	(68, 'EX1067', 'Doppler Ambas Piernas', 65.00, 70.00, 9, 1, '2025-05-02 20:23:41'),
+	(69, 'EX1068', 'UROTAC', 100.00, 200.00, 10, 1, '2025-05-02 20:23:42'),
+	(70, 'EX1069', 'PIELOTAC', 100.00, 200.00, 10, 1, '2025-05-02 20:23:43'),
+	(71, 'EX1070', 'ANGIOTAC', 200.00, 250.00, 10, 1, '2025-05-02 20:23:43'),
+	(72, 'EX1071', 'TAC CRANEO', 100.00, 200.00, 10, 1, '2025-05-02 20:23:44'),
+	(73, 'EX1072', 'TAC ABDOMINAL', 100.00, 200.00, 10, 1, '2025-05-02 20:23:44'),
+	(74, 'EX1073', 'ABDOMINO/PELVICO', 250.00, 350.00, 10, 1, '2025-05-02 20:23:46'),
+	(75, 'EX1074', 'TAC PELVICO', 100.00, 200.00, 10, 1, '2025-05-02 20:23:47'),
+	(76, 'EX1075', 'TAC 3D/MI/Columnas', 180.00, 250.00, 10, 1, '2025-05-02 20:23:48'),
+	(77, 'EX1076', 'TAC TORAX', 100.00, 200.00, 10, 1, '2025-05-02 20:23:48');
 
 -- Volcando estructura para tabla db_clinica_radiologica.tbl_medicos
 CREATE TABLE IF NOT EXISTS `tbl_medicos` (
@@ -617,12 +740,13 @@ CREATE TABLE IF NOT EXISTS `tbl_menu` (
   `htmlMenu` text NOT NULL,
   `fechaMenu` timestamp NOT NULL DEFAULT current_timestamp(),
   PRIMARY KEY (`idMenu`)
-) ENGINE=InnoDB AUTO_INCREMENT=34 DEFAULT CHARSET=utf8 COLLATE=utf8_spanish_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8 COLLATE=utf8_spanish_ci;
 
--- Volcando datos para la tabla db_clinica_radiologica.tbl_menu: ~33 rows (aproximadamente)
+-- Volcando datos para la tabla db_clinica_radiologica.tbl_menu: ~3 rows (aproximadamente)
 INSERT INTO `tbl_menu` (`idMenu`, `nombreMenu`, `htmlMenu`, `fechaMenu`) VALUES
 	(1, 'Pacientes', '<li class="menu-item">\r\n                    <a href="#" class="has-chevron" data-toggle="collapse" data-target="#patient" aria-expanded="false"\r\n                        aria-controls="patient">\r\n                        <span><i class="fas fa-user"></i>Pacientes</span>\r\n                    </a>\r\n                    <ul id="patient" class="collapse" aria-labelledby="patient" data-parent="#side-nav-accordion">\r\n                        <li> <a href="<?php echo base_url(); ?>Consulta/agregar_paciente">Agregar paciente</a> </li>\r\n                        <li> <a href="<?php echo base_url(); ?>Consulta/lista_pacientes">Lista pacientes</a> </li>\r\n                    </ul>\r\n                </li>', '2021-04-29 20:00:15'),
-	(2, 'Configuraciòn', '<li class="menu-item">\r\n                    <a href="#" class="has-chevron" data-toggle="collapse" data-target="#configuracion"\r\n                        aria-expanded="false" aria-controls="configuracion">\r\n                        <span><i class="fa fa-cog"></i>Configuración</span>\r\n                    </a>\r\n                    <ul id="configuracion" class="collapse" aria-labelledby="configuracion"\r\n                        data-parent="#side-nav-accordion">\r\n                        <li><a href="<?php echo base_url(); ?>Accesos/">Accesos</a></li>\r\n                        <li><a href="<?php echo base_url(); ?>Usuarios/gestion_usuarios">Usuarios</a></li>\r\n                        <li><a href="<?php echo base_url(); ?>Permisos/">Permisos</a></li>\r\n                    </ul>\r\n                </li>', '2021-04-30 18:20:44');
+	(2, 'Configuraciòn', '<li class="menu-item">\r\n                    <a href="#" class="has-chevron" data-toggle="collapse" data-target="#configuracion"\r\n                        aria-expanded="false" aria-controls="configuracion">\r\n                        <span><i class="fa fa-cog"></i>Configuración</span>\r\n                    </a>\r\n                    <ul id="configuracion" class="collapse" aria-labelledby="configuracion"\r\n                        data-parent="#side-nav-accordion">\r\n                        <li><a href="<?php echo base_url(); ?>Accesos/">Accesos</a></li>\r\n                        <li><a href="<?php echo base_url(); ?>Usuarios/gestion_usuarios">Usuarios</a></li>\r\n                        <li><a href="<?php echo base_url(); ?>Permisos/">Permisos</a></li>\r\n                    </ul>\r\n                </li>', '2021-04-30 18:20:44'),
+	(3, 'Medicos', '<li class="menu-item">\r\n    <a href="#" class="has-chevron" data-toggle="collapse" data-target="#doctor" aria-expanded="false"\r\n        aria-controls="doctor">\r\n        <span><i class="fas fa-stethoscope"></i>Médico</span>\r\n    </a>\r\n    <ul id="doctor" class="collapse" aria-labelledby="doctor" data-parent="#side-nav-accordion">\r\n        <li> <a href="<?php echo base_url(); ?>Medico/">Lista médicos</a> </li>\r\n    </ul>\r\n</li>', '2025-05-02 20:25:40');
 
 -- Volcando estructura para tabla db_clinica_radiologica.tbl_permisos
 CREATE TABLE IF NOT EXISTS `tbl_permisos` (
@@ -632,12 +756,35 @@ CREATE TABLE IF NOT EXISTS `tbl_permisos` (
   `estadoPermiso` int(11) NOT NULL,
   `fechaPermiso` timestamp NOT NULL DEFAULT current_timestamp(),
   PRIMARY KEY (`idPermiso`)
-) ENGINE=InnoDB AUTO_INCREMENT=131 DEFAULT CHARSET=utf8 COLLATE=utf8_spanish_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=132 DEFAULT CHARSET=utf8 COLLATE=utf8_spanish_ci;
 
--- Volcando datos para la tabla db_clinica_radiologica.tbl_permisos: ~2 rows (aproximadamente)
+-- Volcando datos para la tabla db_clinica_radiologica.tbl_permisos: ~3 rows (aproximadamente)
 INSERT INTO `tbl_permisos` (`idPermiso`, `idMenu`, `idAcceso`, `estadoPermiso`, `fechaPermiso`) VALUES
 	(1, 1, 1, 1, '2021-04-29 20:41:05'),
-	(2, 2, 1, 1, '2021-04-30 19:48:47');
+	(2, 2, 1, 1, '2021-04-30 19:48:47'),
+	(131, 3, 1, 1, '2025-05-02 20:26:29');
+
+-- Volcando estructura para tabla db_clinica_radiologica.tbl_tipo_examenes
+CREATE TABLE IF NOT EXISTS `tbl_tipo_examenes` (
+  `idTipo` int(11) NOT NULL AUTO_INCREMENT,
+  `codigoTipo` varchar(20) DEFAULT NULL,
+  `nombreTipo` varchar(100) DEFAULT NULL,
+  `creado` timestamp NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`idTipo`)
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_spanish_ci;
+
+-- Volcando datos para la tabla db_clinica_radiologica.tbl_tipo_examenes: ~10 rows (aproximadamente)
+INSERT INTO `tbl_tipo_examenes` (`idTipo`, `codigoTipo`, `nombreTipo`, `creado`) VALUES
+	(1, '1000', 'SISTEMA OSEO CRANEO', '2025-05-02 19:57:02'),
+	(2, '1001', 'TRONCO', '2025-05-02 19:57:02'),
+	(3, '1002', 'EXTREMIDADES', '2025-05-02 19:57:02'),
+	(4, '1003', 'SISTEMA RESPIRATORIO', '2025-05-02 19:57:02'),
+	(5, '1004', 'SISTEMA GASTROINTESTINAL', '2025-05-02 19:57:02'),
+	(6, '1005', 'SISTEMA URINARIO', '2025-05-02 19:57:02'),
+	(7, '1006', 'ESTUDIOS ESPECIALES', '2025-05-02 19:57:02'),
+	(8, '1007', 'MAMOGRAFIAS', '2025-05-02 19:57:02'),
+	(9, '1008', 'ULTRASONOGRAFIAS', '2025-05-02 19:57:02'),
+	(10, '1009', 'TOMOGRAFIAS', '2025-05-02 19:57:02');
 
 -- Volcando estructura para tabla db_clinica_radiologica.tbl_usuarios
 CREATE TABLE IF NOT EXISTS `tbl_usuarios` (
@@ -660,7 +807,7 @@ CREATE TABLE IF NOT EXISTS `tbl_usuarios` (
 
 -- Volcando datos para la tabla db_clinica_radiologica.tbl_usuarios: ~1 rows (aproximadamente)
 INSERT INTO `tbl_usuarios` (`idUsuario`, `nombreUsuario`, `psUsuario`, `idEmpleado`, `idAcceso`, `codigoVerificacion`, `nivelUsuario`, `estadoUsuario`, `pivoteUsuario`, `celebrar`, `imagen`, `fechaUsuario`) VALUES
-	(1, 'Informatica', 'd41d8cd98f00b204e9800998ecf8427e', 1, 1, '2f2bb449c2cb83320769d123f0904b5a', 1, 1, 0, 0, 'edwin', '2021-04-29 18:05:52');
+	(1, 'Informatica', 'e10adc3949ba59abbe56e057f20f883e', 1, 1, '2f2bb449c2cb83320769d123f0904b5a', 1, 1, 0, 0, 'edwin', '2021-04-29 18:05:52');
 
 /*!40103 SET TIME_ZONE=IFNULL(@OLD_TIME_ZONE, 'system') */;
 /*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;
