@@ -9,7 +9,7 @@ class Facturacion_Model extends CI_Model {
 
     public function obtenerHojaCobro($cod = null){
         if($cod != null){
-            $sql ="SELECT COALESCE((SELECT hc.idHoja FROM tbl_hoja_cobro AS hc WHERE hc.codigoHoja = '$cod' LIMIT 1), 0) AS hoja;";
+            $sql ="SELECT COALESCE((SELECT v.idVenta FROM tbl_ventas AS v WHERE v.codigoVenta = '$cod' LIMIT 1), 0) AS hoja";
             $datos = $this->db->query($sql);
             return $datos->row();
         }
@@ -45,17 +45,15 @@ class Facturacion_Model extends CI_Model {
         return $datos->result();
     }
 
-    public function detalleHoja($id){
-        if($id != null){
-            $sql = "SELECT hc.idHoja, hc.seguroHoja, hc.destinoHoja, hc.credito_fiscal, hc.notaFactura, cc.idCaja, cc.codigoReciboCaja, cc.nombreCaja, p.* 
-                    FROM tbl_hoja_cobro as hc 
-                    INNER JOIN tbl_pacientes as p ON(hc.idPaciente = p.idPaciente)
-                    LEFT  JOIN tbl_control_cajas AS cc ON(cc.idHoja = hc.idHoja)
-                    WHERE hc.idHoja = '$id' ";
+    public function detalleVenta($v = null){
+        if($v != null){
+            $sql = "SELECT m.nombreMedicamento, m.imagenMedicamento, m.cFiscal, v.codigoVenta, v.fechaVenta, v.subtotalVenta, v.ivaVenta, v.totalVenta, dv.* 
+                FROM tbl_detalle_venta AS dv
+                INNER JOIN tbl_ventas AS v ON(v.idVenta = dv.idVenta)
+                INNER JOIN tbl_medicamentos AS m ON(m.idMedicamento = dv.idMedicamento)
+                WHERE dv.idVenta = '$v' ORDER BY dv.idDetalleVenta ASC";
             $datos = $this->db->query($sql);
-            return $datos->row();
-        }else{
-            return null;
+            return $datos->result();
         }
     }
 
@@ -264,48 +262,48 @@ class Facturacion_Model extends CI_Model {
 
             switch ($pivote) {
                 case '1':
-                    $sql = "INSERT INTO tbl_dte_fc(numeroDTE, anioDTE, detalleDTE, idHoja, codigoGeneracion, jsonDTE, respuestaHacienda, datosLocales, establecimiento)
-                            VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                    $sql = "INSERT INTO tbl_dte_fc(numeroDTE, anioDTE, detalleDTE, idHoja, codigoGeneracion, jsonDTE, respuestaHacienda, datosLocales)
+                            VALUES(?, ?, ?, ?, ?, ?, ?, ?)";
                     break;
                 case '3':
-                    $sql = "INSERT INTO tbl_dte_ccf(numeroDTE, anioDTE, detalleDTE, idHoja, codigoGeneracion, jsonDTE, respuestaHacienda, datosLocales, establecimiento)
-                            VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                    $sql = "INSERT INTO tbl_dte_ccf(numeroDTE, anioDTE, detalleDTE, idHoja, codigoGeneracion, jsonDTE, respuestaHacienda, datosLocales)
+                            VALUES(?, ?, ?, ?, ?, ?, ?, ?)";
                     break;
                 case '5':
-                    $sql = "INSERT INTO tbl_dte_nc(numeroDTE, anioDTE, detalleDTE, idHoja, codigoGeneracion, jsonDTE, respuestaHacienda, datosLocales, padreDTE, establecimiento)
-                            VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-                    break;
-                case '6':
-                    $sql = "INSERT INTO tbl_dte_nd(numeroDTE, anioDTE, detalleDTE, idHoja, codigoGeneracion, jsonDTE, respuestaHacienda, datosLocales, padreDTE, establecimiento)
-                            VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-                    break;
-                case '14':
-                    $sql = "INSERT INTO tbl_dte_se(numeroDTE, anioDTE, detalleDTE, idHoja, codigoGeneracion, jsonDTE, respuestaHacienda, datosLocales, establecimiento)
+                    $sql = "INSERT INTO tbl_dte_nc(numeroDTE, anioDTE, detalleDTE, idHoja, codigoGeneracion, jsonDTE, respuestaHacienda, datosLocales, padreDTE)
                             VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)";
                     break;
+                case '6':
+                    $sql = "INSERT INTO tbl_dte_nd(numeroDTE, anioDTE, detalleDTE, idHoja, codigoGeneracion, jsonDTE, respuestaHacienda, datosLocales, padreDTE)
+                            VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                    break;
+                case '14':
+                    $sql = "INSERT INTO tbl_dte_se(numeroDTE, anioDTE, detalleDTE, idHoja, codigoGeneracion, jsonDTE, respuestaHacienda, datosLocales)
+                            VALUES(?, ?, ?, ?, ?, ?, ?, ?)";
+                    break;
                 case '11':
-                    $sql = "INSERT INTO tbl_dte_fc(numeroDTE, anioDTE, detalleDTE, idHoja, codigoGeneracion, padreDTE, jsonDTE, respuestaHacienda, datosLocales, establecimiento)
-                            VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                    $sql = "INSERT INTO tbl_dte_fc(numeroDTE, anioDTE, detalleDTE, idHoja, codigoGeneracion, padreDTE, jsonDTE, respuestaHacienda, datosLocales)
+                            VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)";
                     break;
                 case '33':
-                    $sql = "INSERT INTO tbl_dte_ccf(numeroDTE, anioDTE, detalleDTE, idHoja, codigoGeneracion, padreDTE, jsonDTE, respuestaHacienda, datosLocales, establecimiento)
-                            VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                    $sql = "INSERT INTO tbl_dte_ccf(numeroDTE, anioDTE, detalleDTE, idHoja, codigoGeneracion, padreDTE, jsonDTE, respuestaHacienda, datosLocales)
+                            VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)";
                 case '40':
-                    $sql = "INSERT INTO tbl_dte_se(numeroDTE, anioDTE, detalleDTE, idHoja, codigoGeneracion, padreDTE, jsonDTE, respuestaHacienda, datosLocales, establecimiento)
-                            VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                    $sql = "INSERT INTO tbl_dte_se(numeroDTE, anioDTE, detalleDTE, idHoja, codigoGeneracion, padreDTE, jsonDTE, respuestaHacienda, datosLocales)
+                            VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)";
                     break;
                 // Eventos por contingencia
                 case '50': // Consumidor final
-                    $sql = "INSERT INTO tbl_dte_fc(numeroDTE, anioDTE, detalleDTE, idHoja, codigoGeneracion, jsonDTE, respuestaHacienda, datosLocales, enContingencia, firma, establecimiento)
-                            VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                    $sql = "INSERT INTO tbl_dte_fc(numeroDTE, anioDTE, detalleDTE, idHoja, codigoGeneracion, jsonDTE, respuestaHacienda, datosLocales, enContingencia, firma)
+                            VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
                     break;
                 case '51': // Credito fiscal
-                    $sql = "INSERT INTO tbl_dte_ccf(numeroDTE, anioDTE, detalleDTE, idHoja, codigoGeneracion, jsonDTE, respuestaHacienda, datosLocales, enContingencia, firma, establecimiento)
-                            VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                    $sql = "INSERT INTO tbl_dte_ccf(numeroDTE, anioDTE, detalleDTE, idHoja, codigoGeneracion, jsonDTE, respuestaHacienda, datosLocales, enContingencia, firma)
+                            VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
                     break;
                 case '52': // Sujeto excluido
-                    $sql = "INSERT INTO tbl_dte_se(numeroDTE, anioDTE, detalleDTE, idHoja, codigoGeneracion, jsonDTE, respuestaHacienda, datosLocales, enContingencia, firma, establecimiento)
-                            VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                    $sql = "INSERT INTO tbl_dte_se(numeroDTE, anioDTE, detalleDTE, idHoja, codigoGeneracion, jsonDTE, respuestaHacienda, datosLocales, enContingencia, firma)
+                            VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
                     break;
                 case '60': // Datos de la contingencia
                     $sql = "INSERT INTO tbl_documentos_contingencia(codigoDocumento, motivoDocumento, textoDocumento)
@@ -428,22 +426,22 @@ class Facturacion_Model extends CI_Model {
         
     }
 
-    public function validarDTE($tipo, $anio, $establecimiento){
+    public function validarDTE($tipo, $anio){
         switch ($tipo) {
             case '1':
-                $sql = "SELECT COALESCE(MAX(fc.numeroDTE), 0) AS actual FROM tbl_dte_fc AS fc WHERE fc.anioDTE = '$anio' AND fc.establecimiento = '$establecimiento' ";
+                $sql = "SELECT COALESCE(MAX(fc.numeroDTE), 0) AS actual FROM tbl_dte_fc AS fc WHERE fc.anioDTE = '$anio'";
                 break;
             case '3':
-                $sql = "SELECT COALESCE(MAX(fc.numeroDTE), 0) AS actual FROM tbl_dte_ccf AS fc WHERE fc.anioDTE = '$anio' AND fc.establecimiento = '$establecimiento' ";
+                $sql = "SELECT COALESCE(MAX(fc.numeroDTE), 0) AS actual FROM tbl_dte_ccf AS fc WHERE fc.anioDTE = '$anio'";
                 break;
             case '5':
-                $sql = "SELECT COALESCE(MAX(fc.numeroDTE), 0) AS actual FROM tbl_dte_nc AS fc WHERE fc.anioDTE = '$anio' AND fc.establecimiento = '$establecimiento' ";
+                $sql = "SELECT COALESCE(MAX(fc.numeroDTE), 0) AS actual FROM tbl_dte_nc AS fc WHERE fc.anioDTE = '$anio'";
                 break;
             case '6':
-                $sql = "SELECT COALESCE(MAX(fc.numeroDTE), 0) AS actual FROM tbl_dte_nd AS fc WHERE fc.anioDTE = '$anio' AND fc.establecimiento = '$establecimiento' ";
+                $sql = "SELECT COALESCE(MAX(fc.numeroDTE), 0) AS actual FROM tbl_dte_nd AS fc WHERE fc.anioDTE = '$anio'";
                 break;
             case '14':
-                $sql = "SELECT COALESCE(MAX(fc.numeroDTE), 0) AS actual FROM tbl_dte_se AS fc WHERE fc.anioDTE = '$anio' AND fc.establecimiento = '$establecimiento' ";
+                $sql = "SELECT COALESCE(MAX(fc.numeroDTE), 0) AS actual FROM tbl_dte_se AS fc WHERE fc.anioDTE = '$anio'";
                 break;
             
             default:
@@ -544,9 +542,6 @@ class Facturacion_Model extends CI_Model {
         }
     }
 
-    
-
-
     public function buscarRecomendaciones($txt = null){
         $sql = "SELECT * FROM tbl_anexo_facturacion AS an WHERE an.nombrePaciente LIKE '%$txt%' LIMIT 10";
         $datos = $this->db->query($sql);
@@ -644,19 +639,6 @@ class Facturacion_Model extends CI_Model {
         }
     }
 
-    public function asignarOnline($factura = null, $dte = null){
-        if($factura != null){
-            $sql = "UPDATE tbl_dte_fc SET onlineDTE = '$factura' WHERE idDTEFC = '$dte' ";
-            if($this->db->query($sql)){
-                return true;
-            }else{
-                return false;
-            }
-        }else{
-            return false;
-        }
-    }
-
     public function agregarAControlCajeras($data = null){
         if($data != null){
             $sql = "INSERT INTO tbl_control_cajeras(idUsuario, idHoja, correlativoHoja, fechaGenerado) VALUES(?, ?, ?, ?)";
@@ -670,55 +652,12 @@ class Facturacion_Model extends CI_Model {
         }
     }
 
-    public function guardarFacturaLocal($data = null){
-        if($data != null){
-            $sql = "INSERT INTO tbl_control_cajeras(idUsuario, idHoja, correlativoHoja, fechaGenerado) VALUES(?, ?, ?, ?)";
-            if($this->db->query($sql, $data)){
-                return true;
-            }else{
-                return false;
-            }
-        }else{
-            return false;
-        }
+
+    public function pacienteGeneral(){
+        $sql = "SELECT * from tbl_anexo_facturacion AS af WHERE af.idAnexo= '1'";
+        $datos = $this->db->query($sql);
+        return $datos->row();
     }
-
-    public function guardarCorrelativoFactura($data = null){
-        if($data != null){
-            // Antes
-                /*  $sql = "INSERT INTO tbl_facturas(clienteFactura, duiFactura, idHojaCobro, numeroFactura, tipoFactura, fechaMostrar) VALUES(?, ?, ?, ?, ?, ?)";
-
-                $sql2 = "UPDATE tbl_facturas SET numeroFactura = '$factura', fechaMostrar = '$fecha'  WHERE idHojaCobro = '$id' ";
-
-                if(isset($data["actualizarCodigoFactura"])){
-                    $bool = $this->db->query($sql2);
-                }else{
-                    $bool = $this->db->query($sql, $data);
-                }
-                if($bool){
-                    if($tipo == 1){
-                        $sql2 = "UPDATE tbl_hoja_cobro SET credito_fiscal = '$factura' WHERE idHoja = '$id' ";
-                        $this->db->query($sql2);
-                    }
-                    return true;
-                }else{
-                    return false;
-                } */
-
-            // Antes
-
-            $sql = "INSERT INTO tbl_facturas(clienteFactura, duiFactura, idHojaCobro, numeroFactura, tipoFactura, fechaMostrar) VALUES(?, ?, ?, ?, ?, ?)";
-            if($this->db->query($sql, $data)){
-                return true;
-            }else{
-                return false;
-            }
-
-        }else{
-            return false;
-        }
-    }
-
 
     // Conexion con la API
         private $tokenFile = APPPATH . 'cache/auth_token.json'; // Ruta del archivo donde se guarda el token
@@ -786,6 +725,10 @@ class Facturacion_Model extends CI_Model {
             return null; // Si falla la autenticación, retorna null
         }
     // Conexion con la API
+
+
+
+
 
 }
 ?>

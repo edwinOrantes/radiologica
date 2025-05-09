@@ -5,17 +5,17 @@ defined('BASEPATH') OR exit('No direct script access allowed');
     use Curl\Curl;
 // Importar la clase Curl
 
+// Mailer
+    use PHPMailer\PHPMailer\PHPMailer;
+    use PHPMailer\PHPMailer\Exception;
+// Mailer
+
 // Crear QR
     use BaconQrCode\Renderer\ImageRenderer;
     use BaconQrCode\Renderer\RendererStyle\RendererStyle;
     use BaconQrCode\Renderer\Image\SvgImageBackEnd; // También puedes usar \ImagickImageBackEnd o \GdImageBackEnd
     use BaconQrCode\Writer;
 // Crear QR
-
-// Mailer
-    use PHPMailer\PHPMailer\PHPMailer;
-    use PHPMailer\PHPMailer\Exception;
-// Mailer
 
 // Libreria para impresora termica
     use Mike42\Escpos\Printer;
@@ -25,14 +25,13 @@ defined('BASEPATH') OR exit('No direct script access allowed');
     use Mike42\Escpos\EscposImage;
 // Libreria para impresora termica
 
-
-
 class Facturacion extends CI_Controller {
     // Declarar una variable global
     protected $urlHacienda;
     private $tokenHacienda;
+
     private $establecimiento;
-    private $urlOnline;
+    private $psPublica;
 
 	public function __construct(){
         parent::__construct();
@@ -44,58 +43,63 @@ class Facturacion extends CI_Controller {
             redirect(base_url());
         }
         $this->load->model("Facturacion_Model");
+        $this->load->model("Consulta_Model");
 
-        $this->urlHacienda = "https://apitest.dtes.mh.gob.sv/fesv/"; // URL de prueba
-        // $this->urlHacienda = "https://api.dtes.mh.gob.sv/fesv/"; // URL produccion
-
-        $this->urlOnline = "http://192.168.1.92/lab-online/Facturas/"; // URL de prueba
-        // $this->urlOnline = "https://factura.hospitalorellana.com.sv/Facturas/"; // URL online
-
-        $this->establecimiento = $this->session->userdata('establecimiento');
+        // $this->urlHacienda = "https://apitest.dtes.mh.gob.sv/fesv/";
+        $this->urlHacienda = "https://api.dtes.mh.gob.sv/fesv/"; // URL produccion
+        $this->establecimiento = "S001";
+        $this->psPublica = "UnionMedica_25";
 
         $this->tokenHacienda = $this->Facturacion_Model->obtenerToken(); // Obtener el token y asignarlo a la variable de clase
     }
 
-	public function index(){
-        /* if (!$this->tokenHacienda) {
-            echo "Error al obtener el token.";
-            return;
+        public function index(){
+            if (!$this->tokenHacienda) {
+                echo "Error al obtener el token.";
+                return;
+            }else{
+                redirect(base_url()."Ventas/");
+            }
+
+            // echo "Token disponible: " . $this->tokenHacienda;
+
+
+            /* $timestamp = 1740451324;
+            if ($timestamp > 9999999999) { // Si el timestamp tiene más de 10 dígitos, está en milisegundos
+                $timestamp = intval($timestamp / 1000);
+            }
+            echo date('Y-m-d H:i:s', $timestamp); */
+
+
+
+            // echo json_encode($token);
+
+            
         }
-
-        echo "Token disponible: " . $this->tokenHacienda; */
-
-
-        /* $timestamp = 1740451324;
-        if ($timestamp > 9999999999) { // Si el timestamp tiene más de 10 dígitos, está en milisegundos
-            $timestamp = intval($timestamp / 1000);
-        }
-        echo date('Y-m-d H:i:s', $timestamp); */
-
-        
-	}
-
 
     
     // Pivote manejo de facturas
-        public function crear_factura($params = null){
-            $datos = unserialize(base64_decode(urldecode($params)));
+        public function procesar_factura($params = null){
+            $datos = $this->input->post();
+            $pivote = $datos["documentoPago"];
             $params = urlencode(base64_encode(serialize($datos)));
-            
-            switch ($datos["codigoCatDetalle"]) {
-                case '01':
-                    redirect(base_url()."Facturacion/factura_comercial/".$params."/");
+                        
+           
+            switch ($pivote) {
+                case '2':
+                    redirect(base_url()."Facturacion/sellar_factura/".$params."/");
                     break;
-                case '03':
+                case '3':
                     redirect(base_url()."Facturacion/credito_fiscal/".$params."/");
                     break;
-                case '14':
-                    redirect(base_url()."Facturacion/sujeto_excluido/".$params."/");
+                case '22':
+                    redirect(base_url()."Facturacion/consumidor_final_solicitado/".$params."/");
                     break;
                 
                 default:
                     # code...
                     break;
-            }
+            } 
 
             // echo json_encode($datos);
 
@@ -105,9 +109,9 @@ class Facturacion extends CI_Controller {
         public function fin_factura_electronica($dte = null, $mensaje = null){
             if($dte > 0){
                 $datos = $this->Facturacion_Model->obtenerDTE($dte, 1);
-
                 $data["datos"] = $datos;
                 $data["datosLocales"] = $datos->datosLocales;
+                $datosLocales = unserialize(base64_decode(urldecode($datos->datosLocales)));
                 $data["respuestaHacienda"] = $datos->respuestaHacienda;
                 $data["jsonDTE"] = $datos->jsonDTE;
                 $hacienda = null;
@@ -124,19 +128,10 @@ class Facturacion extends CI_Controller {
                 
                 $jsonDTE = unserialize(base64_decode(urldecode($datos->jsonDTE)));
 
+                
+
                 $identificacion = $jsonDTE["dteJson"]["identificacion"];
                 $receptor = "FC-".$jsonDTE["dteJson"]["receptor"]["nombre"]."_".$datos->idDTEFC;
-
-
-                // Creando registro de factura para control interno
-                    $locales = unserialize(base64_decode(urldecode($datos->datosLocales)));
-                    $controlFactura["clienteFactura"] = $locales["nombrePaciente"];
-                    $controlFactura["duiFactura"] = $locales["duiPaciente"];
-                    $controlFactura["idHojaCobro"] = $locales["idHoja"];
-                    $controlFactura["numeroFactura"] = $locales["baseDTE"];
-                    $controlFactura["tipoFactura"] = "1";
-                    $controlFactura["fechaMostrar"] = $identificacion["fecEmi"];
-                // Creando registro de factura para control interno
                 
                 // Parametro para URL
                     $ambiente = $identificacion["ambiente"];
@@ -188,35 +183,26 @@ class Facturacion extends CI_Controller {
                     $data["qrs"] = $tablaQrs;
                 // Contenidos para los tres QR
         
+                $mpdf = new \Mpdf\Mpdf(['mode' => 'utf-8', 'format' => 'A4']);
                 $mpdf = new \Mpdf\Mpdf([
-                    'mode' => 'utf-8',
-                    'format' => 'A4',
                     'margin_left' => 15,
                     'margin_right' => 15,
                     'margin_top' => 25,
                     'margin_bottom' => 25,
                     'margin_header' => 20,
                     'margin_footer' => 23
-                ]);
+                    ]);
                 //$mpdf->setFooter('');
                 //$mpdf->SetProtection(array('print'));
                 $mpdf->SetTitle("Hospital Orellana, Usulutan");
                 $mpdf->SetAuthor("Edwin Orantes");
-                if($datos->estadoDTE == 0){
-                    $mpdf->setWatermarkText('ANULADA'); // set the watermark
-                    $mpdf->showWatermarkText = true;
-                }else{
-                    $mpdf->showWatermarkText = false;
-                }
+                $mpdf->showWatermarkText = false;
                 $mpdf->watermark_font = 'DejaVuSansCondensed';
                 $mpdf->watermarkTextAlpha = 0.1;
-                $mpdf->simpleTables = true;
-                $mpdf->packTableData = true;
-
                 $mpdf->SetDisplayMode('fullpage');
                 //$mpdf->AddPage('L'); //Voltear Hoja
                 $html = $this->load->view('FE/factura_pdf', $data ,true); // Cargando hoja de estilos
-                // $mpdf->SetHTMLHeader('');
+                $mpdf->SetHTMLHeader('');
                 $mpdf->WriteHTML($html);
                 // Nombre del archivo PDF basado en el JSON
                 // Guardar el PDF en el servidor
@@ -231,100 +217,23 @@ class Facturacion extends CI_Controller {
                     file_put_contents($rutaJson, json_encode($jsonPaciente, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
                 // Guardar el JSON en el servidor
 
+                
                 $mpdf->Output($receptor.'-FC.pdf', 'I');
+               /*  if($mensaje == "V"){
+                    $mpdf->Output($receptor.'-FC.pdf', 'I');
 
-                // Subiendo archivo
-                    if($datos->onlineDTE == 0){
-                        $respOnline = json_decode($this->subir_online($receptor, $dte, $data["jsonDTE"], 1));
-                        if($respOnline->factura > 0){
-                            $this->Facturacion_Model->asignarOnline($respOnline->factura, $dte);
-                        }
-                        $this->imprimir_ticket($datos->idHoja, $data["jsonDTE"], $respOnline->factura);
-                        $this->Facturacion_Model->guardarCorrelativoFactura($controlFactura);
+                }else{
+                    $this->imprimir_ticket($datos->idHoja, $data["jsonDTE"]);
+                    redirect(base_url()."Ventas/");
+                } */
 
-                        // echo json_encode($respOnline);
-                    }else{
-                        // Solo mover archivo
-                        $respOnline = json_decode( $this->subir_online($receptor, $dte, $data["jsonDTE"], 0) );
-                    }
-                // Subiendo archivo
-
-                // $this->imprimir_ticket($datos->idHoja, $data["jsonDTE"]);
-                $this->recibo_hoja($datos->idHoja);
-
-                // echo json_encode($data);
+                /* 
+                $this->recibo_hoja($datos->idHoja); */
 
             }else{
-                $mh = unserialize(base64_decode(urldecode($mensaje))); // Mensaje de hacienda
                 
-                $estado = $mh->estado;
-                $descripcionMsg = $mh->descripcionMsg;
-                $descripcionMsg = $mh->descripcionMsg;
-                $observaciones = $mh->observaciones;
-                
-                echo "<div style='margin: 0 auto; width: 500px; text-align: center'>";
-                    echo "<h2 class=''>Advertencia</h2>
-                        <table class='table table-bordered table-striped'>
-                            <thead class=''>
-                                <tr style='color: red'>
-                                    <th>ESTADO</th>
-                                    <th>".$estado."</th>
-                                </tr>
-                            </thead>
-                            <tbody>";
-                            echo "<tr><td colspan='2'><strong>Errores</strong></td></tr>";
-                            $index = 1;
-                        foreach ($observaciones as $row) {
-                            echo "<tr><td><strong>$index</strong></td><td>$row</td></tr>";
-                            $index++;
-                        }
-                    echo "  </tbody>
-                            </table>
-                            <button class='btn btn-primary' onclick='goBack()'>⬅️ Regresar</button>
-                            <script>
-                            function goBack() {
-                                window.history.back();
-                            }
-                        </script>";
-                echo "</div>";
+                echo urldecode($mensaje);
             }
-        }
-
-        private function subir_online($archivo = null, $dte = null, $json = null, $pivote = null){
-
-            $filepath = FCPATH . '/public/archivos_pdf/' . $archivo.'.pdf'; // Ruta local del archivo
-
-            // URL Hacienda
-                $jsonDTE = unserialize(base64_decode(urldecode($json)));
-                $ambiente = $jsonDTE["dteJson"]["identificacion"]["ambiente"];
-                $fecha = $jsonDTE["dteJson"]["identificacion"]["fecEmi"];
-                $codigo = $jsonDTE["dteJson"]["identificacion"]["codigoGeneracion"];
-                $urlHacienda =  urlencode(base64_encode(serialize('https://admin.factura.gob.sv/consultaPublica?ambiente='.urlencode($ambiente).'&codGen='.urlencode($codigo).'&fechaEmi='.urlencode($fecha)))); // Datos de sistema local
-            // URL Hacienda
-
-            // Verificar si el archivo existe antes de enviarlo
-            if (!file_exists($filepath)) {
-                die("<br>Error: El archivo no existe en la ruta especificada.");
-            }
-
-            // URL del servidor donde se subirá el archivo
-            $url_servidor = $this->urlOnline."guardar_factura";
-
-            // Inicializar Curl
-            $curl = new Curl();
-
-            // Enviar el archivo y los datos adicionales
-            $resp = $curl->post($url_servidor, [
-                'codigo' => time(),
-                'dte' => $dte,
-                'nombre' => $archivo,
-                'fecha'  => date('Y-m-d'),
-                'urlHacienda'  => $urlHacienda,
-                'file'   => new CURLFile($filepath),
-                'pivote' => $pivote
-            ]);
-
-            return $resp->response;
         }
         
         public function fin_ccf($dte = null, $mensaje = null){
@@ -401,17 +310,16 @@ class Facturacion extends CI_Controller {
                     $tablaQrs .= '</tr></table>';
                     $data["qrs"] = $tablaQrs;
                 // Contenidos para los tres QR
-    
+        
+                $mpdf = new \Mpdf\Mpdf(['mode' => 'utf-8', 'format' => 'A4']);
                 $mpdf = new \Mpdf\Mpdf([
-                    'mode' => 'utf-8',
-                    'format' => 'A4',
                     'margin_left' => 15,
                     'margin_right' => 15,
                     'margin_top' => 25,
                     'margin_bottom' => 25,
                     'margin_header' => 20,
                     'margin_footer' => 23
-                ]);
+                    ]);
                 //$mpdf->setFooter('');
                 //$mpdf->SetProtection(array('print'));
                 $mpdf->SetTitle("Hospital Orellana, Usulutan");
@@ -425,7 +333,7 @@ class Facturacion extends CI_Controller {
                 $mpdf->watermark_font = 'DejaVuSansCondensed';
                 $mpdf->watermarkTextAlpha = 0.1;
                 $mpdf->SetDisplayMode('fullpage');
-                //$mpdf->AddPage('L'); //Voltear Hoja
+                //$mpdf->AddPage('L'); //Voltear Hoja 
                 $html = $this->load->view('FE/ccf_pdf', $data ,true); // Cargando hoja de estilos
                 $mpdf->SetHTMLHeader('');
                 $mpdf->WriteHTML($html);
@@ -444,46 +352,30 @@ class Facturacion extends CI_Controller {
                     file_put_contents($rutaJson, json_encode($jsonPaciente, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
                 // Guardar el JSON en el servidor
 
+                /* 
                 $mpdf->Output($receptor.'-CCF.pdf', 'I');
 
-                // $this->imprimir_ticket($datos->idHoja, $data["jsonDTE"]);
-                $this->recibo_hoja($datos->idHoja);
+                // echo json_encode($datos);
+
+                $this->imprimir_ticket($datos->idHoja, $data["jsonDTE"]);
+                $this->recibo_hoja($datos->idHoja); */
+
+                if($mensaje == "V"){
+                    $mpdf->Output($receptor.'-FC.pdf', 'I');
+                }else{
+                    $this->imprimir_ticket($datos->idHoja, $data["jsonDTE"]);
+                    redirect(base_url()."Ventas/");
+                }
+
 
             }else{
-                $mh = unserialize(base64_decode(urldecode($mensaje))); // Mensaje de hacienda
-                
-                $estado = $mh->estado;
-                $descripcionMsg = $mh->descripcionMsg;
-                $descripcionMsg = $mh->descripcionMsg;
-                $observaciones = $mh->observaciones;
-                
-                echo "<div style='margin: 0 auto; width: 500px; text-align: center'>";
-                    echo "<h2 class=''>Advertencia</h2>
-                        <table class='table table-bordered table-striped'>
-                            <thead class=''>
-                                <tr style='color: red'>
-                                    <th>ESTADO</th>
-                                    <th>".$estado."</th>
-                                </tr>
-                            </thead>
-                            <tbody>";
-                            echo "<tr><td colspan='2'><strong>Errores</strong></td></tr>";
-                            $index = 1;
-                        foreach ($observaciones as $row) {
-                            echo "<tr><td><strong>$index</strong></td><td>$row</td></tr>";
-                            $index++;
-                        }
-                    echo "  </tbody>
-                            </table>
-                            <button class='btn btn-primary' onclick='goBack()'>⬅️ Regresar</button>
-                            <script>
-                            function goBack() {
-                                window.history.back();
-                            }
-                        </script>";
-                echo "</div>";
+                $arrayStr = $frutas = explode("-", $mensaje);
+                $mh = unserialize(base64_decode(urldecode($arrayStr[1]))); // Mensaje de hacienda
+                echo $mh;
             }
 
+            // echo $strUrl;
+        
 
         }
         
@@ -547,16 +439,15 @@ class Facturacion extends CI_Controller {
                     $data["qrs"] = $tablaQrs;
                 // Contenidos para los tres QR
         
+                $mpdf = new \Mpdf\Mpdf(['mode' => 'utf-8', 'format' => 'A4']);
                 $mpdf = new \Mpdf\Mpdf([
-                    'mode' => 'utf-8',
-                    'format' => 'A4',
                     'margin_left' => 15,
                     'margin_right' => 15,
                     'margin_top' => 25,
                     'margin_bottom' => 25,
                     'margin_header' => 20,
                     'margin_footer' => 23
-                ]);
+                    ]);
                 //$mpdf->setFooter('');
                 //$mpdf->SetProtection(array('print'));
                 $mpdf->SetTitle("Hospital Orellana, Usulutan");
@@ -587,39 +478,9 @@ class Facturacion extends CI_Controller {
               
                 // $this->imprimir_ticket($datos->idHoja, $data["jsonDTE"]);
             }else{
-                $mh = unserialize(base64_decode(urldecode($mensaje))); // Mensaje de hacienda
-                
-                $estado = $mh->estado;
-                $descripcionMsg = $mh->descripcionMsg;
-                $descripcionMsg = $mh->descripcionMsg;
-                $observaciones = $mh->observaciones;
-                
-                echo "<div style='margin: 0 auto; width: 500px; text-align: center'>";
-                    echo "<h2 class=''>Advertencia</h2>
-                        <table class='table table-bordered table-striped'>
-                            <thead class=''>
-                                <tr style='color: red'>
-                                    <th>ESTADO</th>
-                                    <th>".$estado."</th>
-                                </tr>
-                            </thead>
-                            <tbody>";
-                            echo "<tr><td colspan='2'><strong>Errores</strong></td></tr>";
-                            $index = 1;
-                        foreach ($observaciones as $row) {
-                            echo "<tr><td><strong>$index</strong></td><td>$row</td></tr>";
-                            $index++;
-                        }
-                    echo "  </tbody>
-                            </table>
-                            <button class='btn btn-primary' onclick='goBack()'>⬅️ Regresar</button>
-                            <script>
-                            function goBack() {
-                                window.history.back();
-                            }
-                        </script>";
-                echo "</div>";
-            
+                $arrayStr = $frutas = explode("-", $mensaje);
+                $mh = unserialize(base64_decode(urldecode($arrayStr[1]))); // Mensaje de hacienda
+                echo $mh;
             }
 
             // echo $strUrl;
@@ -687,16 +548,15 @@ class Facturacion extends CI_Controller {
                     $data["qrs"] = $tablaQrs;
                 // Contenidos para los tres QR
         
+                $mpdf = new \Mpdf\Mpdf(['mode' => 'utf-8', 'format' => 'A4']);
                 $mpdf = new \Mpdf\Mpdf([
-                    'mode' => 'utf-8',
-                    'format' => 'A4',
                     'margin_left' => 15,
                     'margin_right' => 15,
                     'margin_top' => 25,
                     'margin_bottom' => 25,
                     'margin_header' => 20,
                     'margin_footer' => 23
-                ]);
+                    ]);
                 //$mpdf->setFooter('');
                 //$mpdf->SetProtection(array('print'));
                 $mpdf->SetTitle("Hospital Orellana, Usulutan");
@@ -725,41 +585,12 @@ class Facturacion extends CI_Controller {
 
                 $mpdf->Output($receptor.'-ND.pdf', 'I');
 
-                // $this->imprimir_ticket($datos->idHoja, $data["jsonDTE"]);
+                $this->imprimir_ticket($datos->idHoja, $data["jsonDTE"]);
 
             }else{
-                $mh = unserialize(base64_decode(urldecode($mensaje))); // Mensaje de hacienda
-                
-                $estado = $mh->estado;
-                $descripcionMsg = $mh->descripcionMsg;
-                $descripcionMsg = $mh->descripcionMsg;
-                $observaciones = $mh->observaciones;
-                
-                echo "<div style='margin: 0 auto; width: 500px; text-align: center'>";
-                    echo "<h2 class=''>Advertencia</h2>
-                        <table class='table table-bordered table-striped'>
-                            <thead class=''>
-                                <tr style='color: red'>
-                                    <th>ESTADO</th>
-                                    <th>".$estado."</th>
-                                </tr>
-                            </thead>
-                            <tbody>";
-                            echo "<tr><td colspan='2'><strong>Errores</strong></td></tr>";
-                            $index = 1;
-                        foreach ($observaciones as $row) {
-                            echo "<tr><td><strong>$index</strong></td><td>$row</td></tr>";
-                            $index++;
-                        }
-                    echo "  </tbody>
-                            </table>
-                            <button class='btn btn-primary' onclick='goBack()'>⬅️ Regresar</button>
-                            <script>
-                            function goBack() {
-                                window.history.back();
-                            }
-                        </script>";
-                echo "</div>";
+                $arrayStr = $frutas = explode("-", $mensaje);
+                $mh = unserialize(base64_decode(urldecode($arrayStr[1]))); // Mensaje de hacienda
+                echo $mh;
             }
 
             // echo $strUrl;
@@ -840,26 +671,20 @@ class Facturacion extends CI_Controller {
                     $data["qrs"] = $tablaQrs;
                 // Contenidos para los tres QR
         
+                $mpdf = new \Mpdf\Mpdf(['mode' => 'utf-8', 'format' => 'A4']);
                 $mpdf = new \Mpdf\Mpdf([
-                    'mode' => 'utf-8',
-                    'format' => 'A4',
                     'margin_left' => 15,
                     'margin_right' => 15,
                     'margin_top' => 25,
                     'margin_bottom' => 25,
                     'margin_header' => 20,
                     'margin_footer' => 23
-                ]);
+                    ]);
                 //$mpdf->setFooter('');
                 //$mpdf->SetProtection(array('print'));
                 $mpdf->SetTitle("Hospital Orellana, Usulutan");
                 $mpdf->SetAuthor("Edwin Orantes");
-                if($datos->estadoDTE == 0){
-                    $mpdf->setWatermarkText('ANULADA'); // set the watermark
-                    $mpdf->showWatermarkText = true;
-                }else{
-                    $mpdf->showWatermarkText = false;
-                }
+                $mpdf->showWatermarkText = false;
                 $mpdf->watermark_font = 'DejaVuSansCondensed';
                 $mpdf->watermarkTextAlpha = 0.1;
                 $mpdf->SetDisplayMode('fullpage');
@@ -884,7 +709,7 @@ class Facturacion extends CI_Controller {
 
                 $mpdf->Output($receptor.'-SE.pdf', 'I');
                 // $this->imprimir_ticket($datos->idHoja, $data["jsonDTE"]);
-                //$this->recibo_hoja($datos->idHoja);
+                @$this->recibo_hoja($datos->idHoja);
 
                 if($datos->idHoja > 0){
                     $this->imprimir_ticket($datos->idHoja, $data["jsonDTE"]);
@@ -892,38 +717,7 @@ class Facturacion extends CI_Controller {
 
                 // echo "Orale wachin";
             }else{
-                $mh = unserialize(base64_decode(urldecode($mensaje))); // Mensaje de hacienda
-                
-                $estado = $mh->estado;
-                $descripcionMsg = $mh->descripcionMsg;
-                $descripcionMsg = $mh->descripcionMsg;
-                $observaciones = $mh->observaciones;
-                
-                echo "<div style='margin: 0 auto; width: 500px; text-align: center'>";
-                    echo "<h2 class=''>Advertencia</h2>
-                        <table class='table table-bordered table-striped'>
-                            <thead class=''>
-                                <tr style='color: red'>
-                                    <th>ESTADO</th>
-                                    <th>".$estado."</th>
-                                </tr>
-                            </thead>
-                            <tbody>";
-                            echo "<tr><td colspan='2'><strong>Errores</strong></td></tr>";
-                            $index = 1;
-                        foreach ($observaciones as $row) {
-                            echo "<tr><td><strong>$index</strong></td><td>$row</td></tr>";
-                            $index++;
-                        }
-                    echo "  </tbody>
-                            </table>
-                            <button class='btn btn-primary' onclick='goBack()'>⬅️ Regresar</button>
-                            <script>
-                            function goBack() {
-                                window.history.back();
-                            }
-                        </script>";
-                echo "</div>";
+                echo $mensaje;
             }
 
             // echo $strUrl;
@@ -943,14 +737,13 @@ class Facturacion extends CI_Controller {
             // echo json_encode($data);
         }
 
-        public function agregar_ccf($ch = 0){
+         public function agregar_ccf(){
             $tipo = 3; // Para validar el tipo de DTE requerido
             $anio = date("Y");
-            $strDte = $this->obtener_dte($tipo, $anio, $this->establecimiento);
+            $strDte = $this->obtener_dte($tipo, $anio);
             $partesDTE = explode('.', $strDte);
 
 
-            $data["codigoHoja"] = $ch;
             $data["empresa"] = $this->Facturacion_Model->obtenerEmpresa();
             $data["dte"] = $partesDTE[0];
             $data["baseDTE"] = $partesDTE[1];
@@ -969,9 +762,9 @@ class Facturacion extends CI_Controller {
 
         public function crear_estructura_ccf(){
             $datos = $this->input->post();
+            
             $contingencia = 0;
             $modelo = 1;
-            $existeHojaCobro = $this->Facturacion_Model->obtenerHojaCobro(trim($datos["codigoHojaCobro"]));
 
             // Agregando o actualizando datos de el anexo de facturacion
                 $pivote = $datos["idAnexo"];
@@ -995,11 +788,11 @@ class Facturacion extends CI_Controller {
                 }
                 $this->Facturacion_Model->guardarProveedorAnexo($datosAnexo);
             // Agregando o actualizando datos de el anexo de facturacion
-
+            
             // Validando DTE
                 $tipo = 3;
                 $anio = date("Y");
-                $strDte = $this->obtener_dte($tipo, $anio, $this->establecimiento);
+                $strDte = $this->obtener_dte($tipo, $anio);
                 $partesDTE = explode('.', $strDte);
                 $datos["dteFactura"] = $partesDTE[0];
                 $datos["baseDTE"] = $partesDTE[1];
@@ -1012,17 +805,16 @@ class Facturacion extends CI_Controller {
                     $datos["cGeneracion"] = $this->codigo_generacion();
                 }
             // Validando codigo generacion
-
-
-
+           
             // Datos a insertar en la base de datos
                 $arrayDTE["numeroDTE"] = $datos["baseDTE"];
                 $arrayDTE["anioDTE"] = date("Y");
                 $arrayDTE["detalleDTE"] = $datos["dteFactura"];
-                $arrayDTE["idHoja"] = $existeHojaCobro->hoja;
-                $arrayDTE["generacion"] = $datos["cGeneracion"];
+                $arrayDTE["idHoja"] = 0;
+                // $arrayDTE["generacion"] = $datos["cGeneracion"];
             // Datos a insertar en la base de datos
-
+           
+           
             if(!isset($datos["tipoContingencia"])){
                 $datos["tipoContingencia"] = null;
             }else{
@@ -1037,10 +829,9 @@ class Facturacion extends CI_Controller {
                 $iva = $datos["ivaServicio"];
                 $total = $datos["totalServicio"];
             //Precios
-
-            $montoTotal = $total;
-            $arregloNumero = explode(".", number_format($montoTotal, 2, '.', ''));
             
+            $montoTotal = $total;
+            $arregloNumero = explode(".", round($montoTotal, 2));
             $letras = "";
             if(isset($arregloNumero[1])){
                 $letras = strtoupper($this->convertir($arregloNumero[0])." ".$arregloNumero[1]."/100");
@@ -1055,7 +846,7 @@ class Facturacion extends CI_Controller {
             $factura = array(
                 "nit" => $empresa->nitEmpresa,
                 "activo" => true, // Booleano sin comillas
-                "passwordPri" => "UnionMedica_25",
+                "passwordPri" => $this->psPublica,
                 "dteJson" => array(
                     "identificacion" => array(
                         "version" => 3,
@@ -1168,6 +959,8 @@ class Facturacion extends CI_Controller {
                     "apendice" => null,
                 )
             );
+
+
             
             if($contingencia == 0){
                 $this->envioHaciendaCCF($factura, $empresa, $datos, $arrayDTE, 2, 3);
@@ -1182,7 +975,6 @@ class Facturacion extends CI_Controller {
  
                  if($documentoFirmado->status == "OK"){
                      $arrayDTE["firma"] = $documentoFirmado->body; // Datos de sistema local
-                     $arrayDTE["establecimiento"] = $this->establecimiento; // Datos de sistema local
                      
                      $pivoteDTE = $this->Facturacion_Model->guardarDTE($arrayDTE, 51);
  
@@ -1201,7 +993,7 @@ class Facturacion extends CI_Controller {
  
             }
 
-            // echo json_encode($factura);
+            // echo json_encode($arrayDTE);
             
             
         }
@@ -1228,7 +1020,7 @@ class Facturacion extends CI_Controller {
             $data["resumen"] = $jsonDTE["dteJson"]["resumen"];
             
             $anio = date("Y");
-            $strDte = $this->obtener_dte($tipo, $anio, $this->establecimiento);
+            $strDte = $this->obtener_dte($tipo, $anio);
             $partesDTE = explode('.', $strDte);
             $data["dte"] = $partesDTE[0];
             $data["baseDTE"] = $partesDTE[1];
@@ -1282,7 +1074,7 @@ class Facturacion extends CI_Controller {
                     $total = $datos["totalServicio"];
                 //Precios
                 $montoTotal = $total;
-                $arregloNumero = explode(".", number_format($montoTotal, 2, '.', ''));
+                $arregloNumero = explode(".", round($montoTotal, 2));
                 $letras = "";
                 if(isset($arregloNumero[1])){
                     $letras = strtoupper($this->convertir($arregloNumero[0])." ".$arregloNumero[1]."/100");
@@ -1305,7 +1097,7 @@ class Facturacion extends CI_Controller {
                 $factura = array(
                     "nit" => $empresa->nitEmpresa,
                     "activo" => true, // Booleano sin comillas
-                    "passwordPri" => "UnionMedica_25",
+                    "passwordPri" => $this->psPublica,
                     "dteJson" => array(
                         "identificacion" => array(
                             "version" => 3,
@@ -1443,7 +1235,7 @@ class Facturacion extends CI_Controller {
                 $this->procesarAnulacionCCF($empresa, $generacion,  $datosNuevaFactura = null, $jsonAnterior, $dteAnular, $tipoAnulacion, $datos);
             }
 
-            /*  echo json_encode($tipoAnulacion); */
+            //  echo json_encode($tipoAnulacion);
 
         }
 
@@ -1454,7 +1246,7 @@ class Facturacion extends CI_Controller {
                 $factura = array(
                     "nit" => $empresa->nitEmpresa,
                     "activo" => true, // Booleano sin comillas
-                    "passwordPri" => "UnionMedica_25",
+                    "passwordPri" => $this->psPublica,
                     "dteJson" => array(
                         "identificacion" => array(
                             "version" => 2,
@@ -1559,7 +1351,7 @@ class Facturacion extends CI_Controller {
                         redirect(base_url()."Facturacion/fin_ccf/$nuevoDTE/$mensaje/");
                     }else{
                         $this->session->set_flashdata("exito","DTE anulado con exito");
-                        redirect(base_url()."Facturacion/lista_ccf/");
+                        redirect(base_url()."Facturacion/lista_ccf");
                     }
 
                 }else{
@@ -1573,6 +1365,8 @@ class Facturacion extends CI_Controller {
                 redirect(base_url()."Facturacion/anular_factura/$dteAnular/");
             }
 
+            // echo json_encode($factura);
+
         }
 
     // Anular credito fiscal
@@ -1580,30 +1374,80 @@ class Facturacion extends CI_Controller {
     // Credito fiscal
         public function credito_fiscal($params = null){
             $datos = unserialize(base64_decode(urldecode($params)));
+            $totalVenta = 0;
+            $totalIva = 0;
+
+            // Para venta 
+                $venta["codigoVenta"] = $datos["codigoVenta"];
+                $venta["fechaVenta"] = $datos["fechaVenta"];
+                $venta["clienteVenta"] = $datos["clienteVenta"];
+                $venta["documentoPago"] = $datos["documentoPago"];
+                $venta["numeroDocumento"] = $datos["numeroDocumento"];
+                $venta["formaPago"] = $datos["formaPago"];
+                $venta["txtSubtotal"] = $datos["txtSubtotal"];
+                $venta["txtIVA"] = $datos["txtIVA"];
+                $venta["txtTotal"] = $datos["txtTotal"];
+                $venta["txtDineroRecibido"] = $datos["txtDineroRecibido"];
+                $venta["txtVuelto"] = $datos["txtVuelto"];
+            // Para venta 
+
+
+            // Ordenando datos
+                if(isset($datos["idMedicamento"])){
+                    // Creando Json de medidas
+                        // Crear un arreglo combinado
+                        $datosInsumo = array();
+                        // Obtener el número de elementos en una de las matrices (se asume que todas tienen la misma longitud)
+                        $numElementos = count($datos["idMedicamento"]);
+                        // Iterar sobre la longitud de las matrices y combinar los datos
+                        $index = 1;
+                        for ($i = 0; $i < $numElementos; $i++) {
+
+                            $objeto = array(
+                                "descripcion" => $datos["nombreMedicamento"][$i]."(".$datos["nombreInsumo"][$i].")",
+                                "idMedicamento" => $datos["idMedicamento"][$i],
+                                "precio" => $datos["precios"][$i],
+                                "cantidad" => $datos["cantidad"][$i],
+                                "unitaria" => $datos["cantidadUnitaria"][$i],
+                                "medida" => $datos["nombreInsumo"][$i]
+                            );
+                            // Agregar el arreglo al arreglo combinado
+                            array_push($datosInsumo, $objeto);
+                            $index++;
+                        }
+                        unset($datos["idMedicamento"], $datos["precios"], $datos["cantidad"], $datos["cantidadUnitaria"], $datos["nombreInsumo"], $datos["nombreMedicamento"]);
+                       
+                        $data["insumos"] = $datosInsumo;
+                    // Creando Json de medidas
+
+                }else{
+                    $data["insumos"] = "";
+                }
+
+            // Ordenando datos
+
             // $tipoDocumento = $datos["codigoCatDetalle"];
             $tipo = 3; // Para validar el tipo de DTE requerido
             $anio = date("Y");
-            $strDte = $this->obtener_dte($tipo, $anio, $this->establecimiento);
+            $strDte = $this->obtener_dte($tipo, $anio);
             // Partir la cadena usando el punto como delimitador
             $partesDTE = explode('.', $strDte);
-            $hoja = $datos["idHoja"];
-            $data["paciente"] = $this->Facturacion_Model->detalleHoja($hoja);
-            $data["anexo"] = $this->Facturacion_Model->obtenerPacienteAnexo($data["paciente"]->idPaciente);
+
             $data["empresa"] = $this->Facturacion_Model->obtenerEmpresa();
-            $data["seguros"] = $this->Facturacion_Model->obtenerSeguros();
-            $data["externosHoja"] = $this->Facturacion_Model->externosHoja($hoja);
-            $data["medicamentosHoja"] = $this->Facturacion_Model->medicamentosHoja($hoja);
             $data["dte"] = $partesDTE[0];
             $data["baseDTE"] = $partesDTE[1];
             $data["cGeneracion"] = $this->codigo_generacion();
-            $data["idHoja"] = $datos["idHoja"];
+            $data["idHoja"] = 0;
             $data["departamentos"] = $this->Facturacion_Model->obtenerDetalleCatalogo(12);
             $data["actividadesEconomicas"] = $this->Facturacion_Model->obtenerDetalleCatalogo(19);
+            $data["venta"] = $venta;
 
             
             $this->load->view('Base/header');
             $this->load->view('FE/credito_fiscal', $data);
             $this->load->view('Base/footer');
+
+            // echo json_encode($data);
         
         }
 
@@ -1635,62 +1479,158 @@ class Facturacion extends CI_Controller {
 
         public function sellar_ccf(){
             $datos = $this->input->post();
-            
-            
-            $hoja = $datos["idHoja"];
+            $parametrosFactura = unserialize(base64_decode(urldecode($datos["parametrosFactura"])));
+            $datosVenta = unserialize(base64_decode(urldecode($datos["venta"]))); // Datos a insertar en la venta
+            $insumos = $parametrosFactura["insumos"];
+
+            $contingencia = 0;
+            $modelo = 1;
+            $totalIva = 0;
+            $totalVenta = 0;
+            $subtotal = 0;
+            unset($datos["parametrosFactura"]);
+
+            // Ordenando datos para factura
+                if(isset($datos["detalleServicio"])){
+                    // Creando Json de medidas
+                        // Crear un arreglo combinado
+                        $datosInsumo = array();
+                        // Obtener el número de elementos en una de las matrices (se asume que todas tienen la misma longitud)
+                        $numElementos = count($datos["detalleServicio"]);
+                        // Iterar sobre la longitud de las matrices y combinar los datos
+                        $index = 1;
+                        for ($i = 0; $i < $numElementos; $i++) {
+
+                            // $totalIva += (float)$datos["ivaFila"][$i];
+
+                            $totalVenta += (float)$datos["totalBruto"][$i];
+
+                            $subtotal += (float)$datos["totalNeto"][$i];
+
+                            // Crear un arreglo asociativo para cada conjunto de datos
+                            $objeto = array(
+                                "numItem" => $index,
+                                "tipoItem" => 2,
+                                "numeroDocumento" => null,
+                                "codigo" => null, // Convertido en string
+                                "codTributo" => null,
+                                "descripcion" => $datos["detalleServicio"][$i],
+                                "cantidad" => intval($datos["cantidadServicio"][$i]),
+                                "uniMedida" => 59,
+                                "precioUni" => (float)round($datos["precioServicio"][$i], 5),
+                                "montoDescu" => 0,
+                                "ventaNoSuj" => 0,
+                                "ventaExenta" => 0,
+                                "ventaGravada" => (float)round($datos["totalNeto"][$i], 5),
+                                "tributos" => array(
+                                    "20"
+                                ),
+                                "psv" => 0,
+                                "noGravado" => 0,
+
+
+                            );
+
+                            // Agregar el arreglo al arreglo combinado
+                            array_push($datosInsumo, $objeto);
+                            $index++;
+                        }
+                        unset($datos["cantidadServicio"], $datos["detalleServicio"], $datos["precioServicio"], $datos["totalNeto"], $datos["totalBruto"], $datos["ivaFila"]);
+                    // Creando Json de medidas
+
+                    $totalIva = $subtotal* 0.13;
+
+                }
+            // Ordenando datos para factura
+
+
+            // Agregando o actualizando datos de el anexo de facturacion
+                $pivote = $datos["idAnexo"];
+                $datosAnexo["idDepartamento"] = $datos["departamentoPaciente"];
+                $datosAnexo["idMunicipio"] = $datos["municipioPaciente"];
+                $datosAnexo["nombrePaciente"] = $datos["nombrePaciente"];
+                $datosAnexo["duiPaciente"] = $datos["documentoPaciente"];
+                $datosAnexo["telefonoPaciente"] = $datos["telefonoPaciente"];
+                $datosAnexo["correoPaciente"] = $datos["correoPaciente"];
+                $datosAnexo["codigoDepartamento"] = $datos["codigoDepartamento"];
+                $datosAnexo["codigoMunicipio"] = $datos["codigoMunicipio"];
+                $datosAnexo["direccionPaciente"] = $datos["complementoPaciente"];
+                $datosAnexo["actividadEconomica"] = $datos["codigoActividadEconomica"];
+                $datosAnexo["tipoDocumento"] = $datos["tipoDocumento"];
+                $datosAnexo["nrcCreditoFiscal"] = $datos["nrcPaciente"];
+                if($pivote == 0){
+                    $datosAnexo["pivote"] = 0;
+                }else{
+                    $datosAnexo["idAnexo"] = $datos["idAnexo"];
+                    $datosAnexo["pivote"] = 1;
+                }
+                $this->Facturacion_Model->guardarProveedorAnexo($datosAnexo);
+            // Agregando o actualizando datos de el anexo de facturacion
+
+            $hoja = $parametrosFactura["idHoja"];
+
             // Datos a insertar en la base de datos
                 $arrayDTE["numeroDTE"] = $datos["baseDTE"];
                 $arrayDTE["anioDTE"] = date("Y");
                 $arrayDTE["detalleDTE"] = $datos["dteFactura"];
-                $arrayDTE["idHoja"] = $hoja;
+                
             // Datos a insertar en la base de datos
             
-            if(!isset($datos["tipoContingencia"])){
+            if(isset($datos["tipoContingencia"]) && $datos["tipoContingencia"] == "" ){
                 $datos["tipoContingencia"] = null;
+            }else{
+                $contingencia = 1;
+                $modelo = 2;
             }
 
-            $paciente = $this->Facturacion_Model->detalleHoja($hoja);
-            $anexo = $this->Facturacion_Model->obtenerPacienteAnexo($paciente->idPaciente);
+            // Validando DTE
+                $tipo = 3;
+                $anio = date("Y");
+                $strDte = $this->obtener_dte($tipo, $anio);
+                $partesDTE = explode('.', $strDte);
+                $datos["dteFactura"] = $partesDTE[0];
+                $datos["baseDTE"] = $partesDTE[1];
+            // Validando DTE
 
-            // Uniendo datos locales
-                $anexoArray = (array) $anexo;
-                $datos = array_merge($datos, $anexoArray);
-            // Uniendo datos locales
-            $empresa = $this->Facturacion_Model->obtenerEmpresa();
-
-            // echo json_encode($anexo);
-
-            //Precios
-                if($datos["facturarTodo"] == 0){
-                    $subtotal = $datos["subTotalI"];
-                    $iva = $datos["ivaI"];
-                    $total = $datos["totalInterno"];
-                }else{
-                    $subtotal = $datos["subTotalI"] + $datos["subTotalE"];
-                    $iva = $datos["ivaI"] + $datos["ivaE"];
-                    $total = $datos["totalInterno"] + $datos["totalExterno"];
+            // Validando codigo generacion
+                $strCodigo = $this->Facturacion_Model->validaCodigoGeneracion($datos["cGeneracion"], $anio, $tipo);
+                    if($strCodigo->codigo != 0){
+                    $datos["cGeneracion"] = $this->codigo_generacion();
                 }
-            //Precios
+            // Validando codigo generacion
 
-            $montoTotal = $total;
-            $arregloNumero = explode(".", number_format($montoTotal, 2, '.', ''));
+            // Guardando venta
+                    $venta = $this->Ventas_Model->validarNumeroActual($datos["baseDTE"], 3); //Verificando que el codigo del tiket no haya sido agregado
+                    $paramsVenta["insumos"] = $insumos;
+                    if($venta->codigo > 0){
+                        $maximoActual = $this->Ventas_Model->maximoActual(3);
+                        $datosVenta["numeroDocumento"] = $maximoActual->codigo + 1;
+                    }else{
+                        $datosVenta["numeroDocumento"] = $datos["baseDTE"];
+                    }
+                    $paramsVenta["datosVenta"] = $datosVenta;
+                    
+                    $resp = $this->Ventas_Model->guardarVentaCF($paramsVenta);
+                    $arrayDTE["idHoja"] = $resp;
+            // Guardando venta
+            
+            $empresa = $parametrosFactura["empresa"];
+            $arregloNumero = explode(".", round($totalVenta, 2));
             $letras = "";
             if(isset($arregloNumero[1])){
                 $letras = strtoupper($this->convertir($arregloNumero[0])." ".$arregloNumero[1]."/100");
             }else{
-                $letras = strtoupper($this->convertir($montoTotal)." 00/100 Dolares"); 
+                $letras = strtoupper($this->convertir($totalVenta)." 00/100 Dolares"); 
             }
 
-            $codigoDepartamento = explode( "-", $anexo->codigoDepartamento);
-            $codigoMunicipio = explode( "-", $anexo->codigoMunicipio);
-            $actividadEconomica = explode( "-", $anexo->actividadEconomica);
-            
-
+            $codigoDepartamento = explode( "-", $datosAnexo["codigoDepartamento"]);
+            $codigoMunicipio = explode( "-", $datosAnexo["codigoMunicipio"]);
+            $actividadEconomica = explode( "-", $datosAnexo["actividadEconomica"]);
 
             $factura = array(
                 "nit" => $empresa->nitEmpresa,
                 "activo" => true, // Booleano sin comillas
-                "passwordPri" => "UnionMedica_25",
+                "passwordPri" => $this->psPublica,
                 "dteJson" => array(
                     "identificacion" => array(
                         "version" => 3,
@@ -1698,9 +1638,9 @@ class Facturacion extends CI_Controller {
                         "tipoDte" => "03",
                         "numeroControl" => $datos["dteFactura"], // Valor entre comillas
                         "codigoGeneracion" => $datos["cGeneracion"],
-                        "tipoModelo" => 1,
+                        "tipoModelo" => $modelo,
                         "tipoOperacion" => intval($datos["tipoTransmision"]),
-                        "tipoContingencia" => $datos["tipoContingencia"],
+                        "tipoContingencia" => is_null($datos["tipoContingencia"]) ?  null : intval($datos["tipoContingencia"]),
                         "motivoContin" => null,
                         "fecEmi" => date("Y-m-d"),
                         "horEmi" => date("H:i:s"),
@@ -1729,50 +1669,28 @@ class Facturacion extends CI_Controller {
                     ),
 
                     "receptor" => array(
-                        "nit" => $anexo->duiPaciente == "" ? null : $anexo->duiPaciente,
-                        "nrc" => $anexo->nrcCreditoFiscal == "" ? null : $anexo->nrcCreditoFiscal,
-                        "nombre" => $anexo->nombrePaciente != "" ? $paciente->nombrePaciente : $anexo->nombrePaciente,
+                        "nit" => $datosAnexo["duiPaciente"],
+                        "nrc" => $datosAnexo["nrcCreditoFiscal"],
+                        "nombre" => $datosAnexo["nombrePaciente"],
                         "codActividad" => trim($actividadEconomica[0]),
                         "descActividad" => trim($actividadEconomica[1]),
                         "nombreComercial" => null,
                         "direccion" => array(
                             "departamento" => $codigoDepartamento[0],
                             "municipio" => $codigoMunicipio[0],
-                            "complemento" => $anexo->direccionPaciente,
+                            "complemento" => $datosAnexo["direccionPaciente"],
                         ),
-                        "telefono" => $anexo->telefonoPaciente == "" ? null : $anexo->telefonoPaciente,
-                        "correo" => $anexo->correoPaciente == "" ? null : $anexo->correoPaciente,
+                        "telefono" => $datosAnexo["telefonoPaciente"],
+                        "correo" => $datosAnexo["correoPaciente"],
                     ),
                     "otrosDocumentos" => null,
                     "ventaTercero" => null,
-                    "cuerpoDocumento" => array(
-                        array(
-                            "numItem" => 1,
-                            "tipoItem" => 2,
-                            "numeroDocumento" => null,
-                            "codigo" => "1", // Convertido en string
-                            "codTributo" => null,
-                            "descripcion" => "MEDICAMENTOS E INSUMOS MÉDICOS",
-                            "cantidad" => 1,
-                            "uniMedida" => 59,
-                            "precioUni" => (float)$subtotal,
-                            "montoDescu" => 0,
-                            "ventaNoSuj" => 0,
-                            "ventaExenta" => 0,
-                            "ventaGravada" => (float)$subtotal,
-                            "tributos" => array(
-                                "20"
-                            ),
-                            "psv" => 0,
-                            "noGravado" => 0,
-
-                        )
-                    ),
+                    "cuerpoDocumento" => $datosInsumo,
                     "resumen" => array(
                         "totalNoSuj" => 0,
                         "totalExenta" => 0,
-                        "totalGravada" => (float)$subtotal,
-                        "subTotalVentas" => (float)$subtotal,
+                        "totalGravada" => (float)round($subtotal, 2),
+                        "subTotalVentas" => (float)round($subtotal, 2),
                         "descuNoSuj" => 0,
                         "descuExenta" => 0,
                         "descuGravada" => 0,
@@ -1782,16 +1700,16 @@ class Facturacion extends CI_Controller {
                             [
                                 "codigo" => "20",
                                 "descripcion" => "Impuesto Al valor agregado 13%",
-                                "valor" => (float)$iva,
+                                "valor" => (float)round($totalIva, 2),
                             ],
                         ],
-                        "subTotal" => (float)$subtotal,
+                        "subTotal" => (float)round($subtotal, 2),
                         "ivaPerci1" => 0,
                         "ivaRete1" => 0,
                         "reteRenta" => 0,
-                        "montoTotalOperacion" => (float)$total,
+                        "montoTotalOperacion" => (float)round($totalVenta, 2),
                         "totalNoGravado" => 0,
-                        "totalPagar" => (float)$total,
+                        "totalPagar" => (float)round($totalVenta, 2),
                         "totalLetras" => $letras,
                         "saldoFavor" => 0,
                         "condicionOperacion" => 1,
@@ -1804,8 +1722,36 @@ class Facturacion extends CI_Controller {
                 )
             );
 
-            // $this->envioHaciendaCCF($factura, $empresa, $datos, $arrayDTE, 2, 3);
+            if($contingencia == 0){
+                $this->envioHaciendaCCF($factura, $empresa, $datos, $arrayDTE, 2, 3);
+            }else{
+                $arrayDTE["cGeneracion"] = $datos["cGeneracion"];
+                 $arrayDTE["paramsFactura"] = urlencode(base64_encode(serialize($factura))); // Respuesta de hacienda
+                 $arrayDTE["paramsHacienda"] = "";
+                 $arrayDTE["paramsLocales"] = urlencode(base64_encode(serialize($datos))); // Datos de sistema local
+                 $arrayDTE["contingencia"] = $contingencia; // Datos de sistema local
+                 
+                 // Existe contingencia, el documento solo se firmara y guardara
+                 $documentoFirmado = json_decode($this->firmar_DTE($factura));
+ 
+                 if($documentoFirmado->status == "OK"){
+                     $arrayDTE["firma"] = $documentoFirmado->body; // Datos de sistema local
+                     
+                     $pivoteDTE = $this->Facturacion_Model->guardarDTE($arrayDTE, 51);
+ 
+                     $msg = "El documento se firmo exitosamente";
+                     redirect(base_url()."Facturacion/fin_ccf/$pivoteDTE/$msg/");
+                 }else{
+                     $this->session->set_flashdata("error","El documento no puede ser firmado");
+                     redirect(base_url()."Hoja/detalle_hoja/$hoja/");
+ 
+                }
 
+                // echo json_encode($arrayDTE);
+ 
+            }
+
+            // echo json_encode($factura);
             
         
         }
@@ -1826,7 +1772,7 @@ class Facturacion extends CI_Controller {
 
             $tipo = 5; // Para validar el tipo de DTE requerido
             $anio = date("Y");
-            $strDte = $this->obtener_dte($tipo, $anio, $this->establecimiento);
+            $strDte = $this->obtener_dte($tipo, $anio);
             // Partir la cadena usando el punto como delimitador
             $partesDTE = explode('.', $strDte);
             $data["dte"] = $partesDTE[0];
@@ -1836,192 +1782,143 @@ class Facturacion extends CI_Controller {
             $dte_credito = $this->Facturacion_Model->obtenerDTE($idDTEC, 3);
             $data["jsonDTE"] = $dte_credito->jsonDTE;
             $data["idDTEC"] = $idDTEC;
-            $jsonDTE = unserialize(base64_decode(urldecode($dte_credito->jsonDTE)));
+            // $jsonDTE = unserialize(base64_decode(urldecode($dte_credito->jsonDTE)));
 
             $this->load->view('Base/header');
             $this->load->view('FE/nota_credito', $data);
             $this->load->view('Base/footer');
 
-            // echo json_encode($jsonDTE);
+            // echo json_encode($data["jsonDTE"]);
         }
 
         public function crear_nota_credito(){
             $datos = $this->input->post();
-
-            $dte_credito = $this->Facturacion_Model->obtenerDTE($datos["idDTEC"], 3);
+            $credito_fiscal = unserialize(base64_decode(urldecode($datos["strDocumento"])));
             $empresa = $this->Facturacion_Model->obtenerEmpresa();
-            $data["jsonDTE"] = $dte_credito->jsonDTE;
-            $jsonDTE = unserialize(base64_decode(urldecode($dte_credito->jsonDTE)));
-
-            // Validando DTE
-                $tipo = 5;
-                $anio = date("Y");
-                $strDte = $this->obtener_dte($tipo, $anio, $this->establecimiento);
-                $partesDTE = explode('.', $strDte);
-                $datos["dteFactura"] = $partesDTE[0];
-                $datos["baseDTE"] = $partesDTE[1];
-            // Validando DTE
-
-            // Validando codigo generacion
-                $strCodigo = $this->Facturacion_Model->validaCodigoGeneracion($datos["cGeneracion"], $anio, $tipo);
-                if($strCodigo->codigo != 0){
-                $datos["cGeneracion"] = $this->codigo_generacion();
-                }
-            // Validando codigo generacion
-            
-           
-            // Datos a insertar en la base de datos
-                $arrayDTE["numeroDTE"] = $datos["baseDTE"];
-                $arrayDTE["anioDTE"] = date("Y");
-                $arrayDTE["detalleDTE"] = $datos["dteFactura"];
-                $arrayDTE["idCreditoFiscal"] = 0; // Id del credito fiscal a enlazar
-                $arrayDTE["generacion"] = $datos["cGeneracion"];
-            // Datos a insertar en la base de datos
-            if(!isset($datos["tipoContingencia"])){
-                $datos["tipoContingencia"] = null;
-            }
-
-            $anexo = $jsonDTE["dteJson"]["receptor"];
-            // Uniendo datos locales
-                $anexoArray = (array) $anexo;
-                $datos = array_merge($datos, $anexoArray);
-            // Uniendo datos locales
-
-            //Precios
-                if($datos["totalOld"] == $datos["totalServicio"]){
-                    $subtotal = $jsonDTE["dteJson"]["cuerpoDocumento"][0]["ventaGravada"];
-                    $iva = $jsonDTE["dteJson"]["resumen"]["tributos"][0]["valor"];
-                    $total = $jsonDTE["dteJson"]["resumen"]["montoTotalOperacion"];
-                }else{
-                    $subtotal = $datos["subTotalNew"];
-                    $iva = $datos["ivaNew"];
-                    $total = $datos["totalNew"];
-                }
-            //Precios
-
-            $montoTotal = $total;
-            $arregloNumero = explode(".", number_format($montoTotal, 2, '.', ''));
-            $letras = "";
-            if(isset($arregloNumero[1])){
-                $letras = strtoupper($this->convertir($arregloNumero[0])." ".$arregloNumero[1]."/100");
-            }else{
-                $letras = strtoupper($this->convertir($montoTotal)." 00/100 Dolares"); 
-            }
-
-            $codigoDepartamento = explode( "-", $datos["direccion"]["departamento"]);
-            $codigoMunicipio = explode( "-", $datos["direccion"]["municipio"]);
-            $actividadEconomica = explode( "-", $datos["direccion"]["complemento"]);
-            
-            $factura = array(
-                "nit" => $empresa->nitEmpresa,
-                "activo" => true, // Booleano sin comillas
-                "passwordPri" => "UnionMedica_25",
-                "dteJson" => array(
-                    "identificacion" => array(
-                        "version" => 3,
-                        "ambiente" => $empresa->ambiente,
-                        "tipoDte" => "05",
-                        "numeroControl" => $datos["dteFactura"], // Valor entre comillas
-                        "codigoGeneracion" => $datos["cGeneracion"],
-                        "tipoModelo" => 1,
-                        "tipoOperacion" => intval($datos["tipoTransmision"]),
-                        "tipoContingencia" => $datos["tipoContingencia"],
-                        "motivoContin" => null,
-                        "fecEmi" => date("Y-m-d"),
-                        "horEmi" => date("H:i:s"),
-                        "tipoMoneda" => "USD",
-                    ),
-
-                    "documentoRelacionado" => array(
-                        array(
-                            "tipoDocumento" => "03",
-                            "tipoGeneracion" => 2,
-                            "numeroDocumento" => $jsonDTE["dteJson"]["identificacion"]["codigoGeneracion"],
-                            "fechaEmision" => $jsonDTE["dteJson"]["identificacion"]["fecEmi"] // Valor entre comillas
-                        ),
-                    ),
-                    "emisor" => array(
-                        "nit" => $empresa->nitEmpresa,
-                        "nrc" => $empresa->nrcEmpresa,
-                        "nombre" => $empresa->nombreEmpresa,
-                        "codActividad" => $empresa->codActividadEmpresa,
-                        "descActividad" => $empresa->descActividadEmpresa,
-                        "nombreComercial" => $empresa->nombreEmpresa,
-                        "tipoEstablecimiento" => "02",
-                        "direccion" => array(
-                            "departamento" => $empresa->departamento,
-                            "municipio" => $empresa->municipio,
-                            "complemento" => $empresa->direccionEmpresa,
-                        ),
-                        "telefono" => $empresa->telefonoEmpresa,
-                        "correo" => $empresa->correoEmpresa,
-                    ),
-                    "receptor" => array(
-                        "nit" => $jsonDTE["dteJson"]["receptor"]["nit"],
-                        "nrc" => $jsonDTE["dteJson"]["receptor"]["nrc"],
-                        "nombre" => $jsonDTE["dteJson"]["receptor"]["nombre"],
-                        "codActividad" => $jsonDTE["dteJson"]["receptor"]["codActividad"],
-                        "descActividad" => $jsonDTE["dteJson"]["receptor"]["descActividad"],
-                        "nombreComercial" => $jsonDTE["dteJson"]["receptor"]["nombreComercial"],
-                        "direccion" => array(
-                            "departamento" => $jsonDTE["dteJson"]["receptor"]["direccion"]["departamento"],
-                            "municipio" => $jsonDTE["dteJson"]["receptor"]["direccion"]["municipio"],
-                            "complemento" => $jsonDTE["dteJson"]["receptor"]["direccion"]["complemento"],
-                        ),
-                        "telefono" => $jsonDTE["dteJson"]["receptor"]["telefono"],
-                        "correo" => $jsonDTE["dteJson"]["receptor"]["correo"],
-                    ),
-                    "ventaTercero" => null,
-                    "cuerpoDocumento" => array(
-                        array(
-                            "numItem" => 1,
-                            "tipoItem" => 2,
-                            "numeroDocumento" => $jsonDTE["dteJson"]["identificacion"]["codigoGeneracion"],
-                            "cantidad" => intval($datos['cantidadServicio']),
-                            "codigo" => null, // Convertido en string
-                            "codTributo" => null,
-                            "uniMedida" => 59,
-                            "descripcion" => $datos['descripcionServicio'],
-                            "precioUni" => (float)round($subtotal, 5),
-                            "montoDescu" => 0,
-                            "ventaNoSuj" => 0,
-                            "ventaExenta" => 0,
-                            "ventaGravada" => (float)round($subtotal, 5),
-                            "tributos" => array(
-                                "20"
-                            )
+            $identificacion = $credito_fiscal["dteJson"]["identificacion"];
+            $emisor = $credito_fiscal["dteJson"]["emisor"];
+            // formateando emisor
+                unset($emisor["codEstableMH"]);
+                unset($emisor["codEstable"]);
+                unset($emisor["codPuntoVentaMH"]);
+                unset($emisor["codPuntoVenta"]);
+            // formateando emisor
+            $receptor = $credito_fiscal["dteJson"]["receptor"];
+            $cuerpo_documento = $credito_fiscal["dteJson"]["cuerpoDocumento"];
+            // Formateando el cuerpo del documento
+                $datosInsumo = array();
+                // Obtener el número de elementos en una de las matrices (se asume que todas tienen la misma longitud)
+                $numElementos = count($cuerpo_documento);
+                // Iterar sobre la longitud de las matrices y combinar los datos
+                $index = 1;
+                for ($i = 0; $i < $numElementos; $i++) {
+                    // Crear un arreglo asociativo para cada conjunto de datos
+                    $objeto = array(
+                        "numItem" => $cuerpo_documento[$i]["numItem"],
+                        "tipoItem" => $cuerpo_documento[$i]["tipoItem"],
+                        "numeroDocumento" => $identificacion["codigoGeneracion"],
+                        "cantidad" => intval($cuerpo_documento[$i]["cantidad"]),
+                        "codigo" => null, // Convertido en string
+                        "codTributo" => null,
+                        "uniMedida" => intval($cuerpo_documento[$i]["uniMedida"]),
+                        "descripcion" => $cuerpo_documento[$i]["descripcion"],
+                        "precioUni" => (float)$cuerpo_documento[$i]["precioUni"],
+                        "montoDescu" => 0,
+                        "ventaNoSuj" => 0,
+                        "ventaExenta" => 0,
+                        "ventaGravada" => (float)$cuerpo_documento[$i]["ventaGravada"],
+                        "tributos" => array(
+                            "20"
                         )
-                    ),
-                    "resumen" => array(
-                        "totalNoSuj" => 0,
-                        "totalExenta" => 0,
-                        "totalGravada" => (float)round($subtotal, 2),
-                        "subTotalVentas" => (float)round($subtotal, 2),
-                        "descuNoSuj" => 0,
-                        "descuExenta" => 0,
-                        "descuGravada" => 0,
-                        "totalDescu" => 0,
-                        "tributos" => [
-                            [
-                                "codigo" => "20",
-                                "descripcion" => "Impuesto Al valor agregado 13%",
-                                "valor" => (float)round($iva, 2),
-                            ],
-                        ],
-                        "subTotal" => (float)round($subtotal, 2),
-                        "ivaPerci1" => 0,
-                        "ivaRete1" => 0,
-                        "reteRenta" => 0,
-                        "montoTotalOperacion" => (float)$total,
-                        "totalLetras" => $letras,
-                        "condicionOperacion" => 1
 
-                    ),
-                    "extension" => null,
-                    "apendice" => null
-                )
-            );
+
+                    );
+
+                    // Agregar el arreglo al arreglo combinado
+                    array_push($datosInsumo, $objeto);
+                    $index++;
+                }
+
+
+            // Formateando el cuerpo del documento
+
+            $resumen = $credito_fiscal["dteJson"]["resumen"];
+            // Formateando resumen
+                unset($resumen["porcentajeDescuento"]);
+                unset($resumen["totalNoGravado"]);
+                unset($resumen["totalPagar"]);
+                unset($resumen["saldoFavor"]);
+                unset($resumen["pagos"]);
+                unset($resumen["numPagoElectronico"]);
+            // Formateando resumen
             
+           // Validando DTE
+               $tipo = 5;
+               $anio = date("Y");
+               $strDte = $this->obtener_dte($tipo, $anio);
+               $partesDTE = explode('.', $strDte);
+               $datos["dteFactura"] = $partesDTE[0];
+               $datos["baseDTE"] = $partesDTE[1];
+           // Validando DTE
+           
+           // Validando codigo generacion
+               $strCodigo = $this->Facturacion_Model->validaCodigoGeneracion($datos["cGeneracion"], $anio, $tipo);
+               if($strCodigo->codigo != 0){
+               $datos["cGeneracion"] = $this->codigo_generacion();
+               }
+           // Validando codigo generacion
+           
+           
+           // Datos a insertar en la base de datos
+               $arrayDTE["numeroDTE"] = $datos["baseDTE"];
+               $arrayDTE["anioDTE"] = date("Y");
+               $arrayDTE["detalleDTE"] = $datos["dteFactura"];
+               $arrayDTE["idCreditoFiscal"] = 0; // Id del credito fiscal a enlazar
+               $arrayDTE["generacion"] = $datos["cGeneracion"];
+           // Datos a insertar en la base de datos
+           
+           if(!isset($datos["tipoContingencia"])){
+               $datos["tipoContingencia"] = null;
+           }
+
+           $factura = array(
+               "nit" => $empresa->nitEmpresa,
+               "activo" => true, // Booleano sin comillas
+               "passwordPri" => $this->psPublica,
+               "dteJson" => array(
+                   "identificacion" => array(
+                       "version" => 3,
+                       "ambiente" => $empresa->ambiente,
+                       "tipoDte" => "05",
+                       "numeroControl" => $datos["dteFactura"], // Valor entre comillas
+                       "codigoGeneracion" => $datos["cGeneracion"],
+                       "tipoModelo" => 1,
+                       "tipoOperacion" => intval($datos["tipoTransmision"]),
+                       "tipoContingencia" => $datos["tipoContingencia"],
+                       "motivoContin" => null,
+                       "fecEmi" => date("Y-m-d"),
+                       "horEmi" => date("H:i:s"),
+                       "tipoMoneda" => "USD",
+                   ),
+
+                   "documentoRelacionado" => array(
+                       array(
+                           "tipoDocumento" => "03",
+                           "tipoGeneracion" => 2,
+                           "numeroDocumento" => $identificacion["codigoGeneracion"],
+                           "fechaEmision" => $identificacion["fecEmi"] // Valor entre comillas
+                       ),
+                   ),
+                   "emisor" => $emisor,
+                   "receptor" =>$receptor,
+                   "ventaTercero" => null,
+                   "cuerpoDocumento" => $datosInsumo,
+                   "resumen" => $resumen,
+                   "extension" => null,
+                   "apendice" => null
+               )
+           );
+
             // Procesando en hacienda
                 // Firmando documento
                     $documentoFirmado = json_decode($this->firmar_DTE($factura));
@@ -2029,7 +1926,7 @@ class Facturacion extends CI_Controller {
                 
                 if($documentoFirmado->status == "OK"){
                     
-                    //    $conexion = json_decode($this->conectar_API()); funcion dentro del controlador
+                    //$conexion = json_decode($this->conectar_API()); funcion dentro del controlador
                     $url = $this->urlHacienda."recepciondte"; // Cambia a URL PROD en producción
                     $token = $this->tokenHacienda; // Token obtenido del servicio de autenticación
                     $userAgent = "hospitalOrellana/1.0 (ElSalvador; PHP; CodeIgniter/4.4.0)";
@@ -2065,7 +1962,6 @@ class Facturacion extends CI_Controller {
                         $arrayDTE["paramsHacienda"] = urlencode(base64_encode(serialize($response))); // Respuesta de hacienda obtenida desde la API
                         $arrayDTE["paramsLocales"] = urlencode(base64_encode(serialize($datos))); // Datos de sistema local
                         $arrayDTE["padreDTE"] = $datos["idDTEC"];
-                        $arrayDTE["establecimiento"] = $this->establecimiento; // Datos de sistema local
                         $curl->close();
                         
                         $pivoteDTE = $this->Facturacion_Model->guardarDTE($arrayDTE, 5);
@@ -2076,10 +1972,9 @@ class Facturacion extends CI_Controller {
 
                     }else{
                         $curl->close();
-                        $error = urlencode(base64_encode(serialize($response)));
+                        $error = "No se ha podido validar el documento en hacienda".$response->descripcionMsg;
                         redirect(base_url()."Facturacion/fin_nota_credito/0/$error/");
                     }
-
 
                 }else{
                     $this->session->set_flashdata("error","No se ha podido firmar el documento");
@@ -2087,12 +1982,12 @@ class Facturacion extends CI_Controller {
                 }
             // Procesando en hacienda
 
-            // echo json_encode($factura);
+            // echo json_encode($arrayDTE);
 
         }
     // Nota de credito
 
-    // Nota de debito
+    // Nota de credito
         public function lista_nd(){
             $data["lista"] = $this->Facturacion_Model->listaND();
             $this->load->view('Base/header');
@@ -2105,7 +2000,7 @@ class Facturacion extends CI_Controller {
         public function nota_debito($idDTEC = null){
             $tipo = 6; // Para validar el tipo de DTE requerido
             $anio = date("Y");
-            $strDte = $this->obtener_dte($tipo, $anio, $this->establecimiento);
+            $strDte = $this->obtener_dte($tipo, $anio);
             // Partir la cadena usando el punto como delimitador
             $partesDTE = explode('.', $strDte);
             $data["dte"] = $partesDTE[0];
@@ -2115,7 +2010,7 @@ class Facturacion extends CI_Controller {
             $dte_credito = $this->Facturacion_Model->obtenerDTE($idDTEC, 3);
             $data["jsonDTE"] = $dte_credito->jsonDTE;
             $data["idDTEC"] = $idDTEC;
-            $jsonDTE = unserialize(base64_decode(urldecode($dte_credito->jsonDTE)));
+            // $jsonDTE = unserialize(base64_decode(urldecode($dte_credito->jsonDTE)));
 
             $this->load->view('Base/header');
             $this->load->view('FE/nota_debito', $data);
@@ -2135,7 +2030,7 @@ class Facturacion extends CI_Controller {
             // Validando DTE
                 $tipo = 6;
                 $anio = date("Y");
-                $strDte = $this->obtener_dte($tipo, $anio, $this->establecimiento);
+                $strDte = $this->obtener_dte($tipo, $anio);
                 $partesDTE = explode('.', $strDte);
                 $datos["dteFactura"] = $partesDTE[0];
                 $datos["baseDTE"] = $partesDTE[1];
@@ -2175,7 +2070,7 @@ class Facturacion extends CI_Controller {
             //Precios
 
             $montoTotal = $total;
-            $arregloNumero = explode(".", number_format($montoTotal, 2, '.', ''));
+            $arregloNumero = explode(".", round($montoTotal, 2));
             $letras = "";
             if(isset($arregloNumero[1])){
                 $letras = strtoupper($this->convertir($arregloNumero[0])." ".$arregloNumero[1]."/100");
@@ -2190,7 +2085,7 @@ class Facturacion extends CI_Controller {
             $factura = array(
                 "nit" => $empresa->nitEmpresa,
                 "activo" => true, // Booleano sin comillas
-                "passwordPri" => "UnionMedica_25",
+                "passwordPri" => $this->psPublica,
                 "dteJson" => array(
                     "identificacion" => array(
                         "version" => 3,
@@ -2305,7 +2200,7 @@ class Facturacion extends CI_Controller {
                 
                 if($documentoFirmado->status == "OK"){
                     
-                    //    $conexion = json_decode($this->conectar_API()); funcion dentro del controlador
+                //    $conexion = json_decode($this->conectar_API()); funcion dentro del controlador
                     $url = $this->urlHacienda."recepciondte"; // Cambia a URL PROD en producción
                     $token = $this->tokenHacienda; // Token obtenido del servicio de autenticación
                     $userAgent = "hospitalOrellana/1.0 (ElSalvador; PHP; CodeIgniter/4.4.0)";
@@ -2341,7 +2236,6 @@ class Facturacion extends CI_Controller {
                         $arrayDTE["paramsHacienda"] = urlencode(base64_encode(serialize($response))); // Respuesta de hacienda obtenida desde la API
                         $arrayDTE["paramsLocales"] = urlencode(base64_encode(serialize($datos))); // Datos de sistema local
                         $arrayDTE["padreDTE"] = $datos["idDTEC"]; // Id del credito Fiscal
-                        $arrayDTE["establecimiento"] = $this->establecimiento; // Datos de sistema local
                         $curl->close();
                         
                         $pivoteDTE = $this->Facturacion_Model->guardarDTE($arrayDTE, 6);
@@ -2352,7 +2246,7 @@ class Facturacion extends CI_Controller {
 
                     }else{
                         $curl->close();
-                        $error = urlencode(base64_encode(serialize($response)));
+                        $error = "No se ha podido validar el documento en hacienda".$response->descripcionMsg;
                         redirect(base_url()."Facturacion/fin_nota_debito/0/$error/");
                     }
 
@@ -2363,10 +2257,10 @@ class Facturacion extends CI_Controller {
                 }
             // Procesando en hacienda
 
-            // echo json_encode($datos);
+            // echo json_encode($arrayDTE);
 
         }
-    // Nota de debito
+    // Nota de credito
 
     // Factura consumidor final desde cero
         public function lista_facturas(){
@@ -2381,7 +2275,7 @@ class Facturacion extends CI_Controller {
         public function agregar_consumidor_final(){
             $tipo = 1; // Para validar el tipo de DTE requerido
             $anio = date("Y");
-            $strDte = $this->obtener_dte($tipo, $anio, $this->establecimiento);
+            $strDte = $this->obtener_dte($tipo, $anio);
             $partesDTE = explode('.', $strDte);
 
 
@@ -2400,282 +2294,17 @@ class Facturacion extends CI_Controller {
             // echo json_encode($data);
         
         }
-        
-        // ISBM
-            public function agregar_factura_isbm(){
-                $tipo = 1; // Para validar el tipo de DTE requerido
-                $anio = date("Y");
-                $strDte = $this->obtener_dte($tipo, $anio, $this->establecimiento);
-                $partesDTE = explode('.', $strDte);
-
-
-                $data["empresa"] = $this->Facturacion_Model->obtenerEmpresa();
-                $data["dte"] = $partesDTE[0];
-                $data["baseDTE"] = $partesDTE[1];
-                $data["cGeneracion"] = $this->codigo_generacion();
-                $data["departamentos"] = $this->Facturacion_Model->obtenerDetalleCatalogo(12);
-                $data["actividadesEconomicas"] = $this->Facturacion_Model->obtenerDetalleCatalogo(19);
-
-                
-                $this->load->view('Base/header');
-                $this->load->view('FE/agregar_factura_isbm', $data);
-                $this->load->view('Base/footer');
-
-                // echo json_encode($data);
-            
-            }
-
-            public function crear_estructura_cf_isbm(){
-                $datos = $this->input->post();
-                $contingencia = 0;
-                $modelo = 1;
-                $existeHojaCobro = $this->Facturacion_Model->obtenerHojaCobro(trim($datos["codigoHojaCobro"]));
-                
-    
-                // Validando DTE
-                    $tipo = 1;
-                    $anio = date("Y");
-                    $strDte = $this->obtener_dte($tipo, $anio, $this->establecimiento);
-                    $partesDTE = explode('.', $strDte);
-                    $datos["dteFactura"] = $partesDTE[0];
-                    $datos["baseDTE"] = $partesDTE[1];
-                // Validando DTE
-    
-                // Validando codigo generacion
-                    $strCodigo = $this->Facturacion_Model->validaCodigoGeneracion($datos["cGeneracion"], $anio, $tipo);
-                    if($strCodigo->codigo != 0){
-                    $datos["cGeneracion"] = $this->codigo_generacion();
-                    }
-                // Validando codigo generacion
-    
-    
-                // Agregando o actualizando datos de el anexo de facturacion
-                    $pivote = $datos["idAnexo"];
-                    $datosAnexo["idDepartamento"] = $datos["departamentoPaciente"];
-                    $datosAnexo["idMunicipio"] = $datos["municipioPaciente"];
-                    $datosAnexo["nombrePaciente"] = $datos["nombrePaciente"];
-                    $datosAnexo["duiPaciente"] = $datos["documentoPaciente"];
-                    $datosAnexo["telefonoPaciente"] = $datos["telefonoPaciente"];
-                    $datosAnexo["correoPaciente"] = $datos["correoPaciente"];
-                    $datosAnexo["codigoDepartamento"] = $datos["codigoDepartamento"];
-                    $datosAnexo["codigoMunicipio"] = $datos["codigoMunicipio"];
-                    $datosAnexo["direccionPaciente"] = $datos["complementoPaciente"];
-                    $datosAnexo["actividadEconomica"] = $datos["codigoActividadEconomica"];
-                    $datosAnexo["tipoDocumento"] = $datos["tipoDocumento"];
-                    $datosAnexo["nrcCreditoFiscal"] = $datos["nrcPaciente"];
-                    if($pivote == 0){
-                        $datosAnexo["pivote"] = 0;
-                    }else{
-                        $datosAnexo["idAnexo"] = $datos["idAnexo"];
-                        $datosAnexo["pivote"] = 1;
-                    }
-                    $this->Facturacion_Model->guardarProveedorAnexo($datosAnexo);
-                // Agregando o actualizando datos de el anexo de facturacion
-    
-                // Datos a insertar en la base de datos
-                    $arrayDTE["numeroDTE"] = $datos["baseDTE"];
-                    $arrayDTE["anioDTE"] = date("Y");
-                    $arrayDTE["detalleDTE"] = $datos["dteFactura"];
-                    $arrayDTE["idHoja"] = $existeHojaCobro->hoja;
-                    $arrayDTE["generacion"] = $datos["cGeneracion"];
-                // Datos a insertar en la base de datos
-    
-                if(!isset($datos["tipoContingencia"])){
-                    $datos["tipoContingencia"] = null;
-                }else{
-                    $contingencia = 1;
-                    $modelo = 2;
-                }
-    
-                $empresa = $this->Facturacion_Model->obtenerEmpresa();
-    
-                //Precios
-                    $subtotal = $datos["precioServicio"];
-                    $iva = $datos["ivaServicio"];
-                    $total = $datos["totalServicio"];
-                //Precios
-                $sinIva = $total /1.13;
-                $ivaRete = $sinIva *0.01;
-                $global = $total - $ivaRete;
-    
-                $iva = round($sinIva * 0.13, 2);
-    
-                $montoTotal = $global;
-                $arregloNumero = explode(".", number_format($montoTotal, 2, '.', ''));
-                $letras = "";
-                if(isset($arregloNumero[1])){
-                    $letras = strtoupper($this->convertir($arregloNumero[0])." ".$arregloNumero[1]."/100");
-                }else{
-                    $letras = strtoupper($this->convertir($montoTotal)." 00/100 Dolares"); 
-                }
-    
-                $codigoDepartamento = explode( "-", $datos["codigoDepartamento"]);
-                $codigoMunicipio = explode( "-", $datos["codigoMunicipio"]);
-                $actividadEconomica = explode( "-", $datos["codigoActividadEconomica"]);
-    
-                $direccion = (!empty($codigoDepartamento[0]) && !empty($codigoMunicipio[0]) && !empty($datos["complementoPaciente"])) 
-                    ? array(
-                        "departamento" => $codigoDepartamento[0],
-                        "municipio" => $codigoMunicipio[0],
-                        "complemento" => (!empty($datos["complementoPaciente"])) ? $datos["complementoPaciente"] : null,
-                    ) 
-                    : null;
-    
-                
-                
-                $factura = array(
-                    "nit" => $empresa->nitEmpresa,
-                    "activo" => true, // Booleano sin comillas
-                    "passwordPri" => "UnionMedica_25",
-                    "dteJson" => array(
-                        "identificacion" => array(
-                            "version" => 1,
-                            "ambiente" => $empresa->ambiente,
-                            "tipoDte" => "01",
-                            "numeroControl" => $datos["dteFactura"], // Valor entre comillas
-                            "codigoGeneracion" => $datos["cGeneracion"],
-                            "tipoModelo" => $modelo,
-                            "tipoOperacion" => intval($datos["tipoTransmision"]),
-                            "fecEmi" => date("Y-m-d"),
-                            "horEmi" => date("H:i:s"),
-                            "tipoMoneda" => "USD",
-                            "tipoContingencia" => is_null($datos["tipoContingencia"]) ?  null : intval($datos["tipoContingencia"]),
-                            "motivoContin" => null,
-                        ),
-                        "documentoRelacionado" => null,
-                        "emisor" => array(
-                            "nit" => $empresa->nitEmpresa,
-                            "nrc" => $empresa->nrcEmpresa,
-                            "nombre" => $empresa->nombreEmpresa,
-                            "codActividad" => $empresa->codActividadEmpresa,
-                            "descActividad" => $empresa->descActividadEmpresa,
-                            "nombreComercial" => $empresa->nombreEmpresa,
-                            "tipoEstablecimiento" => "02",
-                            "direccion" => array(
-                                "departamento" => $empresa->departamento,
-                                "municipio" => $empresa->municipio,
-                                "complemento" => $empresa->direccionEmpresa,
-                            ),
-                            "telefono" => $empresa->telefonoEmpresa,
-                            "correo" => $empresa->correoEmpresa,
-                            "codEstableMH" => "P001",
-                            "codEstable" => null,
-                            "codPuntoVentaMH" => "M001",
-                            "codPuntoVenta" => null
-                        ),
-    
-                        "receptor" => array(
-                            "codActividad" => (!empty($actividadEconomica[0])) ? trim($actividadEconomica[0]) : null,
-                            "correo" => (!empty($datos["correoPaciente"])) ? $datos["correoPaciente"] : null,
-                            "descActividad" => (!empty($actividadEconomica[1])) ? trim($actividadEconomica[1]) : null,
-                            "nombre" => $datos["nombrePaciente"],
-                            "nrc" => null,
-                            "numDocumento" => $datos["documentoPaciente"],
-                            "telefono" => $datos["telefonoPaciente"],
-                            "tipoDocumento" => $datos["tipoDocumento"],
-                            "direccion" => $direccion,
-                        ),
-                        "otrosDocumentos" => null,
-                        "ventaTercero" => null,
-                        "cuerpoDocumento" => array(
-                            array( // Sin índice entre comillas
-                                "cantidad" => 1,
-                                "codigo" => "1", // Convertido en string
-                                "codTributo" => null,
-                                "descripcion" => $datos["detalleServicio"],
-                                "ivaItem" => (float)$iva,
-                                "montoDescu" => 0,
-                                "noGravado" => 0,
-                                "numeroDocumento" => null,
-                                "numItem" => 1,
-                                "precioUni" => (float)$total,
-                                "psv" => 0,
-                                "tipoItem" => 2,
-                                "uniMedida" => 59,
-                                "ventaExenta" => 0,
-                                "ventaGravada" => (float)$total,
-                                "ventaNoSuj" => 0,
-                                "tributos" => null,
-                                "psv" => 0,
-                            )
-                        ),
-                        "resumen" => array(
-                            "condicionOperacion" => 1,
-                            "descuExenta" => 0,
-                            "descuGravada" => 0,
-                            "descuNoSuj" => 0,
-                            "ivaRete1" => (float)round($ivaRete, 2),
-                            "montoTotalOperacion" => (float)$total,
-                            "numPagoElectronico" => null,
-                            "porcentajeDescuento" => 0,
-                            "reteRenta" => 0,
-                            "saldoFavor" => 0,
-                            "subTotal" => (float)$total,
-                            "subTotalVentas" => (float)$total,
-                            "totalDescu" => 0,
-                            "totalExenta" => 0,
-                            "totalGravada" => (float)$total,
-                            "totalIva" => (float)$iva,
-                            "totalLetras" => $letras,
-                            "totalNoGravado" => 0,
-                            "totalNoSuj" => 0,
-                            "totalPagar" => (float)round($global, 2),
-                            "pagos" => null,
-                            "tributos" => null,
-                        ),
-                        "extension" => null,
-                        "apendice" => null,
-                    )
-                );
-    
-                
-                if($contingencia == 0){
-                   $this->envioHaciendaCF($factura, $empresa, $datos, $arrayDTE, 2, 1);
-                }else{
-                    $arrayDTE["paramsFactura"] = urlencode(base64_encode(serialize($factura))); // Respuesta de hacienda
-                    $arrayDTE["paramsHacienda"] = "";
-                    $arrayDTE["paramsLocales"] = urlencode(base64_encode(serialize($datos))); // Datos de sistema local
-                    $arrayDTE["contingencia"] = $contingencia; // Datos de sistema local
-                    
-                    // Existe contingencia, el documento solo se firmara y guardara
-                    $documentoFirmado = json_decode($this->firmar_DTE($factura));
-    
-                    if($documentoFirmado->status == "OK"){
-                        $arrayDTE["firma"] = $documentoFirmado->body; // Datos de sistema local
-                        $arrayDTE["establecimiento"] = $this->establecimiento; // Datos de sistema local
-                        
-                        $pivoteDTE = $this->Facturacion_Model->guardarDTE($arrayDTE, 50);
-    
-                        $msg = "El documento se firmo exitosamente";
-                        redirect(base_url()."Facturacion/fin_factura_electronica/$pivoteDTE/$msg/");
-    
-    
-                        // echo json_encode($arrayDTE);
-    
-                    }else{
-                        $this->session->set_flashdata("error","El documento no puede ser firmado");
-                        redirect(base_url()."Hoja/detalle_hoja/$hoja/");
-    
-                    }
-    
-                }
-    
-               // echo json_encode($factura);
-                
-            }
-        // ISBM
 
         public function crear_estructura_cf(){
             $datos = $this->input->post();
             $contingencia = 0;
             $modelo = 1;
             $existeHojaCobro = $this->Facturacion_Model->obtenerHojaCobro(trim($datos["codigoHojaCobro"]));
-            
 
             // Validando DTE
                 $tipo = 1;
                 $anio = date("Y");
-                $strDte = $this->obtener_dte($tipo, $anio, $this->establecimiento);
+                $strDte = $this->obtener_dte($tipo, $anio);
                 $partesDTE = explode('.', $strDte);
                 $datos["dteFactura"] = $partesDTE[0];
                 $datos["baseDTE"] = $partesDTE[1];
@@ -2709,7 +2338,7 @@ class Facturacion extends CI_Controller {
                     $datosAnexo["idAnexo"] = $datos["idAnexo"];
                     $datosAnexo["pivote"] = 1;
                 }
-                $this->Facturacion_Model->guardarProveedorAnexo($datosAnexo);
+                // $this->Facturacion_Model->guardarProveedorAnexo($datosAnexo);
             // Agregando o actualizando datos de el anexo de facturacion
 
             // Datos a insertar en la base de datos
@@ -2736,7 +2365,7 @@ class Facturacion extends CI_Controller {
             //Precios
             
             $montoTotal = $total;
-            $arregloNumero = explode(".", number_format($montoTotal, 2, '.', ''));
+            $arregloNumero = explode(".", number_format($montoTotal, 2));
             $letras = "";
             if(isset($arregloNumero[1])){
                 $letras = strtoupper($this->convertir($arregloNumero[0])." ".$arregloNumero[1]."/100");
@@ -2760,7 +2389,7 @@ class Facturacion extends CI_Controller {
             $factura = array(
                 "nit" => $empresa->nitEmpresa,
                 "activo" => true, // Booleano sin comillas
-                "passwordPri" => "UnionMedica_25",
+                "passwordPri" => $this->psPublica,
                 "dteJson" => array(
                     "identificacion" => array(
                         "version" => 1,
@@ -2792,9 +2421,9 @@ class Facturacion extends CI_Controller {
                         ),
                         "telefono" => $empresa->telefonoEmpresa,
                         "correo" => $empresa->correoEmpresa,
-                        "codEstableMH" => "P001",
+                        "codEstableMH" => $this->establecimiento,
                         "codEstable" => null,
-                        "codPuntoVentaMH" => "M001",
+                        "codPuntoVentaMH" => "P001",
                         "codPuntoVenta" => null
                     ),
 
@@ -2804,7 +2433,7 @@ class Facturacion extends CI_Controller {
                         "descActividad" => (!empty($actividadEconomica[1])) ? trim($actividadEconomica[1]) : null,
                         "nombre" => $datos["nombrePaciente"],
                         "nrc" => null,
-                        "numDocumento" => $this->formatear_dui($datos["documentoPaciente"]),
+                        "numDocumento" => $datos["documentoPaciente"],
                         "telefono" => $datos["telefonoPaciente"],
                         "tipoDocumento" => $datos["tipoDocumento"],
                         "direccion" => $direccion,
@@ -2864,7 +2493,7 @@ class Facturacion extends CI_Controller {
 
             
             if($contingencia == 0){
-               $this->envioHaciendaCF($factura, $empresa, $datos, $arrayDTE, 2, 1);
+               $this->envioHaciendaCF($factura, $empresa, $datos, $arrayDTE, 2, 1, null);
             }else{
                 $arrayDTE["paramsFactura"] = urlencode(base64_encode(serialize($factura))); // Respuesta de hacienda
                 $arrayDTE["paramsHacienda"] = "";
@@ -2876,7 +2505,6 @@ class Facturacion extends CI_Controller {
 
                 if($documentoFirmado->status == "OK"){
                     $arrayDTE["firma"] = $documentoFirmado->body; // Datos de sistema local
-                    $arrayDTE["establecimiento"] = $this->establecimiento; // Datos de sistema local
                     
                     $pivoteDTE = $this->Facturacion_Model->guardarDTE($arrayDTE, 50);
 
@@ -2895,6 +2523,7 @@ class Facturacion extends CI_Controller {
 
             }
             
+            // echo json_encode($factura);
         }
     // Factura consumidor final desde cero
 
@@ -2903,7 +2532,7 @@ class Facturacion extends CI_Controller {
             $datos = unserialize(base64_decode(urldecode($params)));
             $tipo = 1;
             $anio = date("Y");
-            $strDte = $this->obtener_dte($tipo, $anio, $this->establecimiento);
+            $strDte = $this->obtener_dte($tipo, $anio);
             $partesDTE = explode('.', $strDte);
             $hoja = $datos["idHoja"];
             $data["paciente"] = $this->Facturacion_Model->detalleHoja($hoja);
@@ -2958,21 +2587,99 @@ class Facturacion extends CI_Controller {
             }
         }
 
-        public function sellar_factura(){
-            $datos = $this->input->post();
+        public function sellar_factura($params = null){
+            // $datos = $this->input->post();
+            $datos = unserialize(base64_decode(urldecode($params)));
+            $empresa = $this->Facturacion_Model->obtenerEmpresa();
+            // Para venta
+                $venta = $this->Consulta_Model->validarNumeroActual($datos["baseDTE"], $datos["documentoPago"]); //Verificando que el codigo del tiket no haya sido agregado
+                if($venta->codigo > 0){
+                    $maximoActual = $this->Consulta_Model->maximoActual($datos["documentoPago"]);
+                    $datos["numeroDocumento"] = $maximoActual->codigo + 1;
+                }else{
+                    $datos["numeroDocumento"] = $datos["baseDTE"];
+                }
+            // Para venta
+            $totalVenta = 0;
+            $totalIva = 0;
+
+            // Ordenando datos
+                if(isset($datos["nombreExamen"])){
+                    // Creando Json de medidas
+                        // Crear un arreglo combinado
+                        $datosInsumo = array();
+                        $datosInsumoV = array();
+                        // Obtener el número de elementos en una de las matrices (se asume que todas tienen la misma longitud)
+                        $numElementos = count($datos["nombreExamen"]);
+                        // Iterar sobre la longitud de las matrices y combinar los datos
+                        $index = 1;
+                        for ($i = 0; $i < $numElementos; $i++) {
+                            $total_fila = $datos["cantidad"][$i] * $datos["precios"][$i];
+                            $iva = ($total_fila /1.13) * 0.13;
+                            $totalVenta += $total_fila;
+                            $totalIva += $iva;
+                            // Crear un arreglo asociativo para cada conjunto de datos
+                            $objeto = array(
+                                "cantidad" => intval($datos["cantidad"][$i]),
+                                "codigo" => null, // Convertido en string
+                                "codTributo" => null,
+                                "descripcion" => $datos["nombreExamen"][$i],
+                                "ivaItem" => (float)round($iva, 2),
+                                "montoDescu" => 0,
+                                "noGravado" => 0,
+                                "numeroDocumento" => null,
+                                "numItem" => $index,
+                                "precioUni" => (float)$datos["precios"][$i],
+                                "psv" => 0,
+                                "tipoItem" => 2,
+                                "uniMedida" => 59,
+                                "ventaExenta" => 0,
+                                "ventaGravada" => (float)round($total_fila ,2),
+                                "ventaNoSuj" => 0,
+                                "tributos" => null,
+                                "psv" => 0,
+                            );
+
+                            $objetoV = array(
+                                "idExamen" => $datos["idExamen"][$i],
+                                "precio" => $datos["precios"][$i],
+                                "cantidad" => $datos["cantidad"][$i],
+                            );
+
+                            // Agregar el arreglo al arreglo combinado
+                            array_push($datosInsumo, $objeto);
+                            array_push($datosInsumoV, $objetoV);
+                            $index++;
+                        }
+                        unset($datos["idMedicamento"], $datos["precios"], $datos["cantidad"], $datos["cantidadUnitaria"], $datos["nombreInsumo"], $datos["nombreMedicamento"]);
+                       
+                        // $datos["insumos"] = $datosInsumo;
+                        $datos["insumos"] = $datosInsumoV;
+                    // Creando Json de medidas
+
+                }else{
+                    $datos["insumos"] = "";
+                }
+            // Ordenando datos
+
             $contingencia = 0;
             $modelo = 1;
-            $hoja = $datos["idHoja"];
+            $hoja = 0;
+
+            // Guardando venta
+                $datosVenta = $datos;
+                $datosVenta["personalizado"] = 0;
+            // Guardando venta
 
             // Validando DTE
                 $tipo = 1;
                 $anio = date("Y");
-                $strDte = $this->obtener_dte($tipo, $anio, $this->establecimiento);
+                $strDte = $this->obtener_dte($tipo, $anio);
                 $partesDTE = explode('.', $strDte);
                 $datos["dteFactura"] = $partesDTE[0];
                 $datos["baseDTE"] = $partesDTE[1];
             // Validando DTE
-
+            
             // Validando codigo generacion
                 $strCodigo = $this->Facturacion_Model->validaCodigoGeneracion($datos["cGeneracion"], $anio, $tipo);
                 if($strCodigo->codigo != 0){
@@ -2984,54 +2691,34 @@ class Facturacion extends CI_Controller {
                 $arrayDTE["numeroDTE"] = $datos["baseDTE"];
                 $arrayDTE["anioDTE"] = date("Y");
                 $arrayDTE["detalleDTE"] = $datos["dteFactura"];
-                $arrayDTE["idHoja"] = $hoja;
-                $arrayDTE["generacion"] = $datos["cGeneracion"];
+                
             // Datos a insertar en la base de datos
 
-            if(!isset($datos["tipoContingencia"])){
+            if(isset($datos["tipoContingencia"]) && $datos["tipoContingencia"] == "" ){
                 $datos["tipoContingencia"] = null;
             }else{
                 $contingencia = 1;
                 $modelo = 2;
             }
-
+            // $anexo = $this->Facturacion_Model->pacienteGeneral();
+           
             
-            $paciente = $this->Facturacion_Model->detalleHoja($hoja);
-            $anexo = $this->Facturacion_Model->obtenerPacienteAnexo($paciente->idPaciente);
-
-            // Uniendo arreglos
-                $anexoArray = (array) $anexo;
-                $datos = array_merge($datos, $anexoArray);
-            // Uniendo arreglos
-
-            $empresa = $this->Facturacion_Model->obtenerEmpresa();
-
-            // Resumiendo totaltes
-                $totalFactura = 0;
-                $totalIvaFactura = 0;
-                if($datos["facturarTodo"] == 1){
-                    $totalFactura = $datos["totalInterno"] + $datos["totalExterno"];
-                    $totalIvaFactura = $datos["ivaI"] + $datos["ivaE"];
-                }else{
-                    $totalFactura = $datos["totalInterno"];
-                    $totalIvaFactura = $datos["ivaI"];
-                }
-            // Resumiendo totaltes
-
-            $montoTotal = $totalFactura ;
-            $arregloNumero = explode(".", number_format($montoTotal, 2, '.', ''));
+            $arregloNumero = explode(".", round($totalVenta ,2));
             $letras = "";
             if(isset($arregloNumero[1])){
                 $letras = strtoupper($this->convertir($arregloNumero[0])." ".$arregloNumero[1]."/100");
             }else{
-                $letras = strtoupper($this->convertir($montoTotal)." 00/100 Dolares"); 
+                $letras = strtoupper($this->convertir($totalVenta)." 00/100 Dolares"); 
             }
+            
+            $totalVenta = round($totalVenta, 2);
+            $totalIva = round($totalIva, 2);
 
-            $dui = $anexo->duiPaciente == "" ? null : $anexo->duiPaciente;
+
             $factura = array(
                 "nit" => $empresa->nitEmpresa,
                 "activo" => true, // Booleano sin comillas
-                "passwordPri" => "UnionMedica_25",
+                "passwordPri" => $this->psPublica,
                 "dteJson" => array(
                     "identificacion" => array(
                         "version" => 1,
@@ -3044,7 +2731,7 @@ class Facturacion extends CI_Controller {
                         "fecEmi" => date("Y-m-d"),
                         "horEmi" => date("H:i:s"),
                         "tipoMoneda" => "USD",
-                        "tipoContingencia" => is_null($datos["tipoContingencia"]) ?  null : intval($datos["tipoContingencia"]),
+                        "tipoContingencia" => is_null($datos["tipoContingencia"])  ?  null : intval($datos["tipoContingencia"]),
                         "motivoContin" => null,
                     ),
                     "documentoRelacionado" => null,
@@ -3071,60 +2758,39 @@ class Facturacion extends CI_Controller {
 
                     "receptor" => array(
                         "codActividad" => null,
-                        "correo" => $anexo->correoPaciente == "" ? null : $anexo->correoPaciente,
+                        "correo" => null,
                         "descActividad" => null,
-                        "nombre" => $anexo->nombrePaciente != "" ? $anexo->nombrePaciente : $paciente->nombrePaciente,
+                        "nombre" => $datos["clienteVenta"],
                         "nrc" => null,
-                        "numDocumento" => $this->formatear_dui($dui),
-                        "telefono" => $anexo->telefonoPaciente == "" ? null : $anexo->telefonoPaciente,
+                        "numDocumento" => '00000000-0',
+                        "telefono" => 0000-0000,
                         "tipoDocumento" => "13",
                         "direccion" => null,
                     ),
                     "otrosDocumentos" => null,
                     "ventaTercero" => null,
-                    "cuerpoDocumento" => array(
-                        array( // Sin índice entre comillas
-                            "cantidad" => 1,
-                            "codigo" => "1", // Convertido en string
-                            "codTributo" => null,
-                            "descripcion" => $datos["detalleFactura"],
-                            "ivaItem" => (float)round($totalIvaFactura, 5),
-                            "montoDescu" => 0,
-                            "noGravado" => 0,
-                            "numeroDocumento" => null,
-                            "numItem" => 1,
-                            "precioUni" => (float)round($totalFactura, 5),
-                            "psv" => 0,
-                            "tipoItem" => 2,
-                            "uniMedida" => 59,
-                            "ventaExenta" => 0,
-                            "ventaGravada" => (float)round($totalFactura, 5),
-                            "ventaNoSuj" => 0,
-                            "tributos" => null,
-                            "psv" => 0,
-                        )
-                    ),
+                    "cuerpoDocumento" => $datosInsumo,
                     "resumen" => array(
                         "condicionOperacion" => 1,
                         "descuExenta" => 0,
                         "descuGravada" => 0,
                         "descuNoSuj" => 0,
                         "ivaRete1" => 0,
-                        "montoTotalOperacion" => (float)round($totalFactura, 2),
+                        "montoTotalOperacion" => (float)$totalVenta,
                         "numPagoElectronico" => null,
                         "porcentajeDescuento" => 0,
                         "reteRenta" => 0,
                         "saldoFavor" => 0,
-                        "subTotal" => (float)round($totalFactura, 2),
-                        "subTotalVentas" => (float)round($totalFactura, 2),
+                        "subTotal" => (float)$totalVenta,
+                        "subTotalVentas" => (float)$totalVenta,
                         "totalDescu" => 0,
                         "totalExenta" => 0,
-                        "totalGravada" => (float)round($totalFactura, 2),
-                        "totalIva" => (float)round($totalIvaFactura, 2),
+                        "totalGravada" => (float)$totalVenta,
+                        "totalIva" => (float)$totalIva,
                         "totalLetras" => $letras,
                         "totalNoGravado" => 0,
                         "totalNoSuj" => 0,
-                        "totalPagar" => (float)round($totalFactura, 2),
+                        "totalPagar" => (float)$totalVenta,
                         "pagos" => null,
                         "tributos" => null,
                     ),
@@ -3132,10 +2798,21 @@ class Facturacion extends CI_Controller {
                     "apendice" => null,
                 )
             );
+            /* 
+           
+           
+
+            
             
             if($contingencia == 0){
-                $this->envioHaciendaCF($factura, $empresa, $datos, $arrayDTE, 2, 1);
+                $this->envioHaciendaCF($factura, $empresa, $datos, $arrayDTE, 2, 1, $datosVenta);
             }else{
+                unset($datosVenta["personalizado"]);
+                $resp = $this->Ventas_Model->guardarVenta($datosVenta);
+                $arrayDTE["idVenta"] = $resp;
+                $arrayDTE["generacion"] = $datos["cGeneracion"];
+
+
                 $arrayDTE["paramsFactura"] = urlencode(base64_encode(serialize($factura))); // Respuesta de hacienda
                 $arrayDTE["paramsHacienda"] = "";
                 $arrayDTE["paramsLocales"] = urlencode(base64_encode(serialize($datos))); // Datos de sistema local
@@ -3146,7 +2823,6 @@ class Facturacion extends CI_Controller {
 
                 if($documentoFirmado->status == "OK"){
                     $arrayDTE["firma"] = $documentoFirmado->body; // Datos de sistema local
-                    $arrayDTE["establecimiento"] = $this->establecimiento; // Datos de sistema local
                     
                     $pivoteDTE = $this->Facturacion_Model->guardarDTE($arrayDTE, 50);
 
@@ -3163,117 +2839,50 @@ class Facturacion extends CI_Controller {
                 }
 
 
-            }
+            } */
 
-            // echo json_encode($factura);
+            echo json_encode($factura);
 
 
         }
 
-        private function imprimir_ticket($hoja = null, $dte = null, $pivoteOnline = null){
+        public function imprimir_ticket($hoja = null, $dte = null){
 
             try {
                 //Obteniendo datos ya existentes
-                $paciente = $this->Facturacion_Model->detalleHoja($hoja);
-                $empresa = $this->Facturacion_Model->obtenerEmpresa();
+                $venta = $this->Ventas_Model->obtenerVenta($hoja);
                 $jsonDTE = unserialize(base64_decode(urldecode($dte)));
                 $tipoDTE = $jsonDTE["dteJson"]["identificacion"]["tipoDte"];
-                // echo json_encode($jsonDTE);
-                // Detalles de la hoja
-                    $externosHoja = $this->Facturacion_Model->externosHoja($hoja);
-                    $medicamentosHoja = $this->Facturacion_Model->medicamentosHoja($hoja);
-                // Detalles de la hoja
-    
-    
-                // Total de la hoja de cobro.
-                    $totalExternos = 0;
-                    $totalRecibo = 0;
-                    $subTotal = 0;
-                    $mm = 0;
-                    $med = 0;
-                    $iva = 0;
-                    $serm = 0;
-                    $oserm = 0;
-                    $prom = 0;
-                    $totalRenta = 0;
-                    
-                    if($hoja > 0){
-                        foreach ($medicamentosHoja as $medicamento) {
-        
-                            // Suma medicamentos y materiales medicos
-                            switch ($medicamento->tipoMedicamento) {
-                                case 'Medicamentos':
-                                    $med += ($medicamento->cantidadInsumo * $medicamento->precioInsumo);
-                                    break;
-                                case 'Materiales médicos':
-                                    $mm += ($medicamento->cantidadInsumo * $medicamento->precioInsumo);
-                                    break;
-                                case 'Servicios':
-                                    $serm += ($medicamento->cantidadInsumo * $medicamento->precioInsumo);
-                                    break;
-                                case 'Promoción':
-                                    $prom += ($medicamento->cantidadInsumo * $medicamento->precioInsumo);
-                                    break;
-                                case 'Otros servicios':
-                                    $oserm += ($medicamento->cantidadInsumo * $medicamento->precioInsumo);
-                                    break;
-                            }
-                        }
-        
-                        foreach ($externosHoja as $externo) {
-                            $totalExternos += ($externo->precioExterno * $externo->cantidadExterno); // Para el total de los externos
-                        }
-                        $subTotal = $totalExternos + $prom + $mm + $med + $serm + $oserm;
-                        $totalRecibo = $subTotal + $iva;
-                    }else{
-                        $descripcion = $jsonDTE["dteJson"]["cuerpoDocumento"][0]["descripcion"];
-                        if($tipoDTE == 14){
-                            $med = $jsonDTE["dteJson"]["cuerpoDocumento"][0]["precioUni"];
-                            $iva = 0;
-                            $totalRecibo = $jsonDTE["dteJson"]["resumen"]["totalPagar"];
-                            $totalRenta = $jsonDTE["dteJson"]["resumen"]["reteRenta"];
-                        }else{
-                            $med = $jsonDTE["dteJson"]["cuerpoDocumento"][0]["ventaGravada"];
-                            $iva = $jsonDTE["dteJson"]["resumen"]["tributos"][0]["valor"];
-                            $totalRecibo = $jsonDTE["dteJson"]["resumen"]["montoTotalOperacion"];
-                        }
-                        $subTotal = $med;
-                    }
-                    
-                // Fin total hoja de cobro.
-    
+                $emisor = $jsonDTE["dteJson"]["emisor"];
+                $receptor = $jsonDTE["dteJson"]["receptor"];
+                $detalle = $jsonDTE["dteJson"]["cuerpoDocumento"];
+                $resumen = $jsonDTE["dteJson"]["resumen"];
+  
+
                 // Creado ticket
-                        $nombreInsumo = "";
-                        $total = 0;
-                        $totalrow = 0;
-                        $str = "";
-                        $gravado = 0;
-                        $excento = 0;
                         // echo json_encode($totales);
                         $hora = date("h:i:s A");
                         $am_pm = date("h:i:s A", strtotime($hora));
                         // $connector = new WindowsPrintConnector("EPSON TM-T20");
-                        $connector = new NetworkPrintConnector("192.168.1.239");
+                        $connector = new NetworkPrintConnector("192.168.1.154");
                         $printer = new Printer($connector);
-                        
-                        
                         // Encabezado del ticket
                             $printer->setJustification(Printer::JUSTIFY_CENTER);
                             $printer->setEmphasis(true); // Texto en negrita
                             $printer ->feed(1);
                             $printer->setTextSize(1, 1); // Tamaño de texto
-                            $printer->text($empresa->nombreEmpresa."\n");
-                            $printer->setEmphasis(false); // Texto en negrita
+                            $printer->text($emisor["nombreComercial"]."\n");
+                            // $printer->setEmphasis(false); // Texto en negrita
                             $printer->setTextSize(1, 1); // Tamaño de texto
-                            $printer->text("NRC: ".$empresa->nrcEmpresa."\n");
-                            $printer->text("NIT: ".$empresa->nitEmpresa."\n");
-                            $printer->text("GIRO: ".$empresa->descActividadEmpresa."\n");
+                            $printer->text("NRC: ".$emisor["nrc"]."\n");
+                            $printer->text("NIT: ".$emisor["nit"]."\n");
+                            $printer->text("GIRO: ".$emisor["descActividad"]."\n");
                             $df = str_pad("G---->GRAVADO", 10, " ").str_pad(" ", 5, " ").str_pad("E---->EXCENTO", 5, " ");
                             $printer->text($df."\n");
-                            $printer->text($empresa->direccionEmpresa."\n");
+                            $printer->text($emisor["direccion"]["complemento"]."\n");
                             $printer->text("\n");
                             $printer->setJustification(Printer::JUSTIFY_LEFT);
-                            $telefono = substr($empresa->telefonoEmpresa, 0, 4) . "-" . substr($empresa->telefonoEmpresa, 4);
+                            $telefono = substr($emisor["telefono"], 0, 4) . "-" . substr($emisor["telefono"], 4);
                             $tel = str_pad("TEL: ".$telefono, 10, " ").str_pad(" ", 15, " ").str_pad("Caja: HO01", 5, " ");
                             $printer->text($tel."\n");
                             $printer->text("------------------------------------------\n");
@@ -3282,9 +2891,9 @@ class Facturacion extends CI_Controller {
                         // Identificacion
                             $printer ->feed(1);
                             $printer->setJustification(Printer::JUSTIFY_CENTER);
-                            $printer->setEmphasis(true); // Texto en negrita
+                            // $printer->setEmphasis(true); // Texto en negrita
                             $printer->text("FACTURA ELECTRONICA\n");
-                            $printer->setEmphasis(false); // Texto en negrita
+                            // $printer->setEmphasis(false); // Texto en negrita
                             $printer->text("------------------------------------------\n");
                             $printer->setJustification(Printer::JUSTIFY_LEFT);
                             $printer->text("Código de generación\n");
@@ -3295,109 +2904,79 @@ class Facturacion extends CI_Controller {
                             $printer->text($jsonDTE["selloRecibido"]."\n");
                             $fecha = str_pad($jsonDTE["dteJson"]["identificacion"]["fecEmi"], 2, ).str_pad(" ".$jsonDTE["dteJson"]["identificacion"]["horEmi"], 3, " ");
                             $printer->text($fecha."\n");
-                            $printer->text("Caja: HO01\n");
                         // Identificacion
-                        
+    
+    
                         // Receptor
                             $printer->setJustification(Printer::JUSTIFY_CENTER);
-                            $printer->setEmphasis(true); // Texto en negrita
+                            // $printer->setEmphasis(true); // Texto en negrita
                             $printer->text("RECEPTOR\n");
-                            $printer->setEmphasis(false); // Texto en negrita
+                            // $printer->setEmphasis(false); // Texto en negrita
                             $printer->text("------------------------------------------\n");
                             $printer->setJustification(Printer::JUSTIFY_LEFT);
-                            $printer->text("Cliente: ".$jsonDTE["dteJson"]["receptor"]["nombre"]."\n");
-                            $printer->text("Teléfono: ".$jsonDTE["dteJson"]["receptor"]["telefono"]."\n");
-                            $printer->text("Correo: ".$jsonDTE["dteJson"]["receptor"]["correo"]."\n");
-
+                            $printer->text("Cliente: ".$receptor["nombre"]."\n");
+                            $printer->text("Teléfono: ".$receptor["telefono"]."\n");
+                            $printer->text("Correo: ".$receptor["correo"]."\n");
+                    
                         // Receptor
-
+    
+    
                         // Detalle
                             $printer ->feed(1);
                             $printer->setJustification(Printer::JUSTIFY_CENTER);
-                            $printer->setEmphasis(true); // Texto en negrita
+                            // $printer->setEmphasis(true); // Texto en negrita
                             $printer->text("DETALLE\n");
                             $printer->text("------------------------------------------\n");
-                            $printer->setEmphasis(false); // Texto en negrita
+                            // $printer->setEmphasis(false); // Texto en negrita
                             $printer->setJustification(Printer::JUSTIFY_LEFT);
+                    
 
-                            if($med > 0){
-                                if($hoja > 0){
-                                    $printer->text("Medicamentos\n");
-                                }else{
-                                    $printer->text($descripcion."\n");
-                                }
-                                $medi = str_pad("1", 5, ).str_pad("x $".number_format($med, 2), 20, " ") . str_pad("$".number_format($med, 2)."G", 2, " ");
+                            foreach ($detalle as $row) {
+                                $printer->text($row["descripcion"]."\n");
+                                $medi = str_pad($row["cantidad"], 5, ).str_pad("x $".number_format($row["precioUni"], 2), 20, " ") . str_pad("$".number_format($row["ventaGravada"], 2)."G", 2, " ");
                                 $printer->text($medi."\n");
                             }
 
-                            if($mm > 0){
-                                $printer->text("Materiales médicos\n");
-                                $mat = str_pad("1", 5, ).str_pad("x $".number_format($mm, 2), 20, " ") . str_pad("$".number_format($mm, 2)."G", 2, " ");
-                                $printer->text($mat."\n");
-                            }
 
-
-                            if($serm > 0){
-                                $printer->text("Servicios\n");
-                                $serv = str_pad("1", 5, ).str_pad("x $".number_format($serm, 2), 20, " ") . str_pad("$".number_format($serm, 2)."G", 2, " ");
-                                $printer->text($serv."\n");
-                            }
-
-                            if($oserm > 0){
-                                $printer->text("Otros servicios\n");
-                                $oserv = str_pad("1", 5, ).str_pad("x $".number_format($oserm, 2), 20, " ") . str_pad("$".number_format($oserm, 2)."G", 2, " ");
-                                $printer->text($oserv."\n");
-                            }
-
-                            if($totalExternos > 0){
-                                $printer->text("Servicios externos\n");
-                                $exter = str_pad("1", 5, ).str_pad("x $".number_format($totalExternos, 2), 20, " ") . str_pad("$".number_format($totalExternos, 2)."G", 2, " ");
-                                $printer->text($exter."\n");
-                            }
-
+                    
                             $printer->feed(1);
-
+                    
                             $printer->setJustification(Printer::JUSTIFY_RIGHT);
                             $printer->text("------------------------------------------\n");
-                            $printer->text("SUB-TOTAL $:".number_format($subTotal, 2)."\n");
-
-                            if($tipoDTE == 14){
-                                $printer->text("Renta retenida $:".number_format($totalRenta, 2)."\n");
-                            }else{
-                                if($iva > 0){
-                                    $printer->text("IVA $:".number_format($iva, 2)."\n");
-                                }
-                                $printer->text("G= Ventas gravadas $:".number_format($totalRecibo, 2)."\n");
-                                $printer->text("V= Ventas excentas $:".number_format(0, 2)."\n");
-                                $printer->text("Ventas no sujetas $:".number_format(0, 2)."\n");
+                            $printer->text("SUB-TOTAL $:".number_format($resumen["totalPagar"], 2)."\n");
+                            $printer->text("G= Ventas gravadas $:".number_format($resumen["totalPagar"], 2)."\n");
+                            $printer->text("V= Ventas excentas $:".number_format(0, 2)."\n");
+                            $printer->text("Ventas no sujetas $:".number_format(0, 2)."\n");
+                    
+                            $printer->text("TOTAL $:".number_format($resumen["totalPagar"], 2)."\n");
+                            if($hoja > 0){
+                                $printer->text("RECIBIDO $:".number_format($venta->recibidoVenta, 2)."\n");
+                                $printer->text("VUELTO $:".number_format($venta->vueltoVenta, 2)."\n");
                             }
-
-                            $printer->text("TOTAL $:".number_format($totalRecibo, 2)."\n");
                             $printer->text("------------------------------------------\n");
-
-						
+                    
+                        
                         // Detalle
-
+    
                         // Creando QR
                             $ambiente = $jsonDTE["dteJson"]["identificacion"]["ambiente"];
                             $fecha = $jsonDTE["dteJson"]["identificacion"]["fecEmi"];
                             $codigo = $jsonDTE["dteJson"]["identificacion"]["codigoGeneracion"];
                             $strUrl = 'https://admin.factura.gob.sv/consultaPublica?ambiente='.urlencode($ambiente).'&codGen='.urlencode($codigo).'&fechaEmi='.urlencode($fecha);
-                            $strLab = $this->urlOnline."lista_opciones/".urlencode(base64_encode(serialize($pivoteOnline)));
                             
                             $printer -> setJustification(Printer::JUSTIFY_CENTER);
-                            $printer -> qrCode("$strLab", Printer::QR_ECLEVEL_H, 6);
+                            $printer -> qrCode("$strUrl", Printer::QR_ECLEVEL_H, 4);
                             $printer -> setJustification();
+                            $printer -> feed();
                             $printer -> feed();
                         // Creando QR
 
+                        
+                           
+                        // $printer->setEmphasis(true); // Texto en negrita
                         $printer->setJustification(Printer::JUSTIFY_CENTER);
-                        $printer->text("Escanea el código y descarga tu factura!!!\n");
-                        $printer -> feed();
-                        $printer -> feed();
-                        $printer->setEmphasis(true); // Texto en negrita
-                        $printer->text("GRACIAS POR PREFERIRNOS!!!\n");
-                        $printer->setEmphasis(false); // Texto en negrita
+                        $printer->text("Gracias por preferirnos!!!\n");
+                        // $printer->setEmphasis(false); // Texto en negrita
                         $printer -> feed();
                         $printer -> feed();
 
@@ -3410,10 +2989,9 @@ class Facturacion extends CI_Controller {
                         // Cierra la conexión
                         $printer->close();
                 // Creado ticket    
+
+                // echo json_encode($venta);
     
-    
-    
-                // echo json_encode($jsonDTE);
             }catch (Exception $e) {
                 echo "Error al imprimir: " . $e->getMessage();
             }
@@ -3488,28 +3066,11 @@ class Facturacion extends CI_Controller {
 
         private function crear_json($dte = null){
 
-            // Validando si existe receptor o sujeto excluido
-                if(isset($dte["dteJson"]["receptor"])){
-                            
-                }
-            // Validando si existe receptor o sujeto excluido
-
-
             $jsonPaciente  = array(
                 "identificacion" => $dte["dteJson"]["identificacion"],
                 "documentoRelacionado" => isset($dte["dteJson"]["documentoRelacionado"]) ? $dte["dteJson"]["documentoRelacionado"] : null,
                 "emisor" => $dte["dteJson"]["emisor"],
-            );
-
-            // Validar y agregar receptor o sujetoExcluido
-                if (isset($dte["dteJson"]["receptor"])) {
-                    $jsonPaciente["receptor"] = $dte["dteJson"]["receptor"];
-                } elseif (isset($dte["dteJson"]["sujetoExcluido"])) {
-                    $jsonPaciente["sujetoExcluido"] = $dte["dteJson"]["sujetoExcluido"];
-                }
-            // Validar y agregar receptor o sujetoExcluido
-            
-            $jsonPaciente += array(
+                "receptor" => isset($dte["dteJson"]["receptor"]) ? $dte["dteJson"]["receptor"] : $dte["dteJson"]["sujetoExcluido"],
                 "otrosDocumentos" => $dte["dteJson"]["otrosDocumentos"],
                 "ventaTercero" => $dte["dteJson"]["ventaTercero"],
                 "cuerpoDocumento" => $dte["dteJson"]["cuerpoDocumento"],
@@ -3520,33 +3081,380 @@ class Facturacion extends CI_Controller {
                 "selloRecibido" => $dte["selloRecibido"],
             );
 
-
-
-
-
             return urlencode(base64_encode(serialize($jsonPaciente))); // Respuesta de hacienda
         }
 
-        private function formatear_dui($dui) {
-            // Eliminar cualquier caracter que no sea un número
-            $dui = preg_replace('/\D/', '', $dui);
-        
-            // Si tiene exactamente 9 dígitos, colocar el guion en la posición correcta
-            if (strlen($dui) == 9) {
-                return substr($dui, 0, 8) . '-' . substr($dui, 8, 1);
-            }
-        
-            // Si tiene menos de 9 caracteres, agregar ceros al inicio y formatear
-            if (strlen($dui) < 9) {
-                $dui = str_pad($dui, 9, '0', STR_PAD_LEFT);
-                return substr($dui, 0, 8) . '-' . substr($dui, 8, 1);
-            }
-        
-            // Si tiene más de 9 caracteres, cortar y formatear
-            return substr($dui, 0, 8) . '-' . substr($dui, 8, 1);
-        }
-        
     // Factura consumidor final
+
+    //Consumidor final solicitado
+        public function consumidor_final_solicitado($params = null){
+            $datos = unserialize(base64_decode(urldecode($params)));
+            $totalVenta = 0;
+            $totalIva = 0;
+
+            // Para venta 
+                $venta["codigoVenta"] = $datos["codigoVenta"];
+                $venta["fechaVenta"] = $datos["fechaVenta"];
+                $venta["clienteVenta"] = $datos["clienteVenta"];
+                $venta["documentoPago"] = "2";
+                $venta["numeroDocumento"] = $datos["numeroDocumento"];
+                $venta["formaPago"] = $datos["formaPago"];
+                $venta["txtSubtotal"] = $datos["txtSubtotal"];
+                $venta["txtIVA"] = $datos["txtIVA"];
+                $venta["txtTotal"] = $datos["txtTotal"];
+                $venta["txtDineroRecibido"] = $datos["txtDineroRecibido"];
+                $venta["txtVuelto"] = $datos["txtVuelto"];
+            // Para venta 
+
+
+            // Ordenando datos
+                if(isset($datos["idMedicamento"])){
+                    // Creando Json de medidas
+                        // Crear un arreglo combinado
+                        $datosInsumo = array();
+                        // Obtener el número de elementos en una de las matrices (se asume que todas tienen la misma longitud)
+                        $numElementos = count($datos["idMedicamento"]);
+                        // Iterar sobre la longitud de las matrices y combinar los datos
+                        $index = 1;
+                        for ($i = 0; $i < $numElementos; $i++) {
+
+                            $objeto = array(
+                                "descripcion" => $datos["nombreMedicamento"][$i]."(".$datos["nombreInsumo"][$i].")",
+                                "idMedicamento" => $datos["idMedicamento"][$i],
+                                "precio" => $datos["precios"][$i],
+                                "cantidad" => $datos["cantidad"][$i],
+                                "unitaria" => $datos["cantidadUnitaria"][$i],
+                                "medida" => $datos["nombreInsumo"][$i]
+                            );
+                            // Agregar el arreglo al arreglo combinado
+                            array_push($datosInsumo, $objeto);
+                            $index++;
+                        }
+                        unset($datos["idMedicamento"], $datos["precios"], $datos["cantidad"], $datos["cantidadUnitaria"], $datos["nombreInsumo"], $datos["nombreMedicamento"]);
+                       
+                        $data["insumos"] = $datosInsumo;
+                    // Creando Json de medidas
+
+                }else{
+                    $data["insumos"] = "";
+                }
+
+            // Ordenando datos
+
+            // $tipoDocumento = $datos["codigoCatDetalle"];
+            $tipo = 1; // Para validar el tipo de DTE requerido
+            $anio = date("Y");
+            $strDte = $this->obtener_dte($tipo, $anio);
+            // Partir la cadena usando el punto como delimitador
+            $partesDTE = explode('.', $strDte);
+
+            $data["empresa"] = $this->Facturacion_Model->obtenerEmpresa();
+            $data["dte"] = $partesDTE[0];
+            $data["baseDTE"] = $partesDTE[1];
+            $data["cGeneracion"] = $this->codigo_generacion();
+            $data["idHoja"] = 0;
+            $data["departamentos"] = $this->Facturacion_Model->obtenerDetalleCatalogo(12);
+            $data["actividadesEconomicas"] = $this->Facturacion_Model->obtenerDetalleCatalogo(19);
+            $data["venta"] = $venta;
+
+            
+            $this->load->view('Base/header');
+            $this->load->view('FE/consumidor_final_solicitado', $data);
+            $this->load->view('Base/footer');
+
+            // echo json_encode($data);
+        
+        
+        }
+
+        public function sellar_cf_solicitado(){
+            
+            $datos = $this->input->post();
+            $parametrosFactura = unserialize(base64_decode(urldecode($datos["parametrosFactura"])));
+            $datosVenta = unserialize(base64_decode(urldecode($datos["venta"]))); // Datos a insertar en la venta
+            $insumos = $parametrosFactura["insumos"];
+
+            $contingencia = 0;
+            $modelo = 1;
+            $totalIva = 0;
+            $totalVenta = 0;
+            $subtotal = 0;
+            unset($datos["parametrosFactura"]);
+            
+            // Ordenando datos para factura
+                if(isset($datos["detalleServicio"])){
+                    // Creando Json de medidas
+                        // Crear un arreglo combinado
+                        $datosInsumo = array();
+                        // Obtener el número de elementos en una de las matrices (se asume que todas tienen la misma longitud)
+                        $numElementos = count($datos["detalleServicio"]);
+                        // Iterar sobre la longitud de las matrices y combinar los datos
+                        $index = 1;
+                        for ($i = 0; $i < $numElementos; $i++) {
+
+                            $totalIva += (float)$datos["ivaFila"][$i] * $datos["cantidadServicio"][$i];
+
+                            $totalVenta += (float)$datos["totalBruto"][$i];
+
+                            $subtotal += (float)$datos["totalNeto"][$i];
+
+                            // Crear un arreglo asociativo para cada conjunto de datos
+                            $objeto = array(
+                                "cantidad" => intval($datos["cantidadServicio"][$i]),
+                                "codigo" => null, // Convertido en string
+                                "codTributo" => null,
+                                "descripcion" => $datos["detalleServicio"][$i],
+                                "ivaItem" => (float)($datos["ivaFila"][$i] * $datos["cantidadServicio"][$i]),
+                                "montoDescu" => 0,
+                                "noGravado" => 0,
+                                "numeroDocumento" => null,
+                                "numItem" => $index,
+                                "precioUni" => (float)round($datos["precioServicio"][$i], 5),
+                                "psv" => 0,
+                                "tipoItem" => 2,
+                                "uniMedida" => 59,
+                                "ventaExenta" => 0,
+                                "ventaGravada" => (float)round($datos["totalBruto"][$i], 5),
+                                "ventaNoSuj" => 0,
+                                "tributos" => null,
+                                "psv" => 0,
+                            );
+
+
+                            // Agregar el arreglo al arreglo combinado
+                            array_push($datosInsumo, $objeto);
+                            $index++;
+                        }
+                        unset($datos["cantidadServicio"], $datos["detalleServicio"], $datos["precioServicio"], $datos["totalNeto"], $datos["totalBruto"], $datos["ivaFila"]);
+                    // Creando Json de medidas
+
+                    $totalIva = $subtotal* 0.13;
+
+                }
+            // Ordenando datos para factura
+
+            // Agregando o actualizando datos de el anexo de facturacion
+                $pivote = $datos["idAnexo"];
+                $datosAnexo["idDepartamento"] = $datos["departamentoPaciente"];
+                $datosAnexo["idMunicipio"] = $datos["municipioPaciente"];
+                $datosAnexo["nombrePaciente"] = $datos["nombrePaciente"];
+                $datosAnexo["duiPaciente"] = $datos["documentoPaciente"];
+                $datosAnexo["telefonoPaciente"] = $datos["telefonoPaciente"];
+                $datosAnexo["correoPaciente"] = $datos["correoPaciente"];
+                $datosAnexo["codigoDepartamento"] = $datos["codigoDepartamento"];
+                $datosAnexo["codigoMunicipio"] = $datos["codigoMunicipio"];
+                $datosAnexo["direccionPaciente"] = $datos["complementoPaciente"];
+                $datosAnexo["actividadEconomica"] = $datos["codigoActividadEconomica"];
+                $datosAnexo["tipoDocumento"] = $datos["tipoDocumento"];
+                $datosAnexo["nrcCreditoFiscal"] = $datos["nrcPaciente"];
+                if($pivote == 0){
+                    $datosAnexo["pivote"] = 0;
+                }else{
+                    $datosAnexo["idAnexo"] = $datos["idAnexo"];
+                    $datosAnexo["pivote"] = 1;
+                }
+                $this->Facturacion_Model->guardarProveedorAnexo($datosAnexo);
+            // Agregando o actualizando datos de el anexo de facturacion
+            
+            $hoja = $parametrosFactura["idHoja"];
+            
+            
+            // Datos a insertar en la base de datos
+                $arrayDTE["numeroDTE"] = $datos["baseDTE"];
+                $arrayDTE["anioDTE"] = date("Y");
+                $arrayDTE["detalleDTE"] = $datos["dteFactura"];
+            // Datos a insertar en la base de datos
+
+            if(isset($datos["tipoContingencia"]) && $datos["tipoContingencia"] == "" ){
+                $datos["tipoContingencia"] = null;
+            }else{
+                $contingencia = 1;
+                $modelo = 2;
+            }
+
+            // Validando DTE
+                $tipo = 1;
+                $anio = date("Y");
+                $strDte = $this->obtener_dte($tipo, $anio);
+                $partesDTE = explode('.', $strDte);
+                $datos["dteFactura"] = $partesDTE[0];
+                $datos["baseDTE"] = $partesDTE[1];
+            // Validando DTE
+
+            // Validando codigo generacion
+                $strCodigo = $this->Facturacion_Model->validaCodigoGeneracion($datos["cGeneracion"], $anio, $tipo);
+                    if($strCodigo->codigo != 0){
+                    $datos["cGeneracion"] = $this->codigo_generacion();
+                }
+            // Validando codigo generacion
+
+            // Guardando venta
+                    $venta = $this->Ventas_Model->validarNumeroActual($datos["baseDTE"], 2); //Verificando que el codigo del tiket no haya sido agregado
+                    $paramsVenta["insumos"] = $insumos;
+                    if($venta->codigo > 0){
+                        $maximoActual = $this->Ventas_Model->maximoActual(2);
+                        $datosVenta["numeroDocumento"] = $maximoActual->codigo + 1;
+                    }else{
+                        $datosVenta["numeroDocumento"] = $datos["baseDTE"];
+                    }
+                    $paramsVenta["datosVenta"] = $datosVenta;
+                    $paramsVenta["personalizado"] = 1;
+                    /*
+                    
+                    $resp = $this->Ventas_Model->guardarVentaCF($paramsVenta);
+                    $arrayDTE["idHoja"] = $resp;
+                    $arrayDTE["cGeneracion"] = $datos["cGeneracion"]; */
+            // Guardando venta
+            $empresa = $parametrosFactura["empresa"];
+            $arregloNumero = explode(".", round($totalVenta, 2));
+            $letras = "";
+            if(isset($arregloNumero[1])){
+                $letras = strtoupper($this->convertir($arregloNumero[0])." ".$arregloNumero[1]."/100");
+            }else{
+                $letras = strtoupper($this->convertir($totalVenta)." 00/100 Dolares"); 
+            }
+            
+            $codigoDepartamento = explode( "-", $datosAnexo["codigoDepartamento"]);
+            $codigoMunicipio = explode( "-", $datosAnexo["codigoMunicipio"]);
+            $actividadEconomica = explode( "-", $datosAnexo["actividadEconomica"]);
+            
+            $direccion = (!empty($codigoDepartamento[0]) && !empty($codigoMunicipio[0]) && !empty($datos["complementoPaciente"])) 
+            ? array(
+                "departamento" => $codigoDepartamento[0],
+                "municipio" => $codigoMunicipio[0],
+                "complemento" => (!empty($datos["complementoPaciente"])) ? $datos["complementoPaciente"] : null,
+            ) 
+            : null;
+                        
+            $factura = array(
+                "nit" => $empresa->nitEmpresa,
+                "activo" => true, // Booleano sin comillas
+                "passwordPri" => $this->psPublica,
+                "dteJson" => array(
+                    "identificacion" => array(
+                        "version" => 1,
+                        "ambiente" => $empresa->ambiente,
+                        "tipoDte" => "01",
+                        "numeroControl" => $datos["dteFactura"], // Valor entre comillas
+                        "codigoGeneracion" => $datos["cGeneracion"],
+                        "tipoModelo" => $modelo,
+                        "tipoOperacion" => intval($datos["tipoTransmision"]),
+                        "fecEmi" => date("Y-m-d"),
+                        "horEmi" => date("H:i:s"),
+                        "tipoMoneda" => "USD",
+                        "tipoContingencia" => is_null($datos["tipoContingencia"]) ?  null : intval($datos["tipoContingencia"]),
+                        "motivoContin" => null,
+                    ),
+                    "documentoRelacionado" => null,
+                    "emisor" => array(
+                        "nit" => $empresa->nitEmpresa,
+                        "nrc" => $empresa->nrcEmpresa,
+                        "nombre" => $empresa->nombreEmpresa,
+                        "codActividad" => $empresa->codActividadEmpresa,
+                        "descActividad" => $empresa->descActividadEmpresa,
+                        "nombreComercial" => $empresa->nombreEmpresa,
+                        "tipoEstablecimiento" => "02",
+                        "direccion" => array(
+                            "departamento" => $empresa->departamento,
+                            "municipio" => $empresa->municipio,
+                            "complemento" => $empresa->direccionEmpresa,
+                        ),
+                        "telefono" => $empresa->telefonoEmpresa,
+                        "correo" => $empresa->correoEmpresa,
+                        "codEstableMH" => "P001",
+                        "codEstable" => null,
+                        "codPuntoVentaMH" => "M001",
+                        "codPuntoVenta" => null,
+                    ),
+
+                    "receptor" => array(
+                        "codActividad" => (!empty($actividadEconomica[0])) ? trim($actividadEconomica[0]) : null,
+                        "correo" => (!empty($datos["correoPaciente"])) ? $datos["correoPaciente"] : null,
+                        "descActividad" => (!empty($actividadEconomica[1])) ? trim($actividadEconomica[1]) : null,
+                        "nombre" => $datosAnexo["nombrePaciente"],
+                        "nrc" => null,
+                        "numDocumento" => $datosAnexo["duiPaciente"],
+                        "telefono" => $datosAnexo["telefonoPaciente"],
+                        "tipoDocumento" => $datos["tipoDocumento"],
+                        "direccion" => $direccion,
+
+                    ),
+                    "otrosDocumentos" => null,
+                    "ventaTercero" => null,
+                    "cuerpoDocumento" => $datosInsumo,
+                    "resumen" => array(
+                        "condicionOperacion" => 1,
+                        "descuExenta" => 0,
+                        "descuGravada" => 0,
+                        "descuNoSuj" => 0,
+                        "ivaRete1" => 0,
+                        "montoTotalOperacion" => (float)$totalVenta,
+                        "numPagoElectronico" => null,
+                        "porcentajeDescuento" => 0,
+                        "reteRenta" => 0,
+                        "saldoFavor" => 0,
+                        "subTotal" => (float)$totalVenta,
+                        "subTotalVentas" => (float)$totalVenta,
+                        "totalDescu" => 0,
+                        "totalExenta" => 0,
+                        "totalGravada" => (float)$totalVenta,
+                        "totalIva" => (float)round($totalIva, 2),
+                        "totalLetras" => $letras,
+                        "totalNoGravado" => 0,
+                        "totalNoSuj" => 0,
+                        "totalPagar" => (float)$totalVenta,
+                        "pagos" => null,
+                        "tributos" => null,
+
+                    ),
+                    "extension" => null,
+                    "apendice" => null,
+                )
+            );
+            
+
+            if($contingencia == 0){
+                $this->envioHaciendaCF($factura, $empresa, $datos, $arrayDTE, 2, 1, $paramsVenta);
+             }else{
+                unset($paramsVenta["personalizado"]);
+                $resp = $this->Ventas_Model->guardarVentaCF($paramsVenta);
+                $arrayDTE["idVenta"] = $resp;
+                $arrayDTE["generacion"] = $datos["cGeneracion"];
+
+                 $arrayDTE["paramsFactura"] = urlencode(base64_encode(serialize($factura))); // Respuesta de hacienda
+                 $arrayDTE["paramsHacienda"] = "";
+                 $arrayDTE["paramsLocales"] = urlencode(base64_encode(serialize($datos))); // Datos de sistema local
+                 $arrayDTE["contingencia"] = $contingencia; // Datos de sistema local
+                 
+                 // Existe contingencia, el documento solo se firmara y guardara
+                 $documentoFirmado = json_decode($this->firmar_DTE($factura));
+ 
+                 if($documentoFirmado->status == "OK"){
+                     $arrayDTE["firma"] = $documentoFirmado->body; // Datos de sistema local
+                     
+                     $pivoteDTE = $this->Facturacion_Model->guardarDTE($arrayDTE, 50);
+ 
+                     $msg = "El documento se firmo exitosamente";
+                     redirect(base_url()."Facturacion/fin_factura_electronica/$pivoteDTE/$msg/");
+ 
+ 
+                     // echo json_encode($arrayDTE);
+ 
+                 }else{
+                     $this->session->set_flashdata("error","El documento no puede ser firmado");
+                     redirect(base_url()."Hoja/detalle_hoja/$hoja/");
+ 
+                 }
+ 
+ 
+             }
+
+            // echo json_encode($factura);
+            
+        
+        
+        }
+    //Consumidor final solicitado
 
     // Anular fartura comercial
         public function anular_factura($dte = null){
@@ -3568,7 +3476,7 @@ class Facturacion extends CI_Controller {
 
             $tipo = 1;
             $anio = date("Y");
-            $strDte = $this->obtener_dte($tipo, $anio, $this->establecimiento);
+            $strDte = $this->obtener_dte($tipo, $anio);
             $partesDTE = explode('.', $strDte);
             $data["dte"] = $partesDTE[0];
             $data["baseDTE"] = $partesDTE[1];
@@ -3580,12 +3488,71 @@ class Facturacion extends CI_Controller {
             $this->load->view('FE/anular_factura_cf', $data);
             $this->load->view('Base/footer');
             
-            // echo json_encode($data["cuerpoDocumento"]);
+            // echo json_encode($data);
 
         }
 
         public function procesar_anulacion_factura(){
             $datos = $this->input->post();
+
+            // Ordenando datos
+                $totalVenta = 0;
+                $totalIva = 0;
+                if(isset($datos["detalleServicio"])){
+                    // Creando Json de medidas
+                        // Crear un arreglo combinado
+                        $datosInsumo = array();
+                        // Obtener el número de elementos en una de las matrices (se asume que todas tienen la misma longitud)
+                        $numElementos = count($datos["detalleServicio"]);
+                        // Iterar sobre la longitud de las matrices y combinar los datos
+                        $index = 1;
+                        for ($i = 0; $i < $numElementos; $i++) {
+                            
+                            $total_fila = $datos["cantidadServicio"][$i] * $datos["precioServicio"][$i]; // El total
+                            $iva = ($total_fila / 1.13) * 0.13; // Obteneiendo el iva
+
+                            $totalVenta += $total_fila;
+                            $totalIva += $iva;
+                            // Crear un arreglo asociativo para cada conjunto de datos
+                            $objeto = array(
+                                "cantidad" => intval($datos["cantidadServicio"][$i]),
+                                "codigo" => null, // Convertido en string
+                                "codTributo" => null,
+                                "descripcion" => $datos["detalleServicio"][$i],
+                                "ivaItem" => (float)round($iva, 2),
+                                "montoDescu" => 0,
+                                "noGravado" => 0,
+                                "numeroDocumento" => null,
+                                "numItem" => $index,
+                                "precioUni" => (float)$datos["precioServicio"][$i],
+                                "psv" => 0,
+                                "tipoItem" => 2,
+                                "uniMedida" => 59,
+                                "ventaExenta" => 0,
+                                "ventaGravada" => (float)round($total_fila ,2),
+                                "ventaNoSuj" => 0,
+                                "tributos" => null,
+                                "psv" => 0,
+
+                                
+
+                            );
+                            // Agregar el arreglo al arreglo combinado
+                            array_push($datosInsumo, $objeto);
+                            $index++;
+                        }
+                        unset($datos["cantidadServicio"], $datos["precioServicio"], $datos["detalleServicio"]);
+                    
+                    // $datos["insumos"] = $datosInsumo;
+                    // Creando Json de medidas
+
+                }else{
+                    $datos["insumos"] = "";
+                }
+
+            // Ordenando datos
+
+
             $dteAnular = $datos["idDTEAnular"];
             $empresa = $this->Facturacion_Model->obtenerEmpresa();
             $tipoAnulacion = $datos["tipoAnulacion"]; // 1-Nuevo documento; 2-Anular documento
@@ -3598,19 +3565,16 @@ class Facturacion extends CI_Controller {
                         $arrayDTE["anioDTE"] = date("Y");
                         $arrayDTE["detalleDTE"] = $datos["dteFactura"];
                         $arrayDTE["idHoja"] = 0;
+                        $arrayDTE["cGeneracion"] = $datos["cGeneracion"];
                         $arrayDTE["dtePadre"] = $datos["idDTEAnular"];
                     // Datos a insertar en la base de datos
 
                     if(!isset($datos["tipoContingencia"])){
                         $datos["tipoContingencia"] = null;
                     }
-                    //Precios
-                        $subtotal = $datos["precioServicio"];
-                        $iva = $datos["ivaServicio"];
-                        $total = $datos["totalServicio"];
-                    //Precios
-                    $montoTotal = $total;
-                    $$arregloNumero = explode(".", number_format($montoTotal, 2, '.', ''));
+                    
+                    $montoTotal = $totalVenta;
+                    $arregloNumero = explode(".", round($montoTotal, 2));
                     $letras = "";
                     if(isset($arregloNumero[1])){
                         $letras = strtoupper($this->convertir($arregloNumero[0])." ".$arregloNumero[1]."/100");
@@ -3631,10 +3595,12 @@ class Facturacion extends CI_Controller {
                         : null;
                     
                     
+                    $totalVenta = round($totalVenta, 2);
+                    $totalIva = round($totalIva, 2);
                     $factura = array(
                         "nit" => $empresa->nitEmpresa,
                         "activo" => true, // Booleano sin comillas
-                        "passwordPri" => "UnionMedica_25",
+                        "passwordPri" => $this->psPublica,
                         "dteJson" => array(
                             "identificacion" => array(
                                 "version" => 1,
@@ -3685,49 +3651,28 @@ class Facturacion extends CI_Controller {
                             ),
                             "otrosDocumentos" => null,
                             "ventaTercero" => null,
-                            "cuerpoDocumento" => array(
-                                array( // Sin índice entre comillas
-                                    "cantidad" => 1,
-                                    "codigo" => "1", // Convertido en string
-                                    "codTributo" => null,
-                                    "descripcion" => $datos["detalleServicio"],
-                                    "ivaItem" => (float)$iva,
-                                    "montoDescu" => 0,
-                                    "noGravado" => 0,
-                                    "numeroDocumento" => null,
-                                    "numItem" => 1,
-                                    "precioUni" => (float)$total,
-                                    "psv" => 0,
-                                    "tipoItem" => 2,
-                                    "uniMedida" => 59,
-                                    "ventaExenta" => 0,
-                                    "ventaGravada" => (float)$total,
-                                    "ventaNoSuj" => 0,
-                                    "tributos" => null,
-                                    "psv" => 0,
-                                )
-                            ),
+                            "cuerpoDocumento" => $datosInsumo,
                             "resumen" => array(
                                 "condicionOperacion" => 1,
                                 "descuExenta" => 0,
                                 "descuGravada" => 0,
                                 "descuNoSuj" => 0,
                                 "ivaRete1" => 0,
-                                "montoTotalOperacion" => (float)$total,
+                                "montoTotalOperacion" => (float)$totalVenta,
                                 "numPagoElectronico" => null,
                                 "porcentajeDescuento" => 0,
                                 "reteRenta" => 0,
                                 "saldoFavor" => 0,
-                                "subTotal" => (float)$total,
-                                "subTotalVentas" => (float)$total,
+                                "subTotal" => (float)$totalVenta,
+                                "subTotalVentas" => (float)$totalVenta,
                                 "totalDescu" => 0,
                                 "totalExenta" => 0,
-                                "totalGravada" => (float)$total,
-                                "totalIva" => (float)$iva,
+                                "totalGravada" => (float)$totalVenta,
+                                "totalIva" => (float)$totalIva,
                                 "totalLetras" => $letras,
                                 "totalNoGravado" => 0,
                                 "totalNoSuj" => 0,
-                                "totalPagar" => (float)$total,
+                                "totalPagar" => (float)$totalVenta,
                                 "pagos" => null,
                                 "tributos" => null,
                             ),
@@ -3745,17 +3690,18 @@ class Facturacion extends CI_Controller {
                         unset($datos["rhAnterior"]);
                         unset($datos["jsonAnterior"]);
                     // Limpiando datos
-                   $resp = $this->envioHaciendaCF($factura, $empresa, $datos, $arrayDTE, $tipoAnulacion, 11);
+                   $resp = $this->envioHaciendaCF($factura, $empresa, $datos, $arrayDTE, $tipoAnulacion, 11, null);
                    $datosNuevaFactura = unserialize(base64_decode(urldecode($resp)));
 
-                // Si habra nuevo documento
+                    // Si habra nuevo documento
                     $this->procesarAnulacion($empresa, $datos["cGeneracion"],  $datosNuevaFactura, $jsonAnterior, $dteAnular, $tipoAnulacion, $datos);
-                // echo json_encode($resp);
+
+                // echo json_encode($arrayDTE);
             }else{
                 $this->procesarAnulacion($empresa, $generacion,  $datosNuevaFactura = null, $jsonAnterior, $dteAnular, $tipoAnulacion, $datos);
             }
 
-            // echo json_encode($generacion);
+            // echo json_encode($tipoAnulacion);
 
         }
 
@@ -3766,7 +3712,7 @@ class Facturacion extends CI_Controller {
                 $factura = array(
                     "nit" => $empresa->nitEmpresa,
                     "activo" => true, // Booleano sin comillas
-                    "passwordPri" => "UnionMedica_25",
+                    "passwordPri" => $this->psPublica,
                     "dteJson" => array(
                         "identificacion" => array(
                             "version" => 2,
@@ -3822,13 +3768,12 @@ class Facturacion extends CI_Controller {
                 $factura["dteJson"]["documento"]["codigoGeneracionR"] = $generacion;
             }
 
+            // echo json_encode($factura);
 
             // Firmando documento
                 $documentoFirmado = json_decode($this->firmar_DTE($factura));
             // Firmando documento
               
-            // echo json_encode($factura);
-            
             if($documentoFirmado->status == "OK"){
                 // $conexion = json_decode($this->conectar_API()); funcion dentro del controlador
                 $url = $this->urlHacienda."anulardte"; // Cambia a URL PROD en producción
@@ -3868,7 +3813,7 @@ class Facturacion extends CI_Controller {
                         redirect(base_url()."Facturacion/fin_factura_electronica/$nuevoDTE/$mensaje/");
                     }else{
                         $this->session->set_flashdata("exito","DTE anulado con exito");
-                        redirect(base_url()."Facturacion/lista_facturas/");
+                        redirect(base_url()."Facturacion/anular_factura/$dteAnular/");
                     }
 
                 }else{
@@ -3892,7 +3837,7 @@ class Facturacion extends CI_Controller {
             // $tipoDocumento = $datos["codigoCatDetalle"];
             $tipo = 14; // Para validar el tipo de DTE requerido
             $anio = date("Y");
-            $strDte = $this->obtener_dte($tipo, $anio, $this->establecimiento);
+            $strDte = $this->obtener_dte($tipo, $anio);
             // Partir la cadena usando el punto como delimitador
             $partesDTE = explode('.', $strDte);
             $hoja = $datos["idHoja"];
@@ -3959,7 +3904,7 @@ class Facturacion extends CI_Controller {
             //Precios
 
             $montoTotal = $total;
-            $arregloNumero = explode(".", number_format($montoTotal, 2, '.', ''));
+            $arregloNumero = explode(".", round($montoTotal, 2));
             $letras = "";
             if(isset($arregloNumero[1])){
                 $letras = strtoupper($this->convertir($arregloNumero[0])." ".$arregloNumero[1]."/100");
@@ -3976,7 +3921,7 @@ class Facturacion extends CI_Controller {
             $factura = array(
                 "nit" => $empresa->nitEmpresa,
                 "activo" => true, // Booleano sin comillas
-                "passwordPri" => "UnionMedica_25",
+                "passwordPri" => $this->psPublica,
                 "dteJson" => array(
                     "identificacion" => array(
                         "version" => 1,
@@ -4145,7 +4090,7 @@ class Facturacion extends CI_Controller {
         public function agregar_sujeto_excluido(){
             $tipo = 14; // Para validar el tipo de DTE requerido
             $anio = date("Y");
-            $strDte = $this->obtener_dte($tipo, $anio, $this->establecimiento);
+            $strDte = $this->obtener_dte($tipo, $anio);
             $partesDTE = explode('.', $strDte);
 
 
@@ -4197,7 +4142,7 @@ class Facturacion extends CI_Controller {
             // Validando DTE
                 $tipo = 14;
                 $anio = date("Y");
-                $strDte = $this->obtener_dte($tipo, $anio, $this->establecimiento);
+                $strDte = $this->obtener_dte($tipo, $anio);
                 $partesDTE = explode('.', $strDte);
                 $datos["dteFactura"] = $partesDTE[0];
                 $datos["baseDTE"] = $partesDTE[1];
@@ -4230,12 +4175,15 @@ class Facturacion extends CI_Controller {
             $empresa = $this->Facturacion_Model->obtenerEmpresa();
 
             //Precios
-                $subtotal = $datos["precioServicio"];
+                $cantidad = $datos["cantidadServicio"];
+                $precio = $datos["precioServicio"];
+                $subtotal = $cantidad * $precio;
                 $iva = $datos["ivaServicio"];
                 $total = $datos["totalServicio"];
+                $precioCompleto = $precio + $iva;
             //Precios
             
-            $arregloNumero = explode(".", number_format($subtotal, 2, '.', ''));
+            $arregloNumero = explode(".", round($subtotal, 2));
             $letras = "";
             if(isset($arregloNumero[1])){
                 $letras = strtoupper($this->convertir($arregloNumero[0])." ".$arregloNumero[1]."/100");
@@ -4259,7 +4207,7 @@ class Facturacion extends CI_Controller {
             $factura = array(
                 "nit" => $empresa->nitEmpresa,
                 "activo" => true, // Booleano sin comillas
-                "passwordPri" => "UnionMedica_25",
+                "passwordPri" => $this->psPublica,
                 "dteJson" => array(
                     "identificacion" => array(
                         "version" => 1,
@@ -4315,30 +4263,30 @@ class Facturacion extends CI_Controller {
                         array(
                             "numItem" => 1,
                             "tipoItem" => intval($datos["tipoVenta"]),
-                            "cantidad" => 1,
+                            "cantidad" => intval($cantidad),
                             "codigo" => null, // Convertido en string
                             "uniMedida" => 59,
                             "descripcion" => $datos["detalleServicio"],
-                            "precioUni" => (float)$total,
+                            "precioUni" => (float)$precioCompleto,
                             "montoDescu" => 0,
-                            "compra" => (float)$total,
+                            "compra" => (float)($cantidad * $precioCompleto),
 
                         )
                     ),
                     "resumen" => array(
-                        "totalCompra" =>(float)$total,
+                        "totalCompra" =>(float)round(($cantidad * $precioCompleto), 2),
                         "descu" => 0,
                         "totalDescu" => 0,
-                        "subTotal" => (float)$total,
+                        "subTotal" => (float)round(($cantidad * $precioCompleto), 2),
                         "ivaRete1" => 0,
-                        "reteRenta" => (float)$iva,
-                        "totalPagar" => (float)$subtotal,
+                        "reteRenta" => (float)round(($iva * $cantidad), 2),
+                        "totalPagar" => (float)round($subtotal, 2),
                         "totalLetras" => $letras,
                         "condicionOperacion" => 1,
                         "pagos" => [
                             [
                                 "codigo" => "01",
-                                "montoPago" => (float)$subtotal,
+                                "montoPago" => (float)round($subtotal, 2),
                                 "referencia" => null,
                                 "plazo" => null,
                                 "periodo" => null,
@@ -4367,7 +4315,7 @@ class Facturacion extends CI_Controller {
 
                 if($documentoFirmado->status == "OK"){
                     $arrayDTE["firma"] = $documentoFirmado->body; // Datos de sistema local
-                    $arrayDTE["establecimiento"] = $this->establecimiento; // Datos de sistema local
+                    
                     $pivoteDTE = $this->Facturacion_Model->guardarDTE($arrayDTE, 52);
 
                     $msg = "El documento se firmo exitosamente";
@@ -4384,10 +4332,10 @@ class Facturacion extends CI_Controller {
 
             }
             
-            // echo json_encode($factura);
+            //echo json_encode($factura);
         }
 
-        // Anular
+        // Anlar
             public function anular_se($dte = null){
 
                 $datosDte = $this->Facturacion_Model->obtenerDTE($dte, 14);
@@ -4407,7 +4355,7 @@ class Facturacion extends CI_Controller {
 
                 $tipo = 14;
                 $anio = date("Y");
-                $strDte = $this->obtener_dte($tipo, $anio, $this->establecimiento);
+                $strDte = $this->obtener_dte($tipo, $anio);
                 $partesDTE = explode('.', $strDte);
                 $data["dte"] = $partesDTE[0];
                 $data["baseDTE"] = $partesDTE[1];
@@ -4449,7 +4397,7 @@ class Facturacion extends CI_Controller {
                         $iva = $datos["ivaServicio"];
                         $total = $datos["totalServicio"];
                     //Precios
-                    $arregloNumero = explode(".", number_format($subtotal, 2, '.', ''));
+                    $arregloNumero = explode(".", round($subtotal, 2));
                     $letras = "";
                     if(isset($arregloNumero[1])){
                         $letras = strtoupper($this->convertir($arregloNumero[0])." ".$arregloNumero[1]."/100");
@@ -4473,7 +4421,7 @@ class Facturacion extends CI_Controller {
                     $factura = array(
                         "nit" => $empresa->nitEmpresa,
                         "activo" => true, // Booleano sin comillas
-                        "passwordPri" => "UnionMedica_25",
+                        "passwordPri" => $this->psPublica,
                         "dteJson" => array(
                             "identificacion" => array(
                                 "version" => 1,
@@ -4595,7 +4543,7 @@ class Facturacion extends CI_Controller {
                     $factura = array(
                         "nit" => $empresa->nitEmpresa,
                         "activo" => true, // Booleano sin comillas
-                        "passwordPri" => "UnionMedica_25",
+                        "passwordPri" => $this->psPublica,
                         "dteJson" => array(
                             "identificacion" => array(
                                 "version" => 2,
@@ -4625,7 +4573,7 @@ class Facturacion extends CI_Controller {
                                 "fecEmi" => $jsonAnterior["dteJson"]["identificacion"]["fecEmi"],
                                 "montoIva" => null,
                                 "codigoGeneracionR" => null,
-                                "tipoDocumento" => "13",
+                                "tipoDocumento" => $jsonAnterior["dteJson"]["sujetoExcluido"]["tipoDocumento"],
                                 "numDocumento" => $jsonAnterior["dteJson"]["sujetoExcluido"]["numDocumento"],
                                 "nombre" => $jsonAnterior["dteJson"]["sujetoExcluido"]["nombre"],
                                 "telefono" => $jsonAnterior["dteJson"]["sujetoExcluido"]["telefono"],
@@ -4637,7 +4585,7 @@ class Facturacion extends CI_Controller {
                                 "motivoAnulacion" => $datos["detalleAnulacion"],
                                 "nombreResponsable" => $this->session->userdata('nombreEmpleado'),
                                 "tipDocResponsable" => "13",
-                                "numDocResponsable" => $this->session->userdata('duiEmpleado'),
+                                "numDocResponsable" => "043604851",
                                 "nombreSolicita" => $jsonAnterior["dteJson"]["sujetoExcluido"]["nombre"],
                                 "tipDocSolicita" => "13",
                                 "numDocSolicita" => $jsonAnterior["dteJson"]["sujetoExcluido"]["numDocumento"]
@@ -4646,10 +4594,11 @@ class Facturacion extends CI_Controller {
                         )
                     );
                 // Creando factura
-
                 if($pivoteAnulacion == 1){
                     $factura["dteJson"]["documento"]["codigoGeneracionR"] = $generacion;
                 }
+
+
 
 
                 // Firmando documento
@@ -4686,10 +4635,9 @@ class Facturacion extends CI_Controller {
                     $response = json_decode($resp->response); // Verificar la respuesta
                     $mensaje = $response->descripcionMsg;
                     
-                    echo json_encode($factura);
-                    echo json_encode($response );
+                    // echo json_encode($response );
                     
-                    /* if($response->estado == "PROCESADO"){
+                    if($response->estado == "PROCESADO"){
                     
                         $curl->close();
                         $nuevoDTE = $datosNuevaFactura["filaDB"];
@@ -4698,14 +4646,14 @@ class Facturacion extends CI_Controller {
                             redirect(base_url()."Facturacion/fin_se/$nuevoDTE/$mensaje/");
                         }else{
                             $this->session->set_flashdata("exito","DTE anulado con exito");
-                            redirect(base_url()."Facturacion/lista_se/");
+                            redirect(base_url()."Facturacion/anular_se/$dteAnular/");
                         }
 
                     }else{
                         $curl->close();
                         // $this->session->set_flashdata("error","DTE no pudo ser anulado");
                         redirect(base_url()."Facturacion/fin_se/0/$mensaje/");
-                    } */
+                    }
 
                 }else{
                     $this->session->set_flashdata("error","No se ha podido firmar el documento");
@@ -4815,7 +4763,7 @@ class Facturacion extends CI_Controller {
             $factura = array(
                 "nit" => $empresa->nitEmpresa,
                 "activo" => true, // Booleano sin comillas
-                "passwordPri" => "UnionMedica_25",
+                "passwordPri" => $this->psPublica,
                 "dteJson" => array(
                     "identificacion" => array(
                         "version" => 3,
@@ -5019,9 +4967,9 @@ class Facturacion extends CI_Controller {
             $ccf = $this->Facturacion_Model->obtenerDocumentoContingencia(1); 
             foreach ($ccf as $row) {
                 $json = unserialize(base64_decode(urldecode($row->jsonDTE)));
-                $json["dteJson"]["receptor"]["numDocumento"] = "04574571-8";
+                $json["dteJson"]["resumen"]["totalLetras"] = "CERO 29/100";
 
-                $documentoFirmado = json_decode($this->firmar_DTE($json));
+                // $documentoFirmado = json_decode($this->firmar_DTE($json));
                 echo json_encode($documentoFirmado);
             }
 
@@ -5083,38 +5031,12 @@ class Facturacion extends CI_Controller {
                     $error = "No se ha podido validar el documento en hacienda";
                     redirect(base_url()."Facturacion/lista_facturas");
                 }
+                
+
             }else{
                 $curl->close();
-                /* $error = "No se ha podido validar el documento en hacienda";
-                redirect(base_url()."Facturacion/lista_facturas"); */
-
-                $mh = $response; // Mensaje de hacienda
-                
-                $estado = $mh->estado;
-                $descripcionMsg = $mh->descripcionMsg;
-                $descripcionMsg = $mh->descripcionMsg;
-                $observaciones = $mh->observaciones;
-                
-                echo "<div style='margin: 0 auto; width: 500px; text-align: center'>";
-                echo "<h2 class=''>Advertencia</h2>
-                    <table class='table table-bordered table-striped'>
-                        <thead class=''>
-                            <tr style='color: red'>
-                                <th>ESTADO</th>
-                                <th>".$estado."</th>
-                            </tr>
-                        </thead>
-                        <tbody>";
-                        echo "<tr><td colspan='2'><strong>Errores</strong></td></tr>";
-                        $index = 1;
-                    foreach ($observaciones as $row) {
-                        echo "<tr><td><strong>$index</strong></td><td>$row</td></tr>";
-                        $index++;
-                    }
-                echo "  </tbody>
-                    </div>";
-
-                
+                $error = "No se ha podido validar el documento en hacienda";
+                redirect(base_url()."Facturacion/lista_facturas");
             }
 
             // echo json_encode($firmas);
@@ -5179,40 +5101,8 @@ class Facturacion extends CI_Controller {
 
             }else{
                 $curl->close();
-                $mh = $response; // Mensaje de hacienda
-                
-                $estado = $mh->estado;
-                $descripcionMsg = $mh->descripcionMsg;
-                $descripcionMsg = $mh->descripcionMsg;
-                $observaciones = $mh->observaciones;
-                
-                echo "<div style='margin: 0 auto; width: 500px; text-align: center'>";
-                    echo "<h2 class=''>Advertencia</h2>
-                        <table class='table table-bordered table-striped'>
-                            <thead class=''>
-                                <tr style='color: red'>
-                                    <th>ESTADO</th>
-                                    <th>".$estado."</th>
-                                </tr>
-                            </thead>
-                            <tbody>";
-                            echo "<tr><td colspan='2'><strong>Errores</strong></td></tr>";
-                            $index = 1;
-                        foreach ($observaciones as $row) {
-                            echo "<tr><td><strong>$index</strong></td><td>$row</td></tr>";
-                            $index++;
-                        }
-                    echo "  </tbody>
-                            </table>
-                            <button class='btn btn-primary' onclick='goBack()'>Cerrar</button>
-                            <script>
-                            function goBack() {
-                                 window.close();
-                            }
-                        </script>";
-                echo "</div>";
-                /* $error = "No se ha podido validar el documento en hacienda";
-                redirect(base_url()."Facturacion/lista_se"); */
+                $error = "No se ha podido validar el documento en hacienda";
+                redirect(base_url()."Facturacion/lista_se");
             }
 
 
@@ -5351,12 +5241,12 @@ class Facturacion extends CI_Controller {
 		}
 	}
 
-    public function obtener_dte($tipo, $anio, $establecimiento){
+    public function obtener_dte($tipo, $anio){
         $str = "DTE-";
         $strTipo = $this->agregar_ceros($tipo, 2);
         $str = $str.$strTipo."-".$this->establecimiento."P001-";
         $numeroBase = 0;
-        $obtenerNumero = $this->Facturacion_Model->validarDTE($tipo, $anio, $establecimiento);
+        $obtenerNumero = $this->Facturacion_Model->validarDTE($tipo, $anio);
         if($obtenerNumero->actual == 0){
             $numeroBase = 1;
         }else{
@@ -5524,7 +5414,7 @@ class Facturacion extends CI_Controller {
         $curl = new Curl();
         $curl->setHeader('Content-Type', 'application/json');  // Indicamos que el contenido es JSON
         $curl->setHeader('Accept', 'application/json');         // Aceptamos respuestas en formato JSON
-        $resp = $curl->post('http://192.168.1.92:8113/firmardocumento/', $jsonData); //Cambiar a la direccion en la nube
+        $resp = $curl->post('http://localhost:8113/firmardocumento/', $jsonData); //Cambiar a la direccion en la nube
         $respuesta = $resp->response;
         return $respuesta;
 
@@ -5559,7 +5449,9 @@ class Facturacion extends CI_Controller {
             // Firmando documento
                 $documentoFirmado = json_decode($this->firmar_DTE($factura));
             // Firmando documento
-                 
+
+            // echo json_encode($arrayDTE);
+     
              
             if($documentoFirmado->status == "OK"){
                 // $conexion = json_decode($this->conectar_API()); funcion dentro del controlador
@@ -5588,16 +5480,17 @@ class Facturacion extends CI_Controller {
                 
                 $resp = $curl->post($url,  $jsonData); // Enviar la petición POST con los datos
                 $response = json_decode($resp->response); // Verificar la respuesta
-                // echo json_encode($response );
+                /* echo json_encode($response);
+                echo json_encode($factura); */
                 if($response->estado == "PROCESADO"){
 
                     $factura['firmaElectronica'] = $documentoFirmado->body;
                     $factura['selloRecibido'] = $response->selloRecibido;
 
+                    $arrayDTE["cGeneracion"] = $datos["cGeneracion"];
                     $arrayDTE["paramsFactura"] = urlencode(base64_encode(serialize($factura))); // Respuesta de hacienda
                     $arrayDTE["paramsHacienda"] = urlencode(base64_encode(serialize($response))); // Respuesta de hacienda obtenida desde la API
                     $arrayDTE["paramsLocales"] = urlencode(base64_encode(serialize($datos))); // Datos de sistema local
-                    $arrayDTE["establecimiento"] = $this->establecimiento; // Datos de sistema local
                     $curl->close();
 
                     $pivoteDTE = $this->Facturacion_Model->guardarDTE($arrayDTE, $pivoteInsert);
@@ -5608,12 +5501,14 @@ class Facturacion extends CI_Controller {
                         $codificacionAnular = urlencode(base64_encode(serialize($dataAnulacion)));
                         return $codificacionAnular;
                     }else{
+                        
                         $exito = "El documento se proceso exitosamente en hacienda";
                         redirect(base_url()."Facturacion/fin_ccf/$pivoteDTE/$exito/");
                     } 
                 }else{
                     $curl->close();
-                    $error = $error = urlencode(base64_encode(serialize($response)));
+                    $msg = urlencode(base64_encode(serialize($response->descripcionMsg)));
+                    $error = "No se ha podido validar el documento en hacienda-".$msg;
                     redirect(base_url()."Facturacion/fin_ccf/0/$error/");
                 }
 
@@ -5624,7 +5519,7 @@ class Facturacion extends CI_Controller {
         }
     }
 
-    public function envioHaciendaCF($factura = null, $empresa = null, $datos = null, $arrayDTE = null, $pivoteReturn = null, $pivoteInsert = null){
+    public function envioHaciendaCF($factura = null, $empresa = null, $datos = null, $arrayDTE = null, $pivoteReturn = null, $pivoteInsert = null, $datosVenta = null){
         if($factura != null){
             // Firmando documento
                 $documentoFirmado = json_decode($this->firmar_DTE($factura));
@@ -5658,8 +5553,20 @@ class Facturacion extends CI_Controller {
                 
                 $resp = $curl->post($url,  $jsonData); // Enviar la petición POST con los datos
                 $response = json_decode($resp->response); // Verificar la respuesta
-                // echo json_encode($response );
+                /* echo json_encode($factura);
+                echo json_encode($response ); */
                 if($response->estado == "PROCESADO"){
+                    if($datosVenta != null){
+                        $p = $datosVenta["personalizado"];
+                        unset($datosVenta["personalizado"]);
+                        if($p == 1){
+                            $resp = $this->Ventas_Model->guardarVentaCF($datosVenta);
+                        }else{
+                            $resp = $this->Ventas_Model->guardarVenta($datosVenta);
+                        }
+                        $arrayDTE["idVenta"] = $resp;
+                        $arrayDTE["generacion"] = $datos["cGeneracion"];
+                    }
 
                     $factura['firmaElectronica'] = $documentoFirmado->body;
                     $factura['selloRecibido'] = $response->selloRecibido;
@@ -5667,7 +5574,6 @@ class Facturacion extends CI_Controller {
                     $arrayDTE["paramsFactura"] = urlencode(base64_encode(serialize($factura))); // Respuesta de hacienda
                     $arrayDTE["paramsHacienda"] = urlencode(base64_encode(serialize($response))); // Respuesta de hacienda obtenida desde la API
                     $arrayDTE["paramsLocales"] = urlencode(base64_encode(serialize($datos))); // Datos de sistema local
-                    $arrayDTE["establecimiento"] = $this->establecimiento; // Datos de sistema local
 
                     $curl->close();
                     
@@ -5686,7 +5592,7 @@ class Facturacion extends CI_Controller {
 
                 }else{
                     $curl->close();
-                    $error = urlencode(base64_encode(serialize($response)));
+                    $error = "No se ha podido validar el documento en hacienda".$response->descripcionMsg;
                     redirect(base_url()."Facturacion/fin_factura_electronica/0/$error/");
                 }
 
@@ -5740,7 +5646,6 @@ class Facturacion extends CI_Controller {
                     $arrayDTE["paramsFactura"] = urlencode(base64_encode(serialize($factura))); // Respuesta de hacienda
                     $arrayDTE["paramsHacienda"] = urlencode(base64_encode(serialize($response))); // Respuesta de hacienda obtenida desde la API
                     $arrayDTE["paramsLocales"] = urlencode(base64_encode(serialize($datos))); // Datos de sistema local
-                    $arrayDTE["establecimiento"] = $this->establecimiento; // Datos de sistema local
 
                     $curl->close();
                     
@@ -5759,7 +5664,7 @@ class Facturacion extends CI_Controller {
 
                 }else{
                     $curl->close();
-                    $error = urlencode(base64_encode(serialize($response)));
+                    $error = "No se ha podido validar el documento en hacienda".$response->descripcionMsg;
                     redirect(base_url()."Facturacion/fin_se/0/$error/");
                 }
 
@@ -5862,7 +5767,7 @@ class Facturacion extends CI_Controller {
             if (strpos($nombre_archivo, 'CCF') === 0) {
                 return 'Crédito  Fiscal';
             } elseif (strpos($nombre_archivo, 'FC') === 0) {
-                return 'Consumidor final';
+                return 'Factura Comercial';
             } elseif (strpos($nombre_archivo, 'SE') === 0) {
                 return 'Sujeto Excluido';
             }elseif (strpos($nombre_archivo, 'NC') === 0) {
@@ -5991,7 +5896,7 @@ class Facturacion extends CI_Controller {
                     $archivos_a_descargar[] = $archivo;
                 }
             }
-    
+
             // Verificar si se encontraron archivos en el rango
             if (count($archivos_a_descargar) > 0) {
                 // Crear un archivo ZIP con los archivos encontrados
@@ -6022,11 +5927,11 @@ class Facturacion extends CI_Controller {
         public function compartir_archivo($params = null){
             $datos = $this->input->post();
             $datos["asunto"] = "Estimado Cliente, <br>
-                    Por este medio, le hacemos llegar la factura correspondiente a su reciente visita en Hospital Orellana.<br>
+                    Por este medio, le hacemos llegar la factura correspondiente a su reciente visita en Farmacia U. Medica .<br>
                     Agradecemos su confianza en nuestros servicios y nos comprometemos a seguir brind&aacute;dole atenci&oacute;n de calidad con el profesionalismo y el cuidado que usted merece.<br>
 
                     <strong>Atentamente,</strong><br>  
-                    Hospital Orellana, Usulutan";
+                    Farmacia U. Medica";
 
            // echo json_encode($datos);
 
@@ -6034,7 +5939,6 @@ class Facturacion extends CI_Controller {
         }
 
     // Archivos locales
-
 
     // Envio de archivos
         public function send_mail($datos = null){
@@ -6053,7 +5957,7 @@ class Facturacion extends CI_Controller {
                 $mail->Port       = 465; // Puede ser 465 si usas SSL
 
                 // Configuración del remitente y destinatario
-                $mail->setFrom('facturacion@hospitalorellana.com.sv', 'Hospital Orellana');
+                $mail->setFrom('facturacion@hospitalorellana.com.sv', 'Farmacia U. Medica');
                 $mail->addAddress($datos["receptorCorreo"], 'Destinatario');
                 $mail->addCC('facturacion@hospitalorellana.com.sv', 'Copia'); // Dirección de CC (copia)
 
@@ -6092,7 +5996,6 @@ class Facturacion extends CI_Controller {
         }
     // Envio de archivos
 
-
     
     public function test($dte = null, $mensaje = null){
         /* $datos = $this->Facturacion_Model->obtenerDTE($dte, 5);
@@ -6120,9 +6023,8 @@ class Facturacion extends CI_Controller {
         $identificacion = $testjsonDTE["dteJson"]["identificacion"];
 
         echo json_encode($testjsonDTE["dteJson"]["resumen"]); */
-
-        $total = 2.55;
-        $arregloNumero = explode(".", number_format($total, 2, '.', ''));
+        $total = 1050.50;
+        $arregloNumero = explode(".", round($total, 2));
         $letras = "";
         if(isset($arregloNumero[1])){
             $letras = strtoupper($this->convertir($arregloNumero[0])." ".$arregloNumero[1]."/100");
@@ -6131,8 +6033,11 @@ class Facturacion extends CI_Controller {
         }
 
         echo json_encode($letras);
-        
+
     }
+
+
+
 
     public function testQR(){
 
@@ -6198,23 +6103,5 @@ class Facturacion extends CI_Controller {
             $printer -> setEmphasis(false);
             $printer -> textRaw(substr($chars, $y * 32, 32) . "\n");
         }
-    }  
-    
-    public function testPrint(){
-        try {
-            $connector = new NetworkPrintConnector("192.168.1.168");
-            $printer = new Printer($connector);
-            
-            $printer->text("¡Hola, Monica!\n");
-            $printer->cut();
-            $printer->close();
-            
-            echo "Impresión realizada con éxito.";
-        } catch (Exception $e) {
-            echo "Error al imprimir: " . $e->getMessage();
-        }
-    }
-
-    
+    }   
 }
-

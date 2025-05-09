@@ -183,15 +183,13 @@
                                     </div>
 
                                     <div class="col-md-12 text-center">
-                                        <!-- <input type="hidden" value="<?php echo $numser->idSerie; ?>" name="serie">
-                                        <input type="hidden" value="<?php echo $numser->numeroActual; ?>" name="numActual">
                                         
                                         <input type="hidden" value="<?php echo $dte; ?>" name="dteFactura">
                                         <input type="hidden" value="<?php echo $baseDTE; ?>" name="baseDTE">
                                         <input type="hidden" value="<?php echo $cGeneracion; ?>" name="cGeneracion">
-                                        <input type="hidden" value="<?php echo $paciente->idAnexo; ?>" name="pacienteVenta"> -->
 
-                                        <input type="text" value="<?php echo $consulta->idConsulta; ?>" id="consultaActual" name="consultaActual">
+                                        <input type="hidden" value="<?php echo $consulta->tipoReferencia; ?>" id="tipoReferencia" name="tipoReferencia">
+                                        <input type="hidden" value="<?php echo $consulta->idConsulta; ?>" id="consultaActual" name="consultaActual">
         
                                         <button class="btn btn-primary btn-sm">Terminar</button>
                                     </div>
@@ -319,7 +317,8 @@
             event.preventDefault(); // Detenemos submit
             var datos = {
                 str : $(this).val(),
-                consulta: $("#consultaActual").val()
+                consulta: $("#consultaActual").val(),
+                referencia : $("#tipoReferencia").val()
             };
             $("#nombreExamen").val("");
 
@@ -329,55 +328,28 @@
                 beforeSend: function () { },
                 data: datos,
                 success:function(respuesta){
-                    /* var registro = eval(respuesta);
+                    var registro = eval(respuesta);
                     if (registro.length > 0){
                         var html = "";
                         var index = 0;
                         
                         for (var i = 0; i < registro.length; i++) {
-                            if(registro[i]["pivote"] > 0){
-                                index++;
-                                html += "<tr>";
-                                html += "    <td class='text-center'>"+index+"</td>";
-                                html += "    <td class='text-center'>"+registro[i]["nombreMedicamento"]+"<input type='hidden' name='nombreMedicamento[]' value='"+registro[i]["nombreMedicamento"]+"'> <input type='hidden' name='idMedicamento[]' value='"+registro[i]["idMedicamento"]+"'> <input type='hidden' name='nombreInsumo[]' value='Unidad' class='nombreInsumo'> </td>";
+                            index++;
+                            html += "<tr>";
+                            html += "    <td class='text-center'>"+index+"</td>";
+                            html += "    <td class='text-center'>"+registro[i]["nombreExamen"]+"<input type='hidden' name='nombreExamen[]' value='"+registro[i]["nombreExamen"]+"'> <input type='hidden' name='idExamen[]' value='"+registro[i]["idExamen"]+"'></td>";
 
-                                // Recorriendo medidas
-                                var select = '<select class="medidaInsumo form-control">';
-                                    select += '    <option value="'+registro[i]["precioVMedicamento"]+'">Unidad-1</option>';
-                                if(registro[i]["medidasMedicamento"] && registro[i]["medidasMedicamento"].trim() !== ''){
-                                    var medidas = JSON.parse(registro[i]["medidasMedicamento"]);
-                                    // Iterar sobre los elementos del arreglo
-                                    medidas.forEach(function(row) {
-                                        select +='<option value="'+row.precio+'">'+row.nombreMedida+'-'+row.cantidad+'</option>';
-                                    });
-                                }
-                                select += '</select>';
-                                // Iterar sobre los elementos del arreglo
-                                
+                            html += "    <td class='text-center'><strong class='lblPrecioVenta'>$"+registro[i]["precioFinal"]+"</strong><input type='hidden' name='precios[]' value='"+registro[i]["precioFinal"]+"' class='txtPrecioVenta'></td>";
+                            html += "    <td class='text-center'><strong style='display: none' class='lblCantidadVenta'>1</strong><input type='text' value='1' name='cantidad[]' class='txtcantidadVenta'></td>";
+                            html += "    <td class='text-center'><span class='totalRow'>"+(registro[i]["precioFinal"] * 1)+"</span></td>";
+                            html += "    <td class='text-center'><i class='fa fa-times text-danger deleteRow'></i></td>";
+                            html += "</tr>";
 
-                                html += "    <td class='text-center'>"+select+"</td>";
-                                html += "    <td class='text-center'><strong class='lblPrecioVenta'>$"+registro[i]["precioVMedicamento"]+"</strong><input type='hidden' name='precios[]' value='"+registro[i]["precioVMedicamento"]+"' class='txtPrecioVenta'></td>";
-                                html += "    <td class='text-center'><strong style='display: none' class='lblCantidadVenta'>1</strong><input type='text' value='1' name='cantidad[]' class='txtcantidadVenta'> <input type='hidden' value='1' name='cantidadUnitaria[]' class='txtCantidadUnitaria'> </td>";
-                                html += "    <td class='text-center'><span class='totalRow'>"+(registro[i]["precioVMedicamento"] * 1)+"</span></td>";
-                                html += "    <td class='text-center'><i class='fa fa-times text-danger deleteRow'></i></td>";
-                                html += "</tr>";
-
-                                calculos(registro[i]["precioVMedicamento"], 1);
-                                $("#tabla_productos tbody").before(html);
-                            }
+                            calculos(registro[i]["precioFinal"], 1);
+                            $("#tabla_productos tbody").before(html);
+                           
                         }
-
-                        
-
-                        $('#tablag').Tabledit({
-                            url: '../../editar_medicamento',
-                            columns: {
-                                identifier: [0, 'fila'],
-                                editable: [[1, 'codigo'], [2, 'nombreMedicamento'], [3, 'cantidad'], [4, 'idMedicamento'], [5, 'cuentaMedicamento'], [6, 'cantidadActual']]
-                            },
-                            restoreButton:false,
-                        });
-                    } */
+                    }
                 },
                 error:function(){
                     alert("Hay un error");
@@ -400,52 +372,7 @@
         $("#txtVuelto").val(vuelto.toFixed(2));
 
     });
-    
-    $(document).on("change", ".medidaInsumo", function(e) {
-        e.preventDefault();
-        var precio = $(this).val()
-        var total = 0;
-
-        var texto = $(this).find('option:selected').text().split('-');;
-        var nombre = texto[0];
-        var cantidad = texto[1];
-        $(this).closest('tr').find('.txtCantidadUnitaria').val(cantidad * $(this).closest('tr').find('.txtcantidadVenta').val()); // asignando medidas unitarias
-        /* var precio_unitario = (parseFloat(precio)/parseFloat(cantidad)).toFixed(2);
-        $(this).closest('tr').find('.cantidadM').val(cantidad); */
-        $(this).closest('tr').find('.nombreInsumo').val(nombre);
-        $(this).closest('tr').find('.lblPrecioVenta').html(precio);
-        $(this).closest('tr').find('.txtPrecioVenta').val(precio);
-
-        $(this).closest('tr').find('.totalRow').html((precio*$(this).closest('tr').find('.txtcantidadVenta').val()).toFixed(2));
-
-        $(".txtPrecioVenta").each(function() {
-            total += ($(this).closest('tr').find('.txtPrecioVenta').val() * $(this).closest('tr').find('.txtcantidadVenta').val());
-        });
-
-        //Asignando totales
-            // Subtotal
-                var subtotal_new = total;
-                $("#txtSubtotal").val(subtotal_new.toFixed(2))
-                $("#lblSubtotal").html(subtotal_new.toFixed(2))
-            // Subtotal
-
-            // Subtotal
-                var iva_new = subtotal_new * 0.13;
-                /* $("#txtIVA").val(iva_new.toFixed(2))
-                $("#lblIVA").html(iva_new.toFixed(2)) */
-            // Subtotal
-
-            // Subtotal
-                // var total_new = subtotal_new + iva_new;
-                var total_new = subtotal_new;
-                $("#txtTotal").val(total_new.toFixed(2))
-                $("#lblTotal").html(total_new.toFixed(2))
-            // Subtotal
-
-        //Asignando totales
-
-    });
-
+   
     $(document).on("change", ".txtcantidadVenta", function(e) {
         e.preventDefault();
 
@@ -597,7 +524,7 @@
         }
         var html = "";
         $.ajax({
-            url: "obtener_numero",
+            url: "../../obtener_numero_factura",
             type: "POST",
             data: datos,
             success:function(respuesta){
