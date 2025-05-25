@@ -45,10 +45,10 @@ class Facturacion extends CI_Controller {
         $this->load->model("Facturacion_Model");
         $this->load->model("Consulta_Model");
 
-        // $this->urlHacienda = "https://apitest.dtes.mh.gob.sv/fesv/";
-        $this->urlHacienda = "https://api.dtes.mh.gob.sv/fesv/"; // URL produccion
-        $this->establecimiento = "S001";
-        $this->psPublica = "UnionMedica_25";
+        $this->urlHacienda = "https://apitest.dtes.mh.gob.sv/fesv/";
+        // $this->urlHacienda = "https://api.dtes.mh.gob.sv/fesv/"; // URL produccion
+        $this->establecimiento = "M001";
+        $this->psPublica = "Radiologica_25";
 
         $this->tokenHacienda = $this->Facturacion_Model->obtenerToken(); // Obtener el token y asignarlo a la variable de clase
     }
@@ -1393,29 +1393,27 @@ class Facturacion extends CI_Controller {
 
 
             // Ordenando datos
-                if(isset($datos["idMedicamento"])){
+                if(isset($datos["idExamen"])){
                     // Creando Json de medidas
                         // Crear un arreglo combinado
                         $datosInsumo = array();
                         // Obtener el número de elementos en una de las matrices (se asume que todas tienen la misma longitud)
-                        $numElementos = count($datos["idMedicamento"]);
+                        $numElementos = count($datos["idExamen"]);
                         // Iterar sobre la longitud de las matrices y combinar los datos
                         $index = 1;
                         for ($i = 0; $i < $numElementos; $i++) {
 
                             $objeto = array(
-                                "descripcion" => $datos["nombreMedicamento"][$i]."(".$datos["nombreInsumo"][$i].")",
-                                "idMedicamento" => $datos["idMedicamento"][$i],
+                                "descripcion" => $datos["nombreExamen"][$i],
+                                "idExamen" => $datos["idExamen"][$i],
                                 "precio" => $datos["precios"][$i],
-                                "cantidad" => $datos["cantidad"][$i],
-                                "unitaria" => $datos["cantidadUnitaria"][$i],
-                                "medida" => $datos["nombreInsumo"][$i]
+                                "cantidad" => $datos["cantidad"][$i]
                             );
                             // Agregar el arreglo al arreglo combinado
                             array_push($datosInsumo, $objeto);
                             $index++;
                         }
-                        unset($datos["idMedicamento"], $datos["precios"], $datos["cantidad"], $datos["cantidadUnitaria"], $datos["nombreInsumo"], $datos["nombreMedicamento"]);
+                        unset($datos["idExamen"], $datos["precios"], $datos["cantidad"], $datos["nombreExamen"]);
                        
                         $data["insumos"] = $datosInsumo;
                     // Creando Json de medidas
@@ -1447,7 +1445,7 @@ class Facturacion extends CI_Controller {
             $this->load->view('FE/credito_fiscal', $data);
             $this->load->view('Base/footer');
 
-            // echo json_encode($data);
+            // echo json_encode($data["insumos"]);
         
         }
 
@@ -1600,18 +1598,18 @@ class Facturacion extends CI_Controller {
             // Validando codigo generacion
 
             // Guardando venta
-                    $venta = $this->Ventas_Model->validarNumeroActual($datos["baseDTE"], 3); //Verificando que el codigo del tiket no haya sido agregado
+                    $venta = $this->Facturacion_Model->validarNumeroActual($datos["baseDTE"], 3); //Verificando que el codigo del tiket no haya sido agregado
                     $paramsVenta["insumos"] = $insumos;
                     if($venta->codigo > 0){
-                        $maximoActual = $this->Ventas_Model->maximoActual(3);
+                        $maximoActual = $this->Facturacion_Model->maximoActual(3);
                         $datosVenta["numeroDocumento"] = $maximoActual->codigo + 1;
                     }else{
                         $datosVenta["numeroDocumento"] = $datos["baseDTE"];
                     }
                     $paramsVenta["datosVenta"] = $datosVenta;
                     
-                    $resp = $this->Ventas_Model->guardarVentaCF($paramsVenta);
-                    $arrayDTE["idHoja"] = $resp;
+                    // $resp = $this->Ventas_Model->guardarVentaCF($paramsVenta);
+                    //$arrayDTE["idHoja"] = $resp;
             // Guardando venta
             
             $empresa = $parametrosFactura["empresa"];
@@ -1722,7 +1720,7 @@ class Facturacion extends CI_Controller {
                 )
             );
 
-            if($contingencia == 0){
+            /* if($contingencia == 0){
                 $this->envioHaciendaCCF($factura, $empresa, $datos, $arrayDTE, 2, 3);
             }else{
                 $arrayDTE["cGeneracion"] = $datos["cGeneracion"];
@@ -1749,7 +1747,7 @@ class Facturacion extends CI_Controller {
 
                 // echo json_encode($arrayDTE);
  
-            }
+            } */
 
             // echo json_encode($factura);
             
@@ -2651,7 +2649,7 @@ class Facturacion extends CI_Controller {
                             array_push($datosInsumoV, $objetoV);
                             $index++;
                         }
-                        unset($datos["idMedicamento"], $datos["precios"], $datos["cantidad"], $datos["cantidadUnitaria"], $datos["nombreInsumo"], $datos["nombreMedicamento"]);
+                        unset($datos["idExamen"], $datos["precios"], $datos["cantidad"], $datos["nombreExamen"]);
                        
                         // $datos["insumos"] = $datosInsumo;
                         $datos["insumos"] = $datosInsumoV;
@@ -2669,6 +2667,13 @@ class Facturacion extends CI_Controller {
             // Guardando venta
                 $datosVenta = $datos;
                 $datosVenta["personalizado"] = 0;
+                unset($datosVenta["tipoTransmision"]);
+                unset($datosVenta["tipoContingencia"]);
+                unset($datosVenta["dteFactura"]);
+                unset($datosVenta["baseDTE"]);
+                unset($datosVenta["cGeneracion"]);
+                unset($datosVenta["tipoReferencia"]);
+                unset($datosVenta["consultaActual"]);
             // Guardando venta
 
             // Validando DTE
@@ -2763,7 +2768,7 @@ class Facturacion extends CI_Controller {
                         "nombre" => $datos["clienteVenta"],
                         "nrc" => null,
                         "numDocumento" => '00000000-0',
-                        "telefono" => 0000-0000,
+                        "telefono" => "0000-0000",
                         "tipoDocumento" => "13",
                         "direccion" => null,
                     ),
@@ -2798,11 +2803,8 @@ class Facturacion extends CI_Controller {
                     "apendice" => null,
                 )
             );
-            /* 
-           
-           
-
             
+           
             
             if($contingencia == 0){
                 $this->envioHaciendaCF($factura, $empresa, $datos, $arrayDTE, 2, 1, $datosVenta);
@@ -2839,9 +2841,9 @@ class Facturacion extends CI_Controller {
                 }
 
 
-            } */
+            }
 
-            echo json_encode($factura);
+            // echo json_encode($factura);
 
 
         }
@@ -3108,30 +3110,28 @@ class Facturacion extends CI_Controller {
 
 
             // Ordenando datos
-                if(isset($datos["idMedicamento"])){
+                if(isset($datos["idExamen"])){
                     // Creando Json de medidas
                         // Crear un arreglo combinado
                         $datosInsumo = array();
                         // Obtener el número de elementos en una de las matrices (se asume que todas tienen la misma longitud)
-                        $numElementos = count($datos["idMedicamento"]);
+                        $numElementos = count($datos["idExamen"]);
                         // Iterar sobre la longitud de las matrices y combinar los datos
                         $index = 1;
                         for ($i = 0; $i < $numElementos; $i++) {
 
                             $objeto = array(
-                                "descripcion" => $datos["nombreMedicamento"][$i]."(".$datos["nombreInsumo"][$i].")",
-                                "idMedicamento" => $datos["idMedicamento"][$i],
+                                "descripcion" => $datos["nombreExamen"][$i],
+                                "idExamen" => $datos["idExamen"][$i],
                                 "precio" => $datos["precios"][$i],
-                                "cantidad" => $datos["cantidad"][$i],
-                                "unitaria" => $datos["cantidadUnitaria"][$i],
-                                "medida" => $datos["nombreInsumo"][$i]
+                                "cantidad" => $datos["cantidad"][$i]
                             );
                             // Agregar el arreglo al arreglo combinado
                             array_push($datosInsumo, $objeto);
                             $index++;
                         }
-                        unset($datos["idMedicamento"], $datos["precios"], $datos["cantidad"], $datos["cantidadUnitaria"], $datos["nombreInsumo"], $datos["nombreMedicamento"]);
-                       
+                        unset($datos["idExamen"], $datos["precios"], $datos["cantidad"], $datos["nombreExamen"]);
+                        
                         $data["insumos"] = $datosInsumo;
                     // Creando Json de medidas
 
@@ -3289,10 +3289,10 @@ class Facturacion extends CI_Controller {
             // Validando codigo generacion
 
             // Guardando venta
-                    $venta = $this->Ventas_Model->validarNumeroActual($datos["baseDTE"], 2); //Verificando que el codigo del tiket no haya sido agregado
+                    $venta = $this->Facturacion_Model->validarNumeroActual($datos["baseDTE"], 2); //Verificando que el codigo del tiket no haya sido agregado
                     $paramsVenta["insumos"] = $insumos;
                     if($venta->codigo > 0){
-                        $maximoActual = $this->Ventas_Model->maximoActual(2);
+                        $maximoActual = $this->Facturacion_Model->maximoActual(2);
                         $datosVenta["numeroDocumento"] = $maximoActual->codigo + 1;
                     }else{
                         $datosVenta["numeroDocumento"] = $datos["baseDTE"];
@@ -3413,7 +3413,7 @@ class Facturacion extends CI_Controller {
             );
             
 
-            if($contingencia == 0){
+            /* if($contingencia == 0){
                 $this->envioHaciendaCF($factura, $empresa, $datos, $arrayDTE, 2, 1, $paramsVenta);
              }else{
                 unset($paramsVenta["personalizado"]);
@@ -3447,9 +3447,9 @@ class Facturacion extends CI_Controller {
                  }
  
  
-             }
+             } */
 
-            // echo json_encode($factura);
+            echo json_encode($factura);
             
         
         
@@ -5525,6 +5525,7 @@ class Facturacion extends CI_Controller {
                 $documentoFirmado = json_decode($this->firmar_DTE($factura));
             // Firmando documento
                  
+            // echo json_encode($documentoFirmado);
              
             if($documentoFirmado->status == "OK"){
                 // $conexion = json_decode($this->conectar_API()); funcion dentro del controlador
@@ -5553,8 +5554,8 @@ class Facturacion extends CI_Controller {
                 
                 $resp = $curl->post($url,  $jsonData); // Enviar la petición POST con los datos
                 $response = json_decode($resp->response); // Verificar la respuesta
-                /* echo json_encode($factura);
-                echo json_encode($response ); */
+                echo json_encode($factura);
+                echo json_encode($response );
                 if($response->estado == "PROCESADO"){
                     if($datosVenta != null){
                         $p = $datosVenta["personalizado"];
@@ -5592,8 +5593,8 @@ class Facturacion extends CI_Controller {
 
                 }else{
                     $curl->close();
-                    $error = "No se ha podido validar el documento en hacienda".$response->descripcionMsg;
-                    redirect(base_url()."Facturacion/fin_factura_electronica/0/$error/");
+                    /* $error = "No se ha podido validar el documento en hacienda".$response->descripcionMsg;
+                    redirect(base_url()."Facturacion/fin_factura_electronica/0/$error/"); */
                 }
 
             }else{

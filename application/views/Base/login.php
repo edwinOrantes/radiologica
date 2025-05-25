@@ -1,173 +1,189 @@
-
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
 
-<head>
+    <link href="<?php echo base_url(); ?>public/tema/assets/css/bootstrap.min.css" rel="stylesheet">
+    <link href="<?php echo base_url(); ?>public/tema/vendors/iconic-fonts/font-awesome/css/all.min.css" rel="stylesheet">
 
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Hospital Orellana</title>
-  <!-- Iconic Fonts -->
-  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-
-  	<link href="<?php echo base_url(); ?>public/tema/vendors/iconic-fonts/font-awesome/css/all.min.css" rel="stylesheet">
-	<link rel="stylesheet" href="<?php echo base_url(); ?>public/tema/vendors/iconic-fonts/flat-icons/flaticon.css">
-	<link rel="stylesheet" href="<?php echo base_url(); ?>public/tema/vendors/iconic-fonts/cryptocoins/cryptocoins.css">
-	<link rel="stylesheet" href="<?php echo base_url(); ?>public/tema/vendors/iconic-fonts/cryptocoins/cryptocoins-colors.css">
-  <!-- Bootstrap core CSS -->
-  <link href="<?php echo base_url(); ?>public/tema/assets/css/bootstrap.min.css" rel="stylesheet">
-  <!-- jQuery UI -->
-  <link href="<?php echo base_url(); ?>public/tema/assets/css/jquery-ui.min.css" rel="stylesheet">
-  <!-- Medjestic styles -->
-  <link href="<?php echo base_url(); ?>public/tema/assets/css/style.css" rel="stylesheet">
-  
-  <!-- Favicon -->
+    <!-- Favicon -->
   <link rel="icon" type="image/png" sizes="32x32" href="<?php echo base_url(); ?>public/tema/favicon.ico">
 
-  <link href="<?php echo base_url(); ?>public/tema/assets/css/toastr.min.css" rel="stylesheet">
-
-
   
-<style>
-  body{
-    /* background: url('./public/img/bg_navidad.png'); */
-    overflow: hidden;
-  }
-  footer {
-      background: #197fb0;
-      position: relative;
-      bottom: 2rem;
-      z-index: 2;
-      height: 50px;
-      
-    }
-
-</style>
-
-
   <script src="<?php echo base_url(); ?>public/tema/assets/js/jquery-3.3.1.min.js"></script>
   <script src="<?php echo base_url(); ?>public/tema/assets/js/popper.min.js"></script>
+  <link href="<?php echo base_url(); ?>public/tema/assets/css/toastr.min.css" rel="stylesheet">
 
-</head>
+    <title>Farmacia U. Médica</title>
+    <style>
+      /* =======================================================================
+      Template Name: Youtubers
+      Author:  SmartEye Technologies
+      Author URI: www.smarteyeapps.com
+      Version: 1.0
+      coder name:Prabin Raja
+      Description: This Template is created for Youtubers
+      ======================================================================= */
+      /* ===================================== Import Variables ================================== */
+      @import url(https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700);
+      @import url(https://fonts.googleapis.com/css?family=Arimo:300,400,400italic,700,700italic);
+      /* ===================================== Basic CSS ==================================== */
+      * {
+        margin: 0px;
+        padding: 0px;
+        list-style: none; 
+      }
 
-<body class="ms-body ms-primary-theme">
+      body{
+        font-family: "Open Sans";
+      }
 
-<?php if($this->session->flashdata("error")):?>
-  <script type="text/javascript">
-    $(document).ready(function(){
-  	toastr.remove();
-    toastr.options.positionClass = "toast-top-center";
-	  toastr.warning('<?php echo $this->session->flashdata("error")?>', 'Aviso!');
-    });
-  </script>
-<?php endif; ?>
+      img {
+        max-width: 100%; 
+      }
+
+      a {
+        text-decoration: none;
+        outline: none;
+        color: #444; 
+      }
+
+      a:hover {
+        color: #444; 
+      }
+
+      ul {
+        margin-bottom: 0;
+        padding-left: 0; 
+      }
+
+      ol,ul{
+        margin:0px;
+        padding:0px;
+      }
+
+      a:hover,
+      a:focus,
+      input,
+      textarea {
+        text-decoration: none;
+        outline: none; 
+      }
+
+        .container {
+            max-width: 600px; /* Establece un ancho máximo para el contenido */
+            width: 100%;
+            padding: 0 15px; /* Añade un poco de espacio en los bordes */
+        }
+
+      .form-02-main{
+        background:url(public/img/bg-01.png);
+        background-size:cover;
+        background-repeat:no-repeat;
+        background-position:center;
+        height: 100vh;
+        position:relative;
+        z-index:2;
+        overflow:hidden;
+        display: flex;
+        justify-content: center; /* Centra horizontalmente */
+        align-items: center; /* Centra verticalmente */
+        height: 100vh; /* Establece la altura al 100% del viewport */
+      }
 
 
-  <!-- Preloader -->
-  <div id="preloader-wrap">
-    <div class="spinner spinner-8">
-      <div class="ms-circle1 ms-child"></div>
-      <div class="ms-circle2 ms-child"></div>
-      <div class="ms-circle3 ms-child"></div>
-      <div class="ms-circle4 ms-child"></div>
-      <div class="ms-circle5 ms-child"></div>
-      <div class="ms-circle6 ms-child"></div>
-      <div class="ms-circle7 ms-child"></div>
-      <div class="ms-circle8 ms-child"></div>
-      <div class="ms-circle9 ms-child"></div>
-      <div class="ms-circle10 ms-child"></div>
-      <div class="ms-circle11 ms-child"></div>
-      <div class="ms-circle12 ms-child"></div>
-    </div>
-  </div>
+      .form-03-main{
+        width:500px;
+        display:block;
+        margin:20px auto;
+        padding:25px 50px 25px;
+        background:rgba(255,255,255,0.8);
+        border-radius:6px;
+        z-index:9;
+      }
 
-  <div class="ms-lock-screen-weather">
-      <p></p>
-      <p>Usulután, ES</p>
-      <p></p>
-  </div>
+      .logo{
+        display:block;
+        margin:20px auto;
+        width:100px;
+        height:100px;
+      }
 
-  <div class="ms-auth-container">
-    <div class="ms-auth-col">
-      <div class="ms-auth-bg">
-      </div>
-    </div>
+      .form-group{
+        padding:20px 0px;
+        display:inline-block;
+        width:100%;
+        position:relative;
+      }
 
-    <div class="ms-auth-col">
-      <div class="ms-auth-form">
-          <form class="needs-validation" id="frmLogin" method="post" action="<?php echo base_url() ?>Home/validar_usuario" novalidate="">
-            <div class=" text-center"><img src="<?php echo base_url(); ?>public/img/logo.png" width="350" class="mb-3"/></div>
-            
-            <p class="text-info mb-4 mt-2 text-center"> Por favor ingresa tus datos de usuarios </p>
+      .form-group p{
+        margin:0px;
+      }
 
-            <div class="mb-4">
-                <!-- <label for="nombreUsuario" class="text-info">Nombre de usuario</label> -->
-                <div class="input-group">
-                    <div class="input-group-prepend">
-                        <span class="input-group-text"><i class="flaticon-user"></i></span>
-                    </div>
-                    <input type="text" class="form-control" id="nombreUsuario" name="nombreUsuario" placeholder="Ingresa tu nombre de usuario" required>
-                    <div class="invalid-feedback">
-                        Ingresa tu nombre de usuario.
-                    </div>
-                </div>
-            </div>
+      .form-control{
+        min-height:45px;
+        -webkit-box-shadow: none;
+        box-shadow: none;
+        padding: 10px 15px;
+      }
 
-            <div class="mb-3">
-                <!-- <label for="psUsuario" class="text-info">Contraseña</label> -->
-                <div class="input-group">
-                    <div class="input-group-prepend">
-                        <span class="input-group-text"><i class="flaticon-security"></i></span>
-                    </div>
-                    <input type="password" class="form-control" id="psUsuario" name="psUsuario" placeholder="Ingresa tu contraseña de usuario" required>
-                    <div class="invalid-feedback">
-                        Ingresa tu contraseña.
-                    </div>
-                </div>
-            </div>
+      .btn-primary{
+        background: #00A2DE;
+        border: none;
+      }
 
-            <div class="d-flex justify-content-center">
-                <button class="btn btn-primary mt-4 w-50" type="submit">Ingresar</button>
-            </div>
+      .btn-primary:hover{
+        background: #00A2DE;
+      }
+    </style>
 
-            
-          </form>
-      </div>
-    </div>
-    
-  </div>
+  <?php if($this->session->flashdata("error")):?>
+    <script type="text/javascript">
+      $(document).ready(function(){
+      toastr.remove();
+      toastr.options.positionClass = "toast-top-center";
+      toastr.warning('<?php echo $this->session->flashdata("error")?>', 'Aviso!');
+      });
+    </script>
+  <?php endif; ?>
 
-  <div class="ms-lock-screen-time">
-      <p><?php //echo $hora; ?></p>
-      <p class="text-primary bold"><?php echo $fecha; ?></p>
-  </div>
-
+  </head>
+  <body>
+    <section class="form-02-main">
+      <div class="container">
+        <div class="row">
+          <div class="col-md-12">
+            <div class="_lk_de">
+              <form class="needs-validation" id="frmLogin" method="post" action="<?php echo base_url() ?>Home/validar_usuario">
+                <div class="form-03-main">
+                  <div class="logo">
+                    <img src="<?php echo base_url(); ?>public/img/user.png">
+                  </div>
+                  <div class="form-group">
+                    <input class="form-control" type="text" id="nombreUsuario" name="nombreUsuario" placeholder="Ingresa tu nombre de usuario" required>
+                  </div>
   
-  <footer class="footer mt-auto py-2 text-center">
-    <div class="container">
-      <span class="text-white"> Copyright © <span class="text-white"><?php echo date("Y"); ?></span> <a href="javascript:void(0);" class="text-white font-weight-bold">Hospital Orellana</a>.
-          Creado con <span class="fa fa-heart text-success"></span> por <a href="javascript:void(0);">
-          <span class="font-weight-bold text-white text-decoration-underline">Edwin Orantes</span>
-        </a> Todos los derechos reservados.
-      </span>
-    </div>
-  </footer>
-
-</body>
-
+                  <div class="form-group">
+                    <input type="password" class="form-control" id="psUsuario" name="psUsuario" placeholder="Ingresa tu contraseña de usuario" required>
+                  </div>
+  
+                  <div class="form-group">
+                    <div class="_btn_04">
+                      <button class="btn btn-primary btn-block py-3">Ingresar</button>
+                    </div>
+                  </div>
+  
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </body>
 </html>
-
-<!-- SCRIPTS -->
-<!-- Global Required Scripts Start -->
-
-<script src="<?php echo base_url(); ?>public/tema/assets/js/bootstrap.min.js"></script>
-<script src="<?php echo base_url(); ?>public/tema/assets/js/perfect-scrollbar.js"></script>
-<script src="<?php echo base_url(); ?>public/tema/assets/js/jquery-ui.min.js"></script>
-<!-- Global Required Scripts End -->
-
-<script src="<?php echo base_url(); ?>public/tema/assets/js/framework.js"></script>
-<!-- Settings -->
-<script src="<?php echo base_url(); ?>public/tema/assets/js/settings.js"></script>
 
 <script src="<?php echo base_url(); ?>public/tema/assets/js/toastr.min.js" type="text/javascript"></script>

@@ -41,29 +41,17 @@
 				<!-- <div class="ms-panel-header"></div> -->
 				<div class="ms-panel-body">
 					<div class="row">
-                        <div class="col-md-6">
-                            <div id="buscador">
-                                <div class="input-group">
-                                    <div class="input-group-prepend">
-                                        <div class="input-group-text"><i class="fa fa-barcode"></i></div>
-                                    </div>
-                                    <input type="text" id="codigoMedicamento" placeholder="Código del medicamento" class="form-control">
-                                </div>
-                            </div>
-                        </div>
 
-                        <div class="col-md-6">
+                        <div class="col-md-12">
                             <div id="buscador">
                                 <div class="input-group">
-                                    <input type="text" list="lista_examenes"  id="nombreExamen" placeholder="Nombre del medicamento" class="form-control">
+                                    <input type="text" list="lista_examenes"  id="nombreExamen" placeholder="Nombre del medicamento" class="form-control" style="border: 1px solid #2D75B7">
                                     <datalist id="lista_examenes"></datalist>
                                 </div>
                             </div>
                         </div>
 
 						<div class="col-md-12">
-							<!-- <form id="frmVenta" class="needs-validation" method="post" action="<?php echo base_url(); ?>Ventas/guardar_venta" novalidate> Version OLD -->
-							<!-- <form id="frmVenta" class="needs-validation" method="post" action="<?php echo base_url(); ?>Facturacion/sellar_factura" novalidate> -->
 							<form id="frmVenta" class="needs-validation" method="post" action="<?php echo base_url(); ?>Facturacion/procesar_factura" novalidate>
                                 <div class="form-row">
 

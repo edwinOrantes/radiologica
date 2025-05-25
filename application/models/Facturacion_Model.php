@@ -15,6 +15,48 @@ class Facturacion_Model extends CI_Model {
         }
     }
 
+    public function validarNumeroActual($n = null, $pivote = null){
+        if($pivote != null){
+            $sql = "";
+            
+            switch ($pivote) {
+                case '2':
+                    $sql = "SELECT COALESCE((SELECT cf.numeroConsumidorFinal FROM tbl_consumidor_final AS cf  WHERE cf.numeroConsumidorFinal = '$n' 
+                            AND cf.anio = YEAR(CURDATE()) LIMIT 1), 0) AS codigo"; 
+                    break;
+                case '3':
+                    $sql = "SELECT COALESCE((SELECT cf.numeroCreditoFiscal FROM tbl_credito_fiscal AS cf  WHERE cf.numeroCreditoFiscal = '$n' 
+                            AND cf.anio = YEAR(CURDATE()) LIMIT 1), 0) AS codigo"; 
+                    break;
+                
+                default:
+                    # code...
+                    break;
+            }
+
+            $datos = $this->db->query($sql);
+            return $datos->row();
+        }
+    }
+
+    public function maximoActual($p = null){
+        // $sql = "SELECT MAX(v.numeroDocumento) AS codigo FROM tbl_ventas AS v WHERE v.tipoDocumento = '$p' ";
+        switch ($p) {
+            case '2':
+                $sql = "SELECT MAX(cf.numeroConsumidorFinal) AS codigo FROM tbl_consumidor_final AS cf WHERE cf.anio = YEAR(CURDATE())";
+                break;
+            case '3':
+                $sql = "SELECT MAX(cf.numeroCreditoFiscal) AS codigo FROM tbl_credito_fiscal AS cf WHERE cf.anio = YEAR(CURDATE())";
+                break;
+            
+            default:
+                # code...
+                break;
+        }
+        $datos = $this->db->query($sql);
+        return $datos->row();
+    }
+
     public function listaCCF(){
         $sql ="SELECT * FROM tbl_dte_ccf ORDER BY idDTEFC DESC";
         $datos = $this->db->query($sql);
@@ -691,8 +733,8 @@ class Facturacion_Model extends CI_Model {
             // $url = "https://api.dtes.mh.gob.sv/seguridad/auth";
 
             $data = [
-                "user" => "06142405161029", // Usuario proporcionado
-                "pwd" => "Genesis_$2025" // Contraseña proporcionada
+                "user" => "11232704011016", // Usuario proporcionado
+                "pwd" => "Radiologica_$25" // Contraseña proporcionada
             ];
 
             $curl = new Curl();

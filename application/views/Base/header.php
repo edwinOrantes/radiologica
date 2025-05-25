@@ -5,7 +5,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Hospital Orellana</title>
+    <title>Clínica Radiologica</title>
     <!-- Iconic Fonts -->
     <!-- <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"> -->
     <!-- Bootstrap core CSS -->
@@ -121,71 +121,17 @@
         <div class="logo-sn ms-d-block-lg">
             <!-- <a class="pl-0 ml-0 text-center" href="<?php echo base_url(); ?>"> <img src="<?php echo base_url() ?>public/img/logo_web.png" alt="logo"> </a> -->
              <br> <br>
-                <?php
-                    switch ($this->session->userdata('acceso_h')) {
-                        case '1':
-                            echo '<a href="'.base_url().'Usuarios/dashboard" class="text-center ms-logo-img-link">';
-                            break;
-                        case '5':
-                            echo '<a href="'.base_url().'Usuarios/dashboard" class="text-center ms-logo-img-link">';
-                            break;
-                        case '8':
-                            echo '<a href="'.base_url().'Paciente/agregar_pacientes/" class="text-center ms-logo-img-link">';
-                            break;
-                        case '7':
-                            echo '<a href="'.base_url().'Paciente/agregar_pacientes/" class="text-center ms-logo-img-link">';
-                            break;
-                        case '9':
-                            echo '<a href="'.base_url().'Usuarios/dashboard" class="text-center ms-logo-img-link">';
-                            break;
-                        case '14':
-                            echo '<a href="'.base_url().'Paciente/agregar_pacientes/" class="text-center ms-logo-img-link">';
-                            break;
-
-                        default:
-                            echo '<a href="#" class="text-center ms-logo-img-link">';
-                            break;
-                    }
-                ?>
-                <!-- <img src="<?php echo base_url() ?>public/img/logo_circle.png" alt="Logo Hospital Orellana"> -->
+                <a href="<?php echo base_url(); ?>Consulta/agregar_paciente/" class="text-center ms-logo-img-link">
                 <img src="<?php echo base_url().'public/img/users/'.$this->session->userdata('imagen').'.png' ?>" alt="<?php echo $this->session->userdata('empleado_h'); ?>"> 
             </a>
             <h5 class="text-center text-white mt-2"><?php echo $this->session->userdata("empleado_h"); ?></h5>
             <h6 class="text-center text-white mb-3"><?php echo $this->session->userdata("acceso_nombre"); ?></h6>
         </div>
 
-        <div>
-            <?php
-                if($this->session->userdata('acceso_h') != 14){
-            ?>
-            <form action="<?php echo base_url(); ?>Hoja/mover_a_hoja/" method="POST">
-				<div class="input-group">
-                    <div class="input-group-prepend">
-                        <div class="input-group-text"><i class="fa fa-file"></i></div>
-					</div>
-                    <input type="text" class="form-control" placeholder="Código de hoja" name="codigoHoja">
-				</div>
-			</form>
-            <?php } ?>
-        </div>
+        <div></div>
         <!-- Navigation -->
         <ul class="accordion ms-main-aside fs-14" id="side-nav-accordion">
-            <?php
-                if($this->session->userdata("acceso_h") == 1){
-            ?>
-            <!-- Dashboard -->
-                <li class="menu-item">
-                    <a href="#" class="has-chevron" data-toggle="collapse" data-target="#dashboard" aria-expanded="false"
-                        aria-controls="dashboard">
-                        <span><i class="fa fa-th-large"></i>Dashboard</span>
-                    </a>
-                    <ul id="dashboard" class="collapse" aria-labelledby="dashboard" data-parent="#side-nav-accordion">
-                        <li> <a href="<?php echo base_url(); ?>Usuarios/dashboard">General</a> </li>
-                        <li> <a href="<?php echo base_url(); ?>Laboratorio/dashboard_laboratorio">Laboratorio</a> </li>
-                    </ul>
-                </li>
-            <!-- Dashboard -->
-            <?php } ?>
+            
 
             <?php
                 
@@ -220,7 +166,7 @@
                 <span class="ms-toggler-bar bg-white"></span>
             </div>
             <div class="logo-sn logo-sm ms-d-block-sm">
-                <a class="pl-0 ml-0 text-center navbar-brand" href="#"><img src="<?= base_url()?>public/img/mini_logo.png" alt="logo"> </a>
+                <!-- <a class="pl-0 ml-0 text-center navbar-brand" href="#"><img src="<?= base_url()?>public/img/mini_logo.png" alt="logo"> </a> -->
             </div>
 
             <ul class="ms-nav-list ms-inline mb-0" id="ms-nav-options">
