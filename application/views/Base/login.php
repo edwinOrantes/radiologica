@@ -17,7 +17,7 @@
   <script src="<?php echo base_url(); ?>public/tema/assets/js/popper.min.js"></script>
   <link href="<?php echo base_url(); ?>public/tema/assets/css/toastr.min.css" rel="stylesheet">
 
-    <title>Farmacia U. Médica</title>
+    <title>Clínica Radiologica</title>
     <style>
       /* =======================================================================
       Template Name: Youtubers
@@ -108,8 +108,8 @@
       .logo{
         display:block;
         margin:20px auto;
-        width:100px;
-        height:100px;
+        width:230px;
+        height:130px;
       }
 
       .form-group{
@@ -131,12 +131,12 @@
       }
 
       .btn-primary{
-        background: #00A2DE;
+        background: #1E5CA7;
         border: none;
       }
 
       .btn-primary:hover{
-        background: #00A2DE;
+        background: #1E5CA7;
       }
     </style>
 

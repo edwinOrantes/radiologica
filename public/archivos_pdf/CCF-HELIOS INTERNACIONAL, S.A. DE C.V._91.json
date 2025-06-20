@@ -1,0 +1,110 @@
+{
+    "identificacion": {
+        "version": 3,
+        "ambiente": "00",
+        "tipoDte": "03",
+        "numeroControl": "DTE-03-M001P001-000000000000090",
+        "codigoGeneracion": "5368167C-93F2-40D9-9AC3-2E7AEFB44847",
+        "tipoModelo": 1,
+        "tipoOperacion": 1,
+        "tipoContingencia": null,
+        "motivoContin": null,
+        "fecEmi": "2025-06-03",
+        "horEmi": "09:23:12",
+        "tipoMoneda": "USD"
+    },
+    "documentoRelacionado": null,
+    "emisor": {
+        "nit": "12173011871027",
+        "nrc": "2569276",
+        "nombre": "MENDEZ APARICIO, ELISEO ENRIQUE DR.",
+        "codActividad": "86203",
+        "descActividad": "Servicios medicos",
+        "nombreComercial": "MENDEZ APARICIO, ELISEO ENRIQUE DR.",
+        "tipoEstablecimiento": "02",
+        "direccion": {
+            "departamento": "12",
+            "municipio": "23",
+            "complemento": "AVENIDA FERROCARRIL #51 BARRIO LA CRUZ EL TRANSITO SAN MIGUEL OESTE SAN MIGUEL"
+        },
+        "telefono": "70450590",
+        "correo": "eltransitocentromedicolafamilia@gmail.com",
+        "codEstableMH": "P001",
+        "codEstable": null,
+        "codPuntoVentaMH": "M001",
+        "codPuntoVenta": null
+    },
+    "receptor": {
+        "nit": "06142407961057",
+        "nrc": "1208778",
+        "nombre": "HELIOS INTERNACIONAL, S.A. DE C.V.",
+        "codActividad": "46484",
+        "descActividad": "Venta de productos farmacéuticos y medicinales",
+        "nombreComercial": null,
+        "direccion": {
+            "departamento": "14",
+            "municipio": "19",
+            "complemento": "10a CALLE ORIENTE Y 8a AV. SUR BO. LA VEGA  # 470"
+        },
+        "telefono": "22810222",
+        "correo": "example@example.com"
+    },
+    "otrosDocumentos": null,
+    "ventaTercero": null,
+    "cuerpoDocumento": [
+        {
+            "numItem": 1,
+            "tipoItem": 2,
+            "numeroDocumento": null,
+            "codigo": "1",
+            "codTributo": null,
+            "descripcion": "PRUEBA",
+            "cantidad": 1,
+            "uniMedida": 59,
+            "precioUni": 8.85,
+            "montoDescu": 0,
+            "ventaNoSuj": 0,
+            "ventaExenta": 0,
+            "ventaGravada": 8.85,
+            "tributos": [
+                "20"
+            ],
+            "psv": 0,
+            "noGravado": 0
+        }
+    ],
+    "resumen": {
+        "totalNoSuj": 0,
+        "totalExenta": 0,
+        "totalGravada": 8.85,
+        "subTotalVentas": 8.85,
+        "descuNoSuj": 0,
+        "descuExenta": 0,
+        "descuGravada": 0,
+        "porcentajeDescuento": 0,
+        "totalDescu": 0,
+        "tributos": [
+            {
+                "codigo": "20",
+                "descripcion": "Impuesto Al valor agregado 13%",
+                "valor": 1.15
+            }
+        ],
+        "subTotal": 8.85,
+        "ivaPerci1": 0,
+        "ivaRete1": 0,
+        "reteRenta": 0,
+        "montoTotalOperacion": 10,
+        "totalNoGravado": 0,
+        "totalPagar": 10,
+        "totalLetras": "DIEZ 00\/100",
+        "saldoFavor": 0,
+        "condicionOperacion": 1,
+        "pagos": null,
+        "numPagoElectronico": null
+    },
+    "extension": null,
+    "apendice": null,
+    "firmaElectronica": "eyJhbGciOiJSUzUxMiJ9.ew0KICAiaWRlbnRpZmljYWNpb24iIDogew0KICAgICJ2ZXJzaW9uIiA6IDMsDQogICAgImFtYmllbnRlIiA6ICIwMCIsDQogICAgInRpcG9EdGUiIDogIjAzIiwNCiAgICAibnVtZXJvQ29udHJvbCIgOiAiRFRFLTAzLU0wMDFQMDAxLTAwMDAwMDAwMDAwMDA5MCIsDQogICAgImNvZGlnb0dlbmVyYWNpb24iIDogIjUzNjgxNjdDLTkzRjItNDBEOS05QUMzLTJFN0FFRkI0NDg0NyIsDQogICAgInRpcG9Nb2RlbG8iIDogMSwNCiAgICAidGlwb09wZXJhY2lvbiIgOiAxLA0KICAgICJ0aXBvQ29udGluZ2VuY2lhIiA6IG51bGwsDQogICAgIm1vdGl2b0NvbnRpbiIgOiBudWxsLA0KICAgICJmZWNFbWkiIDogIjIwMjUtMDYtMDMiLA0KICAgICJob3JFbWkiIDogIjA5OjIzOjEyIiwNCiAgICAidGlwb01vbmVkYSIgOiAiVVNEIg0KICB9LA0KICAiZG9jdW1lbnRvUmVsYWNpb25hZG8iIDogbnVsbCwNCiAgImVtaXNvciIgOiB7DQogICAgIm5pdCIgOiAiMTIxNzMwMTE4NzEwMjciLA0KICAgICJucmMiIDogIjI1NjkyNzYiLA0KICAgICJub21icmUiIDogIk1FTkRFWiBBUEFSSUNJTywgRUxJU0VPIEVOUklRVUUgRFIuIiwNCiAgICAiY29kQWN0aXZpZGFkIiA6ICI4NjIwMyIsDQogICAgImRlc2NBY3RpdmlkYWQiIDogIlNlcnZpY2lvcyBtZWRpY29zIiwNCiAgICAibm9tYnJlQ29tZXJjaWFsIiA6ICJNRU5ERVogQVBBUklDSU8sIEVMSVNFTyBFTlJJUVVFIERSLiIsDQogICAgInRpcG9Fc3RhYmxlY2ltaWVudG8iIDogIjAyIiwNCiAgICAiZGlyZWNjaW9uIiA6IHsNCiAgICAgICJkZXBhcnRhbWVudG8iIDogIjEyIiwNCiAgICAgICJtdW5pY2lwaW8iIDogIjIzIiwNCiAgICAgICJjb21wbGVtZW50byIgOiAiQVZFTklEQSBGRVJST0NBUlJJTCAjNTEgQkFSUklPIExBIENSVVogRUwgVFJBTlNJVE8gU0FOIE1JR1VFTCBPRVNURSBTQU4gTUlHVUVMIg0KICAgIH0sDQogICAgInRlbGVmb25vIiA6ICI3MDQ1MDU5MCIsDQogICAgImNvcnJlbyIgOiAiZWx0cmFuc2l0b2NlbnRyb21lZGljb2xhZmFtaWxpYUBnbWFpbC5jb20iLA0KICAgICJjb2RFc3RhYmxlTUgiIDogIlAwMDEiLA0KICAgICJjb2RFc3RhYmxlIiA6IG51bGwsDQogICAgImNvZFB1bnRvVmVudGFNSCIgOiAiTTAwMSIsDQogICAgImNvZFB1bnRvVmVudGEiIDogbnVsbA0KICB9LA0KICAicmVjZXB0b3IiIDogew0KICAgICJuaXQiIDogIjA2MTQyNDA3OTYxMDU3IiwNCiAgICAibnJjIiA6ICIxMjA4Nzc4IiwNCiAgICAibm9tYnJlIiA6ICJIRUxJT1MgSU5URVJOQUNJT05BTCwgUy5BLiBERSBDLlYuIiwNCiAgICAiY29kQWN0aXZpZGFkIiA6ICI0NjQ4NCIsDQogICAgImRlc2NBY3RpdmlkYWQiIDogIlZlbnRhIGRlIHByb2R1Y3RvcyBmYXJtYWPDqXV0aWNvcyB5IG1lZGljaW5hbGVzIiwNCiAgICAibm9tYnJlQ29tZXJjaWFsIiA6IG51bGwsDQogICAgImRpcmVjY2lvbiIgOiB7DQogICAgICAiZGVwYXJ0YW1lbnRvIiA6ICIxNCIsDQogICAgICAibXVuaWNpcGlvIiA6ICIxOSIsDQogICAgICAiY29tcGxlbWVudG8iIDogIjEwYSBDQUxMRSBPUklFTlRFIFkgOGEgQVYuIFNVUiBCTy4gTEEgVkVHQSAgIyA0NzAiDQogICAgfSwNCiAgICAidGVsZWZvbm8iIDogIjIyODEwMjIyIiwNCiAgICAiY29ycmVvIiA6ICJleGFtcGxlQGV4YW1wbGUuY29tIg0KICB9LA0KICAib3Ryb3NEb2N1bWVudG9zIiA6IG51bGwsDQogICJ2ZW50YVRlcmNlcm8iIDogbnVsbCwNCiAgImN1ZXJwb0RvY3VtZW50byIgOiBbIHsNCiAgICAibnVtSXRlbSIgOiAxLA0KICAgICJ0aXBvSXRlbSIgOiAyLA0KICAgICJudW1lcm9Eb2N1bWVudG8iIDogbnVsbCwNCiAgICAiY29kaWdvIiA6ICIxIiwNCiAgICAiY29kVHJpYnV0byIgOiBudWxsLA0KICAgICJkZXNjcmlwY2lvbiIgOiAiUFJVRUJBIiwNCiAgICAiY2FudGlkYWQiIDogMSwNCiAgICAidW5pTWVkaWRhIiA6IDU5LA0KICAgICJwcmVjaW9VbmkiIDogOC44NSwNCiAgICAibW9udG9EZXNjdSIgOiAwLA0KICAgICJ2ZW50YU5vU3VqIiA6IDAsDQogICAgInZlbnRhRXhlbnRhIiA6IDAsDQogICAgInZlbnRhR3JhdmFkYSIgOiA4Ljg1LA0KICAgICJ0cmlidXRvcyIgOiBbICIyMCIgXSwNCiAgICAicHN2IiA6IDAsDQogICAgIm5vR3JhdmFkbyIgOiAwDQogIH0gXSwNCiAgInJlc3VtZW4iIDogew0KICAgICJ0b3RhbE5vU3VqIiA6IDAsDQogICAgInRvdGFsRXhlbnRhIiA6IDAsDQogICAgInRvdGFsR3JhdmFkYSIgOiA4Ljg1LA0KICAgICJzdWJUb3RhbFZlbnRhcyIgOiA4Ljg1LA0KICAgICJkZXNjdU5vU3VqIiA6IDAsDQogICAgImRlc2N1RXhlbnRhIiA6IDAsDQogICAgImRlc2N1R3JhdmFkYSIgOiAwLA0KICAgICJwb3JjZW50YWplRGVzY3VlbnRvIiA6IDAsDQogICAgInRvdGFsRGVzY3UiIDogMCwNCiAgICAidHJpYnV0b3MiIDogWyB7DQogICAgICAiY29kaWdvIiA6ICIyMCIsDQogICAgICAiZGVzY3JpcGNpb24iIDogIkltcHVlc3RvIEFsIHZhbG9yIGFncmVnYWRvIDEzJSIsDQogICAgICAidmFsb3IiIDogMS4xNQ0KICAgIH0gXSwNCiAgICAic3ViVG90YWwiIDogOC44NSwNCiAgICAiaXZhUGVyY2kxIiA6IDAsDQogICAgIml2YVJldGUxIiA6IDAsDQogICAgInJldGVSZW50YSIgOiAwLA0KICAgICJtb250b1RvdGFsT3BlcmFjaW9uIiA6IDEwLA0KICAgICJ0b3RhbE5vR3JhdmFkbyIgOiAwLA0KICAgICJ0b3RhbFBhZ2FyIiA6IDEwLA0KICAgICJ0b3RhbExldHJhcyIgOiAiRElFWiAwMC8xMDAiLA0KICAgICJzYWxkb0Zhdm9yIiA6IDAsDQogICAgImNvbmRpY2lvbk9wZXJhY2lvbiIgOiAxLA0KICAgICJwYWdvcyIgOiBudWxsLA0KICAgICJudW1QYWdvRWxlY3Ryb25pY28iIDogbnVsbA0KICB9LA0KICAiZXh0ZW5zaW9uIiA6IG51bGwsDQogICJhcGVuZGljZSIgOiBudWxsDQp9.y0tFai5K9AoxrXhfJoJ7SpgJ8xzOULgZDGs5RlCErSjsFDZ56gtms9tD1SD-5Kkj7PLDo0bu7DDYHhU_jPZYFsgHxO1IOLdzRi_l5a2SUsUpHjc6aZrTDflOR7tDhP5yXI0HlQ8o_3y9teP0Ao913G5JLZ6-3ghjRlvKA-TwcRsbaJWlDYCxtH1vOfPz5M7YWLyx73C9Fswb182rmG0bLm4s8SQugf9RXlpWpIYy3g5wwDtNxLHj6xOg3JlV1ErvU4FCecZnKtE9FsPJ548kfAJRdd1B5B5bcnZ34CHLiBev27o0wd_n5KU9WQw0wMl6TydMaD4zx8-kUQq2Ohdpzg",
+    "selloRecibido": "2025A85DB294872A4C139AF2628E4ECEF062KE8C"
+}

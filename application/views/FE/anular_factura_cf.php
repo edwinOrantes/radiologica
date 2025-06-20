@@ -37,10 +37,7 @@
                             <div class="col-md-6">
                                 <h6>Anular factura</h6>
                             </div>
-                            <div class="col-md-6 text-right">
-                                <a class="btn btn-primary btn-sm" href="#actualizarDatos" data-toggle="modal"><i class="fa fa-file"></i> Actualizar datos</a>
-                                <a href="<?php echo base_url()?>Facturacion/procesar_anulacion_factura/" class="btn btn-outline-success btn-sm"><i class="fa fa-arrow-left"></i> Volver</a>
-                            </div>
+                            <div class="col-md-6 text-right"></div>
                         </div>
                     </div>
 
@@ -101,9 +98,9 @@
                                         <label for="tipoAnulacion"> <strong>Tipo de invalidación</strong> </label>
                                         <select class="form-control" id="tipoAnulacion" name="tipoAnulacion" required>
                                             <option value=""></option>
-                                            <option value="1">Error en la información del Documento Tributario Electrónico a invalidar</option>
+                                            <!-- <option value="1">Error en la información del Documento Tributario Electrónico a invalidar</option> -->
                                             <option value="2">Rescindir de la operacion realizada</option>
-                                            <option value="3">Otro</option>
+                                            <!-- <option value="3">Otro</option> -->
                                         </select>
                                         <div class="invalid-tooltip">
                                             Debes seleccionar una opción.

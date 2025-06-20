@@ -73,7 +73,7 @@
 <div class="contenedor">
 
   <div class="caja">
-        <img src="<?php echo base_url(); ?>public/img/logo.jpg" width="200">
+        <img src="<?php echo base_url(); ?>public/img/logo.jpg" width="150" style="margin-top: -20px ">
         <table id="tabla_emisor">
             <tr>
                 <th colspan="2">Actividades de hospitales</th>

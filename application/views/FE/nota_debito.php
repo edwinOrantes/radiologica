@@ -172,39 +172,64 @@
                                             <th class="text-center">Cantidad</th>
                                             <th class="text-center">Descripción</th>
                                             <th class="text-center">Precio Unitario</th>
+                                            <th class="text-center">IVA</th>
                                             <th class="text-center">Subtotal</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <?php
-                                            $subTotal = $jsonDTE["dteJson"]["cuerpoDocumento"][0]["precioUni"];
-                                            $iva = $jsonDTE["dteJson"]["resumen"]["tributos"][0]["valor"];
-                                            $total = $jsonDTE["dteJson"]["resumen"]["montoTotalOperacion"];
-                                            
-                                            $documento = $jsonDTE["dteJson"]["cuerpoDocumento"];
-                                            $strDocumento = urlencode(base64_encode(serialize($jsonDTE))); // Datos de sistema local;
-                                            foreach ($documento as $row) {
+                                            $cuerpoDocumento = $jsonDTE["dteJson"]["cuerpoDocumento"];
+                                            $flag = 1;
+                                            $total = 0;
+                                            foreach ($cuerpoDocumento as $row) {
+                                                echo '<tr>
+                                                        <td class="text-center">1</td>
+                                                        <td class="text-center">'.$row["descripcion"].'</td>
+                                                        <td class="text-center"> $'.number_format($row["precioUni"], 2).'</td>
+                                                        <td class="text-center"> $'.number_format($row["ventaGravada"]*0.13, 2).'</td>
+                                                        <td class="text-center"> $'.number_format(($row["ventaGravada"] + $row["ventaGravada"]*0.13), 2).'
+                                                            <input type="hidden" value="'.round($row["precioUni"], 2).'" id="subTotalOld" name="subTotalOld">
+                                                            <input type="hidden" value="'.round($row["ventaGravada"]*0.13, 2).'" id="ivaOld" name="ivaOld">
+                                                            <input type="hidden" value="'.round(($row["ventaGravada"] + $row["ventaGravada"]*0.13), 2).'" id="totalOld" name="totalOld">
+                                                        </td>
+                                                    </tr>';
+                                                $flag++;
+                                                $total += ($row["ventaGravada"] + $row["ventaGravada"]*0.13);
+                                            }    
                                         ?>
                                         
                                         
 
                                         <tr>
-                                            <td><input size="1" type="text" value="<?php echo $row["cantidad"]; ?>" class="form-control cantidadServicio" id="" name="cantidadServicio" required readonly></td>
-                                            <td>
-                                                <textarea rows="1"  class="form-control descripcionServicios" id="" name="descripcionServicio" required readonly><?php echo $row["descripcion"]; ?></textarea>
-                                            </td>
-                                            <td><input type="text" size="1" value="<?php echo $row["precioUni"]; ?>" class="form-control precioServicio" name="precioServicio" required readonly></td>
-                                            <td><input type="text" size="1" value="<?php echo $row["ventaGravada"]; ?>" class="form-control subtotalServicio" name="subtotalServicio" required readonly></td>
+                                            <td colspan="5" class="text-center"><strong>Nuevos datos</strong></td>
                                         </tr>
 
-                                        <?php } ?>
+                                        <tr>
+                                            <td><input size="1" type="text" value="1" class="form-control" id="cantidadServicio" name="cantidadServicio" required></td>
+                                            <td>
+                                                <textarea rows="1"  class="form-control" id="descripcionServicio" name="descripcionServicio" required></textarea>
+                                            </td>
+                                            <td><input type="text" size="1" value="" class="form-control" id="precioServicio" name="precioServicio" required></td>
+                                            <td><input type="text" size="1" value="" class="form-control" id="ivaServicio" name="ivaServicio" required></td>
+                                            <td><input type="text" size="1" value="" class="form-control" id="totalServicio" name="totalServicio" required readonly></td>
+                                        </tr>
+
+                                            
+                                        <tr>
+                                            <td class="text-right" colspan="4"><strong>TOTAL</strong></td>
+                                            <td class="text-center"><span id="tdTotalGlobal">$<?php echo number_format($total, 2); ?></span>
+                                                <input type="hidden" value="<?php echo round($total, 2) ?>" id="totalGlobal" name="totalGlobal">
+                                                <input type="hidden" value="" id="subTotalNew" name="subTotalNew">
+                                                <input type="hidden" value="" id="ivaNew" name="ivaNew">
+                                                <input type="hidden" value="" id="totalNew" name="totalNew">
+                                            </td>
+                                        </tr>
                                     </tbody>
                                 </table>
                             </div>
                             
                             <div class="row">
                                 <div class="col-md-12 text-center" >
-                                    <input type="hidden" value="<?php echo $strDocumento; ?>" id="strDocumento" name="strDocumento">
                                     <input type="hidden" value="<?php echo $idDTEC; ?>" id="idDTEC" name="idDTEC">
                                     <button class="btn btn-primary mt-4 d-inline w-20" type="submit"> Crear documento <i class="fa fa-arrow-right"></i></button>
                                 </div>

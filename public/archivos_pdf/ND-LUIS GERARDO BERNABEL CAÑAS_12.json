@@ -1,0 +1,106 @@
+{
+    "identificacion": {
+        "version": 3,
+        "ambiente": "00",
+        "tipoDte": "06",
+        "numeroControl": "DTE-06-M001P001-000000000000012",
+        "codigoGeneracion": "52703CED-7EAB-419E-82BC-8B1D93885496",
+        "tipoModelo": 1,
+        "tipoOperacion": 1,
+        "tipoContingencia": null,
+        "motivoContin": null,
+        "fecEmi": "2025-06-05",
+        "horEmi": "09:58:00",
+        "tipoMoneda": "USD"
+    },
+    "documentoRelacionado": [
+        {
+            "tipoDocumento": "03",
+            "tipoGeneracion": 2,
+            "numeroDocumento": "5799F20D-6E36-4EA1-9940-6B565FDF3E35",
+            "fechaEmision": "2025-06-05"
+        }
+    ],
+    "emisor": {
+        "nit": "11232704011016",
+        "nrc": "1303033",
+        "nombre": "Clinica Radiológica Usuluteca, S.A De C.V",
+        "codActividad": "86901",
+        "descActividad": "Servicios de análisis y estudios de diagnóstico",
+        "nombreComercial": "Clinica Radiológica Usuluteca, S.A De C.V",
+        "tipoEstablecimiento": "02",
+        "direccion": {
+            "departamento": "11",
+            "municipio": "25",
+            "complemento": "2a calle poniente y 1a avenida norte #9"
+        },
+        "telefono": "26658914",
+        "correo": "clinicaradiologicausu2021@gmail.com"
+    },
+    "receptor": {
+        "nit": "010714499",
+        "nrc": "1895065",
+        "nombre": "LUIS GERARDO BERNABEL CAÑAS",
+        "codActividad": "86203",
+        "descActividad": "Servicios médicos",
+        "nombreComercial": null,
+        "direccion": {
+            "departamento": "11",
+            "municipio": "24",
+            "complemento": "C. FEDERICO PENADO 7A. AV. NORTE, BO. LA MERCED USULUTÁN"
+        },
+        "telefono": "0000-0000",
+        "correo": "informatica@hospitalorellana.com.sv"
+    },
+    "otrosDocumentos": null,
+    "ventaTercero": null,
+    "cuerpoDocumento": [
+        {
+            "numItem": 1,
+            "tipoItem": 2,
+            "numeroDocumento": "5799F20D-6E36-4EA1-9940-6B565FDF3E35",
+            "cantidad": 1,
+            "codigo": null,
+            "codTributo": null,
+            "uniMedida": 59,
+            "descripcion": "PRUEBA",
+            "precioUni": 6.19,
+            "montoDescu": 0,
+            "ventaNoSuj": 0,
+            "ventaExenta": 0,
+            "ventaGravada": 6.19,
+            "tributos": [
+                "20"
+            ]
+        }
+    ],
+    "resumen": {
+        "totalNoSuj": 0,
+        "totalExenta": 0,
+        "totalGravada": 6.19,
+        "subTotalVentas": 6.19,
+        "descuNoSuj": 0,
+        "descuExenta": 0,
+        "descuGravada": 0,
+        "totalDescu": 0,
+        "tributos": [
+            {
+                "codigo": "20",
+                "descripcion": "Impuesto Al valor agregado 13%",
+                "valor": 0.81
+            }
+        ],
+        "subTotal": 6.19,
+        "ivaPerci1": 0,
+        "ivaRete1": 0,
+        "reteRenta": 0,
+        "montoTotalOperacion": 7,
+        "totalLetras": "SIETE 00\/100",
+        "condicionOperacion": 1,
+        "numPagoElectronico": null
+    },
+    "extension": null,
+    "apendice": null,
+    "firmaElectronica": "eyJhbGciOiJSUzUxMiJ9.ew0KICAiaWRlbnRpZmljYWNpb24iIDogew0KICAgICJ2ZXJzaW9uIiA6IDMsDQogICAgImFtYmllbnRlIiA6ICIwMCIsDQogICAgInRpcG9EdGUiIDogIjA2IiwNCiAgICAibnVtZXJvQ29udHJvbCIgOiAiRFRFLTA2LU0wMDFQMDAxLTAwMDAwMDAwMDAwMDAxMiIsDQogICAgImNvZGlnb0dlbmVyYWNpb24iIDogIjUyNzAzQ0VELTdFQUItNDE5RS04MkJDLThCMUQ5Mzg4NTQ5NiIsDQogICAgInRpcG9Nb2RlbG8iIDogMSwNCiAgICAidGlwb09wZXJhY2lvbiIgOiAxLA0KICAgICJ0aXBvQ29udGluZ2VuY2lhIiA6IG51bGwsDQogICAgIm1vdGl2b0NvbnRpbiIgOiBudWxsLA0KICAgICJmZWNFbWkiIDogIjIwMjUtMDYtMDUiLA0KICAgICJob3JFbWkiIDogIjA5OjU4OjAwIiwNCiAgICAidGlwb01vbmVkYSIgOiAiVVNEIg0KICB9LA0KICAiZG9jdW1lbnRvUmVsYWNpb25hZG8iIDogWyB7DQogICAgInRpcG9Eb2N1bWVudG8iIDogIjAzIiwNCiAgICAidGlwb0dlbmVyYWNpb24iIDogMiwNCiAgICAibnVtZXJvRG9jdW1lbnRvIiA6ICI1Nzk5RjIwRC02RTM2LTRFQTEtOTk0MC02QjU2NUZERjNFMzUiLA0KICAgICJmZWNoYUVtaXNpb24iIDogIjIwMjUtMDYtMDUiDQogIH0gXSwNCiAgImVtaXNvciIgOiB7DQogICAgIm5pdCIgOiAiMTEyMzI3MDQwMTEwMTYiLA0KICAgICJucmMiIDogIjEzMDMwMzMiLA0KICAgICJub21icmUiIDogIkNsaW5pY2EgUmFkaW9sw7NnaWNhIFVzdWx1dGVjYSwgUy5BIERlIEMuViIsDQogICAgImNvZEFjdGl2aWRhZCIgOiAiODY5MDEiLA0KICAgICJkZXNjQWN0aXZpZGFkIiA6ICJTZXJ2aWNpb3MgZGUgYW7DoWxpc2lzIHkgZXN0dWRpb3MgZGUgZGlhZ27Ds3N0aWNvIiwNCiAgICAibm9tYnJlQ29tZXJjaWFsIiA6ICJDbGluaWNhIFJhZGlvbMOzZ2ljYSBVc3VsdXRlY2EsIFMuQSBEZSBDLlYiLA0KICAgICJ0aXBvRXN0YWJsZWNpbWllbnRvIiA6ICIwMiIsDQogICAgImRpcmVjY2lvbiIgOiB7DQogICAgICAiZGVwYXJ0YW1lbnRvIiA6ICIxMSIsDQogICAgICAibXVuaWNpcGlvIiA6ICIyNSIsDQogICAgICAiY29tcGxlbWVudG8iIDogIjJhIGNhbGxlIHBvbmllbnRlIHkgMWEgYXZlbmlkYSBub3J0ZSAjOSINCiAgICB9LA0KICAgICJ0ZWxlZm9ubyIgOiAiMjY2NTg5MTQiLA0KICAgICJjb3JyZW8iIDogImNsaW5pY2FyYWRpb2xvZ2ljYXVzdTIwMjFAZ21haWwuY29tIg0KICB9LA0KICAicmVjZXB0b3IiIDogew0KICAgICJuaXQiIDogIjAxMDcxNDQ5OSIsDQogICAgIm5yYyIgOiAiMTg5NTA2NSIsDQogICAgIm5vbWJyZSIgOiAiTFVJUyBHRVJBUkRPIEJFUk5BQkVMIENBw5FBUyIsDQogICAgImNvZEFjdGl2aWRhZCIgOiAiODYyMDMiLA0KICAgICJkZXNjQWN0aXZpZGFkIiA6ICJTZXJ2aWNpb3MgbcOpZGljb3MiLA0KICAgICJub21icmVDb21lcmNpYWwiIDogbnVsbCwNCiAgICAiZGlyZWNjaW9uIiA6IHsNCiAgICAgICJkZXBhcnRhbWVudG8iIDogIjExIiwNCiAgICAgICJtdW5pY2lwaW8iIDogIjI0IiwNCiAgICAgICJjb21wbGVtZW50byIgOiAiQy4gRkVERVJJQ08gUEVOQURPIDdBLiBBVi4gTk9SVEUsIEJPLiBMQSBNRVJDRUQgVVNVTFVUw4FOIg0KICAgIH0sDQogICAgInRlbGVmb25vIiA6ICIwMDAwLTAwMDAiLA0KICAgICJjb3JyZW8iIDogImluZm9ybWF0aWNhQGhvc3BpdGFsb3JlbGxhbmEuY29tLnN2Ig0KICB9LA0KICAidmVudGFUZXJjZXJvIiA6IG51bGwsDQogICJjdWVycG9Eb2N1bWVudG8iIDogWyB7DQogICAgIm51bUl0ZW0iIDogMSwNCiAgICAidGlwb0l0ZW0iIDogMiwNCiAgICAibnVtZXJvRG9jdW1lbnRvIiA6ICI1Nzk5RjIwRC02RTM2LTRFQTEtOTk0MC02QjU2NUZERjNFMzUiLA0KICAgICJjYW50aWRhZCIgOiAxLA0KICAgICJjb2RpZ28iIDogbnVsbCwNCiAgICAiY29kVHJpYnV0byIgOiBudWxsLA0KICAgICJ1bmlNZWRpZGEiIDogNTksDQogICAgImRlc2NyaXBjaW9uIiA6ICJQUlVFQkEiLA0KICAgICJwcmVjaW9VbmkiIDogNi4xOSwNCiAgICAibW9udG9EZXNjdSIgOiAwLA0KICAgICJ2ZW50YU5vU3VqIiA6IDAsDQogICAgInZlbnRhRXhlbnRhIiA6IDAsDQogICAgInZlbnRhR3JhdmFkYSIgOiA2LjE5LA0KICAgICJ0cmlidXRvcyIgOiBbICIyMCIgXQ0KICB9IF0sDQogICJyZXN1bWVuIiA6IHsNCiAgICAidG90YWxOb1N1aiIgOiAwLA0KICAgICJ0b3RhbEV4ZW50YSIgOiAwLA0KICAgICJ0b3RhbEdyYXZhZGEiIDogNi4xOSwNCiAgICAic3ViVG90YWxWZW50YXMiIDogNi4xOSwNCiAgICAiZGVzY3VOb1N1aiIgOiAwLA0KICAgICJkZXNjdUV4ZW50YSIgOiAwLA0KICAgICJkZXNjdUdyYXZhZGEiIDogMCwNCiAgICAidG90YWxEZXNjdSIgOiAwLA0KICAgICJ0cmlidXRvcyIgOiBbIHsNCiAgICAgICJjb2RpZ28iIDogIjIwIiwNCiAgICAgICJkZXNjcmlwY2lvbiIgOiAiSW1wdWVzdG8gQWwgdmFsb3IgYWdyZWdhZG8gMTMlIiwNCiAgICAgICJ2YWxvciIgOiAwLjgxDQogICAgfSBdLA0KICAgICJzdWJUb3RhbCIgOiA2LjE5LA0KICAgICJpdmFQZXJjaTEiIDogMCwNCiAgICAiaXZhUmV0ZTEiIDogMCwNCiAgICAicmV0ZVJlbnRhIiA6IDAsDQogICAgIm1vbnRvVG90YWxPcGVyYWNpb24iIDogNywNCiAgICAidG90YWxMZXRyYXMiIDogIlNJRVRFIDAwLzEwMCIsDQogICAgImNvbmRpY2lvbk9wZXJhY2lvbiIgOiAxLA0KICAgICJudW1QYWdvRWxlY3Ryb25pY28iIDogbnVsbA0KICB9LA0KICAiZXh0ZW5zaW9uIiA6IG51bGwsDQogICJhcGVuZGljZSIgOiBudWxsDQp9.StPYKtnz4mCsiyz8Kwf57bSnUukdztkbyxHHmSNEKHgXJdKkx_vxQYBtU-r_U2iYiXZHQLp0xS517qg9g0-nG3shc8xrYwGj3f-4or2Sz2HuHmSxEUxIOeI4rpuPzGLbnfa0X2HdlfrKI5jKGvxu8jW65Y1o6CB_i405p2nRiCQWOIRS4Vr23WHO245XTack6jdbxVXHcb38A5L-NreRiFQ5xyteuOAg5gVbzSChVFI9cv15IVNeWM3kGLJQuvFaxz_WGA1MW-RjE_9OHztdjZrtcng7q8MnB1NuCuL0XLn_5pZVk-jQzK9a9gQFzPSG_PM4K6cNUnlh9LkHLgqGLg",
+    "selloRecibido": "2025873E3FDC5FF34DCCA756C79481053675YGPM"
+}

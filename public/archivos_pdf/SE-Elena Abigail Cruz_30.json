@@ -1,0 +1,89 @@
+{
+    "identificacion": {
+        "version": 1,
+        "ambiente": "00",
+        "tipoDte": "14",
+        "numeroControl": "DTE-14-M001P001-000000000000030",
+        "codigoGeneracion": "1EAEF444-2396-4FC4-8AC8-4A03A9136ECE",
+        "tipoModelo": 1,
+        "tipoOperacion": 1,
+        "tipoContingencia": null,
+        "motivoContin": null,
+        "fecEmi": "2025-06-03",
+        "horEmi": "09:36:34",
+        "tipoMoneda": "USD"
+    },
+    "documentoRelacionado": null,
+    "emisor": {
+        "nit": "12173011871027",
+        "nrc": "2569276",
+        "nombre": "MENDEZ APARICIO, ELISEO ENRIQUE DR.",
+        "codActividad": "86203",
+        "descActividad": "Servicios medicos",
+        "direccion": {
+            "departamento": "12",
+            "municipio": "23",
+            "complemento": "AVENIDA FERROCARRIL #51 BARRIO LA CRUZ EL TRANSITO SAN MIGUEL OESTE SAN MIGUEL"
+        },
+        "telefono": "70450590",
+        "codEstableMH": "P001",
+        "codEstable": null,
+        "codPuntoVentaMH": "M001",
+        "codPuntoVenta": null,
+        "correo": "eltransitocentromedicolafamilia@gmail.com"
+    },
+    "receptor": {
+        "tipoDocumento": "13",
+        "numDocumento": "123456789",
+        "nombre": "Elena Abigail Cruz",
+        "codActividad": null,
+        "descActividad": null,
+        "direccion": {
+            "departamento": "11",
+            "municipio": "25",
+            "complemento": "El Aguacero"
+        },
+        "telefono": "7927-8472",
+        "correo": "example@example.com"
+    },
+    "otrosDocumentos": null,
+    "ventaTercero": null,
+    "cuerpoDocumento": [
+        {
+            "numItem": 1,
+            "tipoItem": 1,
+            "cantidad": 1,
+            "codigo": null,
+            "uniMedida": 59,
+            "descripcion": "prueba",
+            "precioUni": 50,
+            "montoDescu": 0,
+            "compra": 50
+        }
+    ],
+    "resumen": {
+        "totalCompra": 50,
+        "descu": 0,
+        "totalDescu": 0,
+        "subTotal": 50,
+        "ivaRete1": 0,
+        "reteRenta": 0,
+        "totalPagar": 50,
+        "totalLetras": "CINCUENTA 00\/100 DOLARES",
+        "condicionOperacion": 1,
+        "pagos": [
+            {
+                "codigo": "01",
+                "montoPago": 50,
+                "referencia": null,
+                "plazo": null,
+                "periodo": null
+            }
+        ],
+        "observaciones": null
+    },
+    "extension": null,
+    "apendice": null,
+    "firmaElectronica": "eyJhbGciOiJSUzUxMiJ9.ew0KICAiaWRlbnRpZmljYWNpb24iIDogew0KICAgICJ2ZXJzaW9uIiA6IDEsDQogICAgImFtYmllbnRlIiA6ICIwMCIsDQogICAgInRpcG9EdGUiIDogIjE0IiwNCiAgICAibnVtZXJvQ29udHJvbCIgOiAiRFRFLTE0LU0wMDFQMDAxLTAwMDAwMDAwMDAwMDAzMCIsDQogICAgImNvZGlnb0dlbmVyYWNpb24iIDogIjFFQUVGNDQ0LTIzOTYtNEZDNC04QUM4LTRBMDNBOTEzNkVDRSIsDQogICAgInRpcG9Nb2RlbG8iIDogMSwNCiAgICAidGlwb09wZXJhY2lvbiIgOiAxLA0KICAgICJ0aXBvQ29udGluZ2VuY2lhIiA6IG51bGwsDQogICAgIm1vdGl2b0NvbnRpbiIgOiBudWxsLA0KICAgICJmZWNFbWkiIDogIjIwMjUtMDYtMDMiLA0KICAgICJob3JFbWkiIDogIjA5OjM2OjM0IiwNCiAgICAidGlwb01vbmVkYSIgOiAiVVNEIg0KICB9LA0KICAiZW1pc29yIiA6IHsNCiAgICAibml0IiA6ICIxMjE3MzAxMTg3MTAyNyIsDQogICAgIm5yYyIgOiAiMjU2OTI3NiIsDQogICAgIm5vbWJyZSIgOiAiTUVOREVaIEFQQVJJQ0lPLCBFTElTRU8gRU5SSVFVRSBEUi4iLA0KICAgICJjb2RBY3RpdmlkYWQiIDogIjg2MjAzIiwNCiAgICAiZGVzY0FjdGl2aWRhZCIgOiAiU2VydmljaW9zIG1lZGljb3MiLA0KICAgICJkaXJlY2Npb24iIDogew0KICAgICAgImRlcGFydGFtZW50byIgOiAiMTIiLA0KICAgICAgIm11bmljaXBpbyIgOiAiMjMiLA0KICAgICAgImNvbXBsZW1lbnRvIiA6ICJBVkVOSURBIEZFUlJPQ0FSUklMICM1MSBCQVJSSU8gTEEgQ1JVWiBFTCBUUkFOU0lUTyBTQU4gTUlHVUVMIE9FU1RFIFNBTiBNSUdVRUwiDQogICAgfSwNCiAgICAidGVsZWZvbm8iIDogIjcwNDUwNTkwIiwNCiAgICAiY29kRXN0YWJsZU1IIiA6ICJQMDAxIiwNCiAgICAiY29kRXN0YWJsZSIgOiBudWxsLA0KICAgICJjb2RQdW50b1ZlbnRhTUgiIDogIk0wMDEiLA0KICAgICJjb2RQdW50b1ZlbnRhIiA6IG51bGwsDQogICAgImNvcnJlbyIgOiAiZWx0cmFuc2l0b2NlbnRyb21lZGljb2xhZmFtaWxpYUBnbWFpbC5jb20iDQogIH0sDQogICJzdWpldG9FeGNsdWlkbyIgOiB7DQogICAgInRpcG9Eb2N1bWVudG8iIDogIjEzIiwNCiAgICAibnVtRG9jdW1lbnRvIiA6ICIxMjM0NTY3ODkiLA0KICAgICJub21icmUiIDogIkVsZW5hIEFiaWdhaWwgQ3J1eiIsDQogICAgImNvZEFjdGl2aWRhZCIgOiBudWxsLA0KICAgICJkZXNjQWN0aXZpZGFkIiA6IG51bGwsDQogICAgImRpcmVjY2lvbiIgOiB7DQogICAgICAiZGVwYXJ0YW1lbnRvIiA6ICIxMSIsDQogICAgICAibXVuaWNpcGlvIiA6ICIyNSIsDQogICAgICAiY29tcGxlbWVudG8iIDogIkVsIEFndWFjZXJvIg0KICAgIH0sDQogICAgInRlbGVmb25vIiA6ICI3OTI3LTg0NzIiLA0KICAgICJjb3JyZW8iIDogImV4YW1wbGVAZXhhbXBsZS5jb20iDQogIH0sDQogICJjdWVycG9Eb2N1bWVudG8iIDogWyB7DQogICAgIm51bUl0ZW0iIDogMSwNCiAgICAidGlwb0l0ZW0iIDogMSwNCiAgICAiY2FudGlkYWQiIDogMSwNCiAgICAiY29kaWdvIiA6IG51bGwsDQogICAgInVuaU1lZGlkYSIgOiA1OSwNCiAgICAiZGVzY3JpcGNpb24iIDogInBydWViYSIsDQogICAgInByZWNpb1VuaSIgOiA1MCwNCiAgICAibW9udG9EZXNjdSIgOiAwLA0KICAgICJjb21wcmEiIDogNTANCiAgfSBdLA0KICAicmVzdW1lbiIgOiB7DQogICAgInRvdGFsQ29tcHJhIiA6IDUwLA0KICAgICJkZXNjdSIgOiAwLA0KICAgICJ0b3RhbERlc2N1IiA6IDAsDQogICAgInN1YlRvdGFsIiA6IDUwLA0KICAgICJpdmFSZXRlMSIgOiAwLA0KICAgICJyZXRlUmVudGEiIDogMCwNCiAgICAidG90YWxQYWdhciIgOiA1MCwNCiAgICAidG90YWxMZXRyYXMiIDogIkNJTkNVRU5UQSAwMC8xMDAgRE9MQVJFUyIsDQogICAgImNvbmRpY2lvbk9wZXJhY2lvbiIgOiAxLA0KICAgICJwYWdvcyIgOiBbIHsNCiAgICAgICJjb2RpZ28iIDogIjAxIiwNCiAgICAgICJtb250b1BhZ28iIDogNTAsDQogICAgICAicmVmZXJlbmNpYSIgOiBudWxsLA0KICAgICAgInBsYXpvIiA6IG51bGwsDQogICAgICAicGVyaW9kbyIgOiBudWxsDQogICAgfSBdLA0KICAgICJvYnNlcnZhY2lvbmVzIiA6IG51bGwNCiAgfSwNCiAgImFwZW5kaWNlIiA6IG51bGwNCn0.Frf7S05AdXcGF-qlGvXOY1bGZB0DmJjbwMwR6-Zd5J23sCu2v81u5XwN7dO43ouTIAe6gyWneLKJjOXoKKyy5e_QtEubkYRhCnX575U0xFKjAssTkR4u1wTHB7a_0-MMBhGGHP8VVxU7cLXy10tL5dUByl330zZEz7xgYzLGSOSdwf52_UkMABcUT3xTcnJk0r44ybkCmLTwfaZydESVLWlYrAFG2uvj9IvHX1cRFU3CZmb34-6y9Uvy-HkYW9XkLgYonQZRo17w63NCqy4VvJRkcrp0r23tkClPqkRFumBnNmp8BxRvusFhSyrsaCC_fF0F7oemcx9-i9FWylHvUw",
+    "selloRecibido": "20257DDC900BD7204AA284B4E920F3BA9827OLCD"
+}

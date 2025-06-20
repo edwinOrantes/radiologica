@@ -1,0 +1,89 @@
+{
+    "identificacion": {
+        "version": 1,
+        "ambiente": "00",
+        "tipoDte": "14",
+        "numeroControl": "DTE-14-M001P001-000000000000003",
+        "codigoGeneracion": "89D30AB8-A603-4580-A316-737F9D3B9888",
+        "tipoModelo": 1,
+        "tipoOperacion": 1,
+        "tipoContingencia": null,
+        "motivoContin": null,
+        "fecEmi": "2025-06-05",
+        "horEmi": "10:10:04",
+        "tipoMoneda": "USD"
+    },
+    "documentoRelacionado": null,
+    "emisor": {
+        "nit": "11232704011016",
+        "nrc": "1303033",
+        "nombre": "Clinica Radiológica Usuluteca, S.A De C.V",
+        "codActividad": "86901",
+        "descActividad": "Servicios de análisis y estudios de diagnóstico",
+        "direccion": {
+            "departamento": "11",
+            "municipio": "25",
+            "complemento": "2a calle poniente y 1a avenida norte #9"
+        },
+        "telefono": "26658914",
+        "codEstableMH": "P001",
+        "codEstable": null,
+        "codPuntoVentaMH": "M001",
+        "codPuntoVenta": null,
+        "correo": "clinicaradiologicausu2021@gmail.com"
+    },
+    "receptor": {
+        "tipoDocumento": "13",
+        "numDocumento": "123456789",
+        "nombre": "Elena Abigail Cruz",
+        "codActividad": null,
+        "descActividad": null,
+        "direccion": {
+            "departamento": "11",
+            "municipio": "25",
+            "complemento": "El Aguacero"
+        },
+        "telefono": "7927-8472",
+        "correo": "example@example.com"
+    },
+    "otrosDocumentos": null,
+    "ventaTercero": null,
+    "cuerpoDocumento": [
+        {
+            "numItem": 1,
+            "tipoItem": 1,
+            "cantidad": 1,
+            "codigo": null,
+            "uniMedida": 59,
+            "descripcion": "Prueba",
+            "precioUni": 50,
+            "montoDescu": 0,
+            "compra": 50
+        }
+    ],
+    "resumen": {
+        "totalCompra": 50,
+        "descu": 0,
+        "totalDescu": 0,
+        "subTotal": 50,
+        "ivaRete1": 0,
+        "reteRenta": 0,
+        "totalPagar": 50,
+        "totalLetras": "CINCUENTA 00\/100 DOLARES",
+        "condicionOperacion": 1,
+        "pagos": [
+            {
+                "codigo": "01",
+                "montoPago": 50,
+                "referencia": null,
+                "plazo": null,
+                "periodo": null
+            }
+        ],
+        "observaciones": null
+    },
+    "extension": null,
+    "apendice": null,
+    "firmaElectronica": "eyJhbGciOiJSUzUxMiJ9.ew0KICAiaWRlbnRpZmljYWNpb24iIDogew0KICAgICJ2ZXJzaW9uIiA6IDEsDQogICAgImFtYmllbnRlIiA6ICIwMCIsDQogICAgInRpcG9EdGUiIDogIjE0IiwNCiAgICAibnVtZXJvQ29udHJvbCIgOiAiRFRFLTE0LU0wMDFQMDAxLTAwMDAwMDAwMDAwMDAwMyIsDQogICAgImNvZGlnb0dlbmVyYWNpb24iIDogIjg5RDMwQUI4LUE2MDMtNDU4MC1BMzE2LTczN0Y5RDNCOTg4OCIsDQogICAgInRpcG9Nb2RlbG8iIDogMSwNCiAgICAidGlwb09wZXJhY2lvbiIgOiAxLA0KICAgICJ0aXBvQ29udGluZ2VuY2lhIiA6IG51bGwsDQogICAgIm1vdGl2b0NvbnRpbiIgOiBudWxsLA0KICAgICJmZWNFbWkiIDogIjIwMjUtMDYtMDUiLA0KICAgICJob3JFbWkiIDogIjEwOjEwOjA0IiwNCiAgICAidGlwb01vbmVkYSIgOiAiVVNEIg0KICB9LA0KICAiZW1pc29yIiA6IHsNCiAgICAibml0IiA6ICIxMTIzMjcwNDAxMTAxNiIsDQogICAgIm5yYyIgOiAiMTMwMzAzMyIsDQogICAgIm5vbWJyZSIgOiAiQ2xpbmljYSBSYWRpb2zDs2dpY2EgVXN1bHV0ZWNhLCBTLkEgRGUgQy5WIiwNCiAgICAiY29kQWN0aXZpZGFkIiA6ICI4NjkwMSIsDQogICAgImRlc2NBY3RpdmlkYWQiIDogIlNlcnZpY2lvcyBkZSBhbsOhbGlzaXMgeSBlc3R1ZGlvcyBkZSBkaWFnbsOzc3RpY28iLA0KICAgICJkaXJlY2Npb24iIDogew0KICAgICAgImRlcGFydGFtZW50byIgOiAiMTEiLA0KICAgICAgIm11bmljaXBpbyIgOiAiMjUiLA0KICAgICAgImNvbXBsZW1lbnRvIiA6ICIyYSBjYWxsZSBwb25pZW50ZSB5IDFhIGF2ZW5pZGEgbm9ydGUgIzkiDQogICAgfSwNCiAgICAidGVsZWZvbm8iIDogIjI2NjU4OTE0IiwNCiAgICAiY29kRXN0YWJsZU1IIiA6ICJQMDAxIiwNCiAgICAiY29kRXN0YWJsZSIgOiBudWxsLA0KICAgICJjb2RQdW50b1ZlbnRhTUgiIDogIk0wMDEiLA0KICAgICJjb2RQdW50b1ZlbnRhIiA6IG51bGwsDQogICAgImNvcnJlbyIgOiAiY2xpbmljYXJhZGlvbG9naWNhdXN1MjAyMUBnbWFpbC5jb20iDQogIH0sDQogICJzdWpldG9FeGNsdWlkbyIgOiB7DQogICAgInRpcG9Eb2N1bWVudG8iIDogIjEzIiwNCiAgICAibnVtRG9jdW1lbnRvIiA6ICIxMjM0NTY3ODkiLA0KICAgICJub21icmUiIDogIkVsZW5hIEFiaWdhaWwgQ3J1eiIsDQogICAgImNvZEFjdGl2aWRhZCIgOiBudWxsLA0KICAgICJkZXNjQWN0aXZpZGFkIiA6IG51bGwsDQogICAgImRpcmVjY2lvbiIgOiB7DQogICAgICAiZGVwYXJ0YW1lbnRvIiA6ICIxMSIsDQogICAgICAibXVuaWNpcGlvIiA6ICIyNSIsDQogICAgICAiY29tcGxlbWVudG8iIDogIkVsIEFndWFjZXJvIg0KICAgIH0sDQogICAgInRlbGVmb25vIiA6ICI3OTI3LTg0NzIiLA0KICAgICJjb3JyZW8iIDogImV4YW1wbGVAZXhhbXBsZS5jb20iDQogIH0sDQogICJjdWVycG9Eb2N1bWVudG8iIDogWyB7DQogICAgIm51bUl0ZW0iIDogMSwNCiAgICAidGlwb0l0ZW0iIDogMSwNCiAgICAiY2FudGlkYWQiIDogMSwNCiAgICAiY29kaWdvIiA6IG51bGwsDQogICAgInVuaU1lZGlkYSIgOiA1OSwNCiAgICAiZGVzY3JpcGNpb24iIDogIlBydWViYSIsDQogICAgInByZWNpb1VuaSIgOiA1MCwNCiAgICAibW9udG9EZXNjdSIgOiAwLA0KICAgICJjb21wcmEiIDogNTANCiAgfSBdLA0KICAicmVzdW1lbiIgOiB7DQogICAgInRvdGFsQ29tcHJhIiA6IDUwLA0KICAgICJkZXNjdSIgOiAwLA0KICAgICJ0b3RhbERlc2N1IiA6IDAsDQogICAgInN1YlRvdGFsIiA6IDUwLA0KICAgICJpdmFSZXRlMSIgOiAwLA0KICAgICJyZXRlUmVudGEiIDogMCwNCiAgICAidG90YWxQYWdhciIgOiA1MCwNCiAgICAidG90YWxMZXRyYXMiIDogIkNJTkNVRU5UQSAwMC8xMDAgRE9MQVJFUyIsDQogICAgImNvbmRpY2lvbk9wZXJhY2lvbiIgOiAxLA0KICAgICJwYWdvcyIgOiBbIHsNCiAgICAgICJjb2RpZ28iIDogIjAxIiwNCiAgICAgICJtb250b1BhZ28iIDogNTAsDQogICAgICAicmVmZXJlbmNpYSIgOiBudWxsLA0KICAgICAgInBsYXpvIiA6IG51bGwsDQogICAgICAicGVyaW9kbyIgOiBudWxsDQogICAgfSBdLA0KICAgICJvYnNlcnZhY2lvbmVzIiA6IG51bGwNCiAgfSwNCiAgImFwZW5kaWNlIiA6IG51bGwNCn0.q87N3Lf0B1yaGN31ZB7g5AW0OBGxWJpkLQa-5FjnLP8tnHLNVMaYCMSGJQhamFOrgy8FPDtz6aZFZqgT8GoPuHKRvc4FpJM2VMUAs5-9kbCmK-83SeS0l_GdW1whWAvKcLc6XHkbjyKzpCKI9C7lTnBzHFxxuYIzCLbgNXlz3IHPIrQtAbIUHpTDILYDBCZMRDQo8tDgULLwURYFbUBpw8xtBJjrySlS6wzAIvz99hE8rDZJ4-bOcP0h0ZQm4E3CacEWE3B7jfetNeGBAT4sVoWTv2jXk7b2Lq0UOqZHxzMeDsMZGJGKoh-oPSO-LXyqVni-5Nk_LgjsJ1DcA3TPjg",
+    "selloRecibido": "20250E353A51A9DD4872BB5EBA103A219BF9A43W"
+}

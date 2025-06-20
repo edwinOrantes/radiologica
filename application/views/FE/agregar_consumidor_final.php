@@ -37,7 +37,7 @@
                     </div>
 
                     <div class="ms-panel-body">
-                        <form class="needs-validation" method="post" action="<?php echo base_url()?>Facturacion/crear_estructura_cf" novalidate>
+                        <form class="needs-validation" target="_blank" method="post" action="<?php echo base_url()?>Facturacion/crear_estructura_cf" novalidate>
 
                             <!-- Datos del emisor -->
                                 <div class="row">

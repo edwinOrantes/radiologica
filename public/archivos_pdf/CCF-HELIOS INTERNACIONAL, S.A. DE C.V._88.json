@@ -1,0 +1,110 @@
+{
+    "identificacion": {
+        "version": 3,
+        "ambiente": "00",
+        "tipoDte": "03",
+        "numeroControl": "DTE-03-M001P001-000000000000087",
+        "codigoGeneracion": "614A4170-BF32-4D97-B2E2-391D6E29915E",
+        "tipoModelo": 1,
+        "tipoOperacion": 1,
+        "tipoContingencia": null,
+        "motivoContin": null,
+        "fecEmi": "2025-06-03",
+        "horEmi": "09:01:44",
+        "tipoMoneda": "USD"
+    },
+    "documentoRelacionado": null,
+    "emisor": {
+        "nit": "12173011871027",
+        "nrc": "2569276",
+        "nombre": "MENDEZ APARICIO, ELISEO ENRIQUE DR.",
+        "codActividad": "86203",
+        "descActividad": "Servicios medicos",
+        "nombreComercial": "MENDEZ APARICIO, ELISEO ENRIQUE DR.",
+        "tipoEstablecimiento": "02",
+        "direccion": {
+            "departamento": "12",
+            "municipio": "23",
+            "complemento": "AVENIDA FERROCARRIL #51 BARRIO LA CRUZ EL TRANSITO SAN MIGUEL OESTE SAN MIGUEL"
+        },
+        "telefono": "70450590",
+        "correo": "eltransitocentromedicolafamilia@gmail.com",
+        "codEstableMH": "P001",
+        "codEstable": null,
+        "codPuntoVentaMH": "M001",
+        "codPuntoVenta": null
+    },
+    "receptor": {
+        "nit": "06142407961057",
+        "nrc": "1208778",
+        "nombre": "HELIOS INTERNACIONAL, S.A. DE C.V.",
+        "codActividad": "46484",
+        "descActividad": "Venta de productos farmacéuticos y medicinales",
+        "nombreComercial": null,
+        "direccion": {
+            "departamento": "14",
+            "municipio": "19",
+            "complemento": "10a CALLE ORIENTE Y 8a AV. SUR BO. LA VEGA  # 470"
+        },
+        "telefono": "22810222",
+        "correo": "example@example.com"
+    },
+    "otrosDocumentos": null,
+    "ventaTercero": null,
+    "cuerpoDocumento": [
+        {
+            "numItem": 1,
+            "tipoItem": 2,
+            "numeroDocumento": null,
+            "codigo": null,
+            "codTributo": null,
+            "descripcion": "USG Musculo Esqueletico",
+            "cantidad": 1,
+            "uniMedida": 59,
+            "precioUni": 30.97345,
+            "montoDescu": 0,
+            "ventaNoSuj": 0,
+            "ventaExenta": 0,
+            "ventaGravada": 30.97345,
+            "tributos": [
+                "20"
+            ],
+            "psv": 0,
+            "noGravado": 0
+        }
+    ],
+    "resumen": {
+        "totalNoSuj": 0,
+        "totalExenta": 0,
+        "totalGravada": 30.97,
+        "subTotalVentas": 30.97,
+        "descuNoSuj": 0,
+        "descuExenta": 0,
+        "descuGravada": 0,
+        "porcentajeDescuento": 0,
+        "totalDescu": 0,
+        "tributos": [
+            {
+                "codigo": "20",
+                "descripcion": "Impuesto Al valor agregado 13%",
+                "valor": 4.03
+            }
+        ],
+        "subTotal": 30.97,
+        "ivaPerci1": 0,
+        "ivaRete1": 0,
+        "reteRenta": 0,
+        "montoTotalOperacion": 35,
+        "totalNoGravado": 0,
+        "totalPagar": 35,
+        "totalLetras": "TREINTA Y CINCO 00\/100 DOLARES",
+        "saldoFavor": 0,
+        "condicionOperacion": 1,
+        "pagos": null,
+        "numPagoElectronico": null
+    },
+    "extension": null,
+    "apendice": null,
+    "firmaElectronica": "eyJhbGciOiJSUzUxMiJ9.ew0KICAiaWRlbnRpZmljYWNpb24iIDogew0KICAgICJ2ZXJzaW9uIiA6IDMsDQogICAgImFtYmllbnRlIiA6ICIwMCIsDQogICAgInRpcG9EdGUiIDogIjAzIiwNCiAgICAibnVtZXJvQ29udHJvbCIgOiAiRFRFLTAzLU0wMDFQMDAxLTAwMDAwMDAwMDAwMDA4NyIsDQogICAgImNvZGlnb0dlbmVyYWNpb24iIDogIjYxNEE0MTcwLUJGMzItNEQ5Ny1CMkUyLTM5MUQ2RTI5OTE1RSIsDQogICAgInRpcG9Nb2RlbG8iIDogMSwNCiAgICAidGlwb09wZXJhY2lvbiIgOiAxLA0KICAgICJ0aXBvQ29udGluZ2VuY2lhIiA6IG51bGwsDQogICAgIm1vdGl2b0NvbnRpbiIgOiBudWxsLA0KICAgICJmZWNFbWkiIDogIjIwMjUtMDYtMDMiLA0KICAgICJob3JFbWkiIDogIjA5OjAxOjQ0IiwNCiAgICAidGlwb01vbmVkYSIgOiAiVVNEIg0KICB9LA0KICAiZG9jdW1lbnRvUmVsYWNpb25hZG8iIDogbnVsbCwNCiAgImVtaXNvciIgOiB7DQogICAgIm5pdCIgOiAiMTIxNzMwMTE4NzEwMjciLA0KICAgICJucmMiIDogIjI1NjkyNzYiLA0KICAgICJub21icmUiIDogIk1FTkRFWiBBUEFSSUNJTywgRUxJU0VPIEVOUklRVUUgRFIuIiwNCiAgICAiY29kQWN0aXZpZGFkIiA6ICI4NjIwMyIsDQogICAgImRlc2NBY3RpdmlkYWQiIDogIlNlcnZpY2lvcyBtZWRpY29zIiwNCiAgICAibm9tYnJlQ29tZXJjaWFsIiA6ICJNRU5ERVogQVBBUklDSU8sIEVMSVNFTyBFTlJJUVVFIERSLiIsDQogICAgInRpcG9Fc3RhYmxlY2ltaWVudG8iIDogIjAyIiwNCiAgICAiZGlyZWNjaW9uIiA6IHsNCiAgICAgICJkZXBhcnRhbWVudG8iIDogIjEyIiwNCiAgICAgICJtdW5pY2lwaW8iIDogIjIzIiwNCiAgICAgICJjb21wbGVtZW50byIgOiAiQVZFTklEQSBGRVJST0NBUlJJTCAjNTEgQkFSUklPIExBIENSVVogRUwgVFJBTlNJVE8gU0FOIE1JR1VFTCBPRVNURSBTQU4gTUlHVUVMIg0KICAgIH0sDQogICAgInRlbGVmb25vIiA6ICI3MDQ1MDU5MCIsDQogICAgImNvcnJlbyIgOiAiZWx0cmFuc2l0b2NlbnRyb21lZGljb2xhZmFtaWxpYUBnbWFpbC5jb20iLA0KICAgICJjb2RFc3RhYmxlTUgiIDogIlAwMDEiLA0KICAgICJjb2RFc3RhYmxlIiA6IG51bGwsDQogICAgImNvZFB1bnRvVmVudGFNSCIgOiAiTTAwMSIsDQogICAgImNvZFB1bnRvVmVudGEiIDogbnVsbA0KICB9LA0KICAicmVjZXB0b3IiIDogew0KICAgICJuaXQiIDogIjA2MTQyNDA3OTYxMDU3IiwNCiAgICAibnJjIiA6ICIxMjA4Nzc4IiwNCiAgICAibm9tYnJlIiA6ICJIRUxJT1MgSU5URVJOQUNJT05BTCwgUy5BLiBERSBDLlYuIiwNCiAgICAiY29kQWN0aXZpZGFkIiA6ICI0NjQ4NCIsDQogICAgImRlc2NBY3RpdmlkYWQiIDogIlZlbnRhIGRlIHByb2R1Y3RvcyBmYXJtYWPDqXV0aWNvcyB5IG1lZGljaW5hbGVzIiwNCiAgICAibm9tYnJlQ29tZXJjaWFsIiA6IG51bGwsDQogICAgImRpcmVjY2lvbiIgOiB7DQogICAgICAiZGVwYXJ0YW1lbnRvIiA6ICIxNCIsDQogICAgICAibXVuaWNpcGlvIiA6ICIxOSIsDQogICAgICAiY29tcGxlbWVudG8iIDogIjEwYSBDQUxMRSBPUklFTlRFIFkgOGEgQVYuIFNVUiBCTy4gTEEgVkVHQSAgIyA0NzAiDQogICAgfSwNCiAgICAidGVsZWZvbm8iIDogIjIyODEwMjIyIiwNCiAgICAiY29ycmVvIiA6ICJleGFtcGxlQGV4YW1wbGUuY29tIg0KICB9LA0KICAib3Ryb3NEb2N1bWVudG9zIiA6IG51bGwsDQogICJ2ZW50YVRlcmNlcm8iIDogbnVsbCwNCiAgImN1ZXJwb0RvY3VtZW50byIgOiBbIHsNCiAgICAibnVtSXRlbSIgOiAxLA0KICAgICJ0aXBvSXRlbSIgOiAyLA0KICAgICJudW1lcm9Eb2N1bWVudG8iIDogbnVsbCwNCiAgICAiY29kaWdvIiA6IG51bGwsDQogICAgImNvZFRyaWJ1dG8iIDogbnVsbCwNCiAgICAiZGVzY3JpcGNpb24iIDogIlVTRyBNdXNjdWxvIEVzcXVlbGV0aWNvIiwNCiAgICAiY2FudGlkYWQiIDogMSwNCiAgICAidW5pTWVkaWRhIiA6IDU5LA0KICAgICJwcmVjaW9VbmkiIDogMzAuOTczNDUsDQogICAgIm1vbnRvRGVzY3UiIDogMCwNCiAgICAidmVudGFOb1N1aiIgOiAwLA0KICAgICJ2ZW50YUV4ZW50YSIgOiAwLA0KICAgICJ2ZW50YUdyYXZhZGEiIDogMzAuOTczNDUsDQogICAgInRyaWJ1dG9zIiA6IFsgIjIwIiBdLA0KICAgICJwc3YiIDogMCwNCiAgICAibm9HcmF2YWRvIiA6IDANCiAgfSBdLA0KICAicmVzdW1lbiIgOiB7DQogICAgInRvdGFsTm9TdWoiIDogMCwNCiAgICAidG90YWxFeGVudGEiIDogMCwNCiAgICAidG90YWxHcmF2YWRhIiA6IDMwLjk3LA0KICAgICJzdWJUb3RhbFZlbnRhcyIgOiAzMC45NywNCiAgICAiZGVzY3VOb1N1aiIgOiAwLA0KICAgICJkZXNjdUV4ZW50YSIgOiAwLA0KICAgICJkZXNjdUdyYXZhZGEiIDogMCwNCiAgICAicG9yY2VudGFqZURlc2N1ZW50byIgOiAwLA0KICAgICJ0b3RhbERlc2N1IiA6IDAsDQogICAgInRyaWJ1dG9zIiA6IFsgew0KICAgICAgImNvZGlnbyIgOiAiMjAiLA0KICAgICAgImRlc2NyaXBjaW9uIiA6ICJJbXB1ZXN0byBBbCB2YWxvciBhZ3JlZ2FkbyAxMyUiLA0KICAgICAgInZhbG9yIiA6IDQuMDMNCiAgICB9IF0sDQogICAgInN1YlRvdGFsIiA6IDMwLjk3LA0KICAgICJpdmFQZXJjaTEiIDogMCwNCiAgICAiaXZhUmV0ZTEiIDogMCwNCiAgICAicmV0ZVJlbnRhIiA6IDAsDQogICAgIm1vbnRvVG90YWxPcGVyYWNpb24iIDogMzUsDQogICAgInRvdGFsTm9HcmF2YWRvIiA6IDAsDQogICAgInRvdGFsUGFnYXIiIDogMzUsDQogICAgInRvdGFsTGV0cmFzIiA6ICJUUkVJTlRBIFkgQ0lOQ08gMDAvMTAwIERPTEFSRVMiLA0KICAgICJzYWxkb0Zhdm9yIiA6IDAsDQogICAgImNvbmRpY2lvbk9wZXJhY2lvbiIgOiAxLA0KICAgICJwYWdvcyIgOiBudWxsLA0KICAgICJudW1QYWdvRWxlY3Ryb25pY28iIDogbnVsbA0KICB9LA0KICAiZXh0ZW5zaW9uIiA6IG51bGwsDQogICJhcGVuZGljZSIgOiBudWxsDQp9.PiMw888BEYtP70IgWpIwKVSuVO6xC45M7SPzRf_OyVp83S4WcJh5JEatVZ-ggOcmakijHFejtfMYJTqM3ZejQS1g_JsNv_DKNoPSxY9Aj5m5uIwarfs-azWJ3IdMHUDigoc_b3sX_EE9sfUc_QzY-dGMy3Y2KaSdM3bswYX58UpK9hrrobkIrJ1wS2Yyp1_H2Jdrexg1lbt7HXYOuWGZZ15_ayHzT99oKP3p_J7uTr1nmv5G6LQLcZjR4JOYt36NY4EEtOGanoARIN0RieE7pu0madw-wGBzJu7pr78A78l23VGVYwlLBjlBo4--6FdcxNfaHv1GOOnMW91iucCrhg",
+    "selloRecibido": "20257269763AF6F946DB981B9FBF07007009ZCBP"
+}

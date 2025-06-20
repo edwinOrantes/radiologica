@@ -109,7 +109,7 @@
 													<a href="<?php echo base_url('Facturacion/descargar_archivo/' . $archivo['nombre_pdf'] . '/' . $archivo['nombre_json']); ?>" class="btn btn-primary btn-sm">
 														<i class="fa fa-download fa-xs"></i>
 													</a>
-													<a href="#envioDeCorreo" data-toggle="modal" class="btn btn-outline-primary btn-sm btnEnviarCorreo"> <i class="fa fa-share fa-xs"></i> </a>
+													<!-- <a href="#envioDeCorreo" data-toggle="modal" class="btn btn-outline-primary btn-sm btnEnviarCorreo"> <i class="fa fa-share fa-xs"></i> </a> -->
 												</td>
 
 

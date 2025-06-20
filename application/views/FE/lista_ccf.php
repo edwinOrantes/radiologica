@@ -105,7 +105,7 @@
 															if($row->estadoDTE == 1){
 														?>
 															<li><a class="dropdown-item btnRecibo" href="<?php echo base_url(); ?>Facturacion/nota_credito/<?php echo $row->idDTEFC; ?>/">Nota crédito</a></li>
-															<!-- <li><a class="dropdown-item" href="<?php echo base_url(); ?>Facturacion/nota_debito/<?php echo $row->idDTEFC; ?>/">Nota débito</a></li> -->
+															<li><a class="dropdown-item" href="<?php echo base_url(); ?>Facturacion/nota_debito/<?php echo $row->idDTEFC; ?>/">Nota débito</a></li>
 															<li><a class="dropdown-item" href="<?php echo base_url(); ?>Facturacion/anular_ccf/<?php echo $row->idDTEFC; ?>/">Anular</a></li>
 
 															<?php

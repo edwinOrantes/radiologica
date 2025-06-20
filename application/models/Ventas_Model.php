@@ -19,8 +19,9 @@ class Ventas_Model extends CI_Model {
         if($data != null){
             $insumos = $data["insumos"];
             unset($data["insumos"]);
-            $sql = "INSERT INTO tbl_ventas(codigoVenta, fechaVenta, clienteVenta, tipoDocumento, numeroDocumento, formaPago, subtotalVenta, ivaVenta, totalVenta, recibidoVenta, vueltoVenta) 
-                    VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            $sql = "INSERT INTO tbl_ventas(codigoVenta, fechaVenta, clienteVenta, tipoDocumento, numeroDocumento, formaPago, subtotalVenta, ivaVenta, totalVenta,
+                    recibidoVenta, vueltoVenta, consulta) 
+                    VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
             if($this->db->query($sql, $data)){
                 $idVenta = $this->db->insert_id(); // Id de la factura
                 for ($i=0; $i < sizeof($insumos) ; $i++) {
@@ -40,6 +41,30 @@ class Ventas_Model extends CI_Model {
             return 0;
         }
     }
+
+    public function guardarVentaCF($data = null){
+        if($data != null){
+            $venta = $data["datosVenta"];
+            $insumos = $data["insumos"];
+            $sql = "INSERT INTO tbl_ventas(codigoVenta, fechaVenta, clienteVenta, tipoDocumento, numeroDocumento, formaPago, subtotalVenta, ivaVenta, totalVenta, 
+                    recibidoVenta, vueltoVenta, consulta) 
+                    VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            if($this->db->query($sql, $venta)){
+                $idVenta = $this->db->insert_id(); // Id de la factura
+                $sqld = "INSERT INTO tbl_detalle_venta(idVenta, idMedicamento, precioDetalleVenta, cantidadDetalleVenta)
+                        VALUES('$idVenta', ?, ?, ?)";
+                foreach($insumos as $row) {
+                    $this->db->query($sqld, $row);
+                }
+                return $idVenta;
+            }else{
+                return 0;
+            }
+        }else{
+            return 0;
+        }
+    }
+
  
     public function eliminarVenta($data = null){
         if($data != null){

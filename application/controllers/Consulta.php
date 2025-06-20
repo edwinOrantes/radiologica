@@ -61,7 +61,7 @@ class Consulta extends CI_Controller {
 		$this->load->view('Consulta/detalle_consulta', $data);
 		$this->load->view('Base/footer');
 
-		// echo json_encode($data["codigo"]);
+	 	// echo json_encode($data);
 	}
 
 	public function buscar_examen(){

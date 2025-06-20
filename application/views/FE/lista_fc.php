@@ -80,7 +80,14 @@
 											</td> 
 
 											<td>
-                                                <div class="btn-group">
+                                                
+												<?php
+													if($row->enContingencia == 1){
+														echo '<a href="'.base_url().'Facturacion/factura_en_contingencia/'.$row->idDTEFC.'/" target="_blank" class="text-primary" title="Enviar documento"> <i class="fa fa-check"> </i></a>';
+													}else{
+												?>
+
+												<div class="btn-group">
                                                     <button type="button" class="btn btn-primary dropdown-toggle btn-sm" data-toggle="dropdown" aria-expanded="false">
                                                         Opciones 
                                                     </button>
@@ -96,11 +103,12 @@
 														
                                                     </ul>
                                                 </div>
+												
+												
 												<?php
-													if($row->enContingencia == 1){
-														echo '<a href="'.base_url().'Facturacion/factura_en_contingencia/'.$row->idDTEFC.'/" target="_blank" class="text-primary" title="Enviar documento"> <i class="fa fa-check"> </i></a>';
 													}
-												?>		
+												?>
+
 												
                                             </td>
 
